@@ -43,7 +43,15 @@ export async function signIn(_: FormState, form: FormData): Promise<FormState> {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user!.id).single();
+  const { data: profile, error: profileError } = await supabase.from("profiles").select("role").eq("id", user!.id).single();
+  if (!profile) {
+    console.error("signIn: no profile row", profileError?.message);
+    return {
+      error:
+        "Your password was right, but your account's profile is missing, so the site can't tell if you're a parent or a student. " +
+        "This usually means the database setup didn't finish. (" + (profileError?.message ?? "no profile") + ")",
+    };
+  }
   const home = profile?.role === "student" ? "/learn" : "/parent";
   redirect(next.startsWith("/") && !next.startsWith("//") ? next : home);
 }
