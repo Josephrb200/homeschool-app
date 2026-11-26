@@ -1,12 +1,13 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { env } from "@/lib/env";
 
 /** Refreshes the session cookie on every request and guards signed-in areas. */
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) return response; // setup page explains what's missing
+  if (!env.configured()) return response; // setup page explains what's missing
+  const url = env.supabaseUrl();
+  const key = env.supabaseAnonKey();
 
   const supabase = createServerClient(url, key, {
     cookies: {
