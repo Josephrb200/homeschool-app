@@ -30,11 +30,12 @@ export function ActionForm({
   children: React.ReactNode;
   className?: string;
 }) {
-  const [state, formAction] = useActionState(action, undefined);
+  const [state, formAction, pending] = useActionState(action, undefined);
   return (
-    <form action={formAction} className={className}>
+    <form action={formAction} className={className} aria-busy={pending}>
       {children}
-      <FormMessage state={state} />
+      <p aria-live="polite" className="muted">{pending ? "Working on it…" : ""}</p>
+      {pending ? null : <FormMessage state={state} />}
     </form>
   );
 }
