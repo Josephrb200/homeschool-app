@@ -10,31 +10,9 @@
 
 import type { SkillId } from "@/engine/types";
 
-export type ContentStatus = "draft" | "in-review" | "verified";
-
-export interface WorkedExample {
-  question: string;
-  steps: string[];
-}
-
-export interface Lesson {
-  skillId: SkillId;
-  status: ContentStatus;
-  /** Approximate minutes for the whole lesson, shown so students can plan. */
-  minutes: number;
-  intro: {
-    whyItMatters: string;
-    byTheEnd: string[];
-  };
-  teaching: {
-    paragraphs: string[];
-    /** Which interactive demonstration to show. */
-    demo: "equivalent-bars" | "simplify-bars" | "common-denominator-bars" | "add-bars" | "amount-bar" | "multiply-grid";
-    examples: WorkedExample[];
-  };
-  /** Number of questions in each practice stage. */
-  counts: { guided: number; independent: number; check: 5 };
-}
+import type { Lesson } from "@/content/lesson-types";
+export type { ContentStatus, WorkedExample, Lesson } from "@/content/lesson-types";
+export { STAGES, STAGE_LABELS, type Stage } from "@/content/lesson-types";
 
 export const FRACTION_LESSONS: Record<SkillId, Lesson> = {
   "frac-equivalent": {
@@ -261,13 +239,3 @@ export const FRACTION_LESSONS: Record<SkillId, Lesson> = {
   },
 };
 
-export const STAGES = ["introduction", "teaching", "guided", "independent", "check", "review"] as const;
-export type Stage = (typeof STAGES)[number];
-export const STAGE_LABELS: Record<Stage, string> = {
-  introduction: "Introduction",
-  teaching: "Teaching",
-  guided: "Guided practice",
-  independent: "On your own",
-  check: "Skill check",
-  review: "Review",
-};

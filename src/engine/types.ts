@@ -48,13 +48,32 @@ export interface Question {
   skillId: SkillId;
   /** Plain text prompt. Fractions written as a/b; the UI renders them stacked. */
   prompt: string;
-  /** Optional visual: fraction bars to draw alongside the prompt. */
-  visual?: { kind: "bars"; bars: Fraction[] };
+  /** Optional visual: fraction bars, or a labelled shape diagram. */
+  visual?: { kind: "bars"; bars: Fraction[] } | { kind: "shape"; shape: ShapeSpec };
   answer: AnswerSpec;
   /** Predicted wrong answers mapped to misconceptions (string form, compared exactly after parsing). */
   wrongAnswers: { value: Fraction | number; misconception: MisconceptionId }[];
   hints: string[];
   solution: string[];
+}
+
+/**
+ * A labelled 2D shape, in real units with y pointing up. Drawn to scale.
+ * Only what is labelled is given to the student; everything else they work out.
+ */
+export interface ShapeSpec {
+  /** Corners in order around the shape. */
+  points: [number, number][];
+  /** Side labels: the side from points[i] to points[i+1] (wrapping), with its text. */
+  sides: { i: number; text: string }[];
+  /** Dashed perpendicular heights (always vertical), with a right-angle mark at the foot. */
+  heights?: { x: number; y1: number; y2: number; text: string }[];
+  /** Corners to mark as right angles (the mark sits inside, toward +x and +y). */
+  right?: [number, number][];
+  /** Draw 1-unit squares behind the shape, for counting. */
+  grid?: boolean;
+  /** Words for screen readers, e.g. "A triangle with base 8 cm and perpendicular height 5 cm." */
+  description: string;
 }
 
 export type AttemptMode = "guided" | "independent" | "check" | "review";

@@ -52,7 +52,7 @@ export default async function ParentHome({ searchParams }: { searchParams: Promi
                   {c.display_name}
                 </Link>
                 <span className="small muted">
-                  Fractions: {c.demonstrated} of {SKILLS.length} skills demonstrated, {c.secure} secure.{" "}
+                  {c.demonstrated} of {SKILLS.length} skills demonstrated, {c.secure} secure.{" "}
                   {c.last ? `Last active ${c.last.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}.` : "Not started yet."}
                 </span>
                 {c.next && <span className="small">Suggested next: {c.next.title}</span>}

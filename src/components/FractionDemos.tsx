@@ -213,7 +213,7 @@ function MultiplyGrid() {
   );
 }
 
-const DEMOS = {
+export const FRACTION_DEMOS = {
   "equivalent-bars": EquivalentBars,
   "simplify-bars": SimplifyBars,
   "common-denominator-bars": CommonDenominatorBars,
@@ -221,13 +221,3 @@ const DEMOS = {
   "amount-bar": AmountBar,
   "multiply-grid": MultiplyGrid,
 };
-
-export function Demo({ kind }: { kind: keyof typeof DEMOS }) {
-  const C = DEMOS[kind];
-  return (
-    <section className="demo" aria-label="Try it">
-      <p className="eyebrow">Try it</p>
-      <C />
-    </section>
-  );
-}

@@ -16,6 +16,7 @@ import {
   type PublicQuestion,
 } from "@/app/actions/learn";
 import { FractionBar } from "./FractionDemos";
+import { ShapeDiagram } from "./ShapeDiagram";
 import { MathText } from "./MathText";
 import { SpeakButton } from "./Speak";
 import { usePrefs } from "./PrefsProvider";
@@ -237,6 +238,11 @@ export function Practice({
             </p>
             <SpeakButton text={q.prompt} label="Hear it" auto={prefs.autoReadQuestions} />
           </div>
+          {q.visual?.kind === "shape" && (
+            <div className="shape-wrap">
+              <ShapeDiagram shape={q.visual.shape} />
+            </div>
+          )}
           {q.visual?.kind === "bars" && mode !== "check" && (
             <div className="stack optional">
               {q.visual.bars.slice(0, 1).map((b, i) => (
@@ -276,7 +282,9 @@ export function Practice({
             )}
           </form>
           <p id="answer-help" className="hint">
-            Type a whole number like 12, a fraction like 3/4, or a mixed number like 1 1/2.
+            {q.visual?.kind === "shape"
+              ? "Type a number like 24 or 7.5. Units like cm² are fine but not needed."
+              : "Type a whole number like 12, a fraction like 3/4, or a mixed number like 1 1/2."}
             {mode === "check" && " This is a skill check, so there are no hints. Answers are explained at the end."}
           </p>
 

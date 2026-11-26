@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { requireRole, loadEvents } from "@/lib/learner";
 import { supabaseServer } from "@/lib/supabase/server";
 import { LESSONS, SKILL_BY_ID } from "@/content";
-import { STAGES, type Stage } from "@/content/maths/fractions/lessons";
+import { STAGES, type Stage } from "@/content/lesson-types";
 import { computeMastery } from "@/engine/mastery";
 import { LessonPlayer } from "@/components/LessonPlayer";
 

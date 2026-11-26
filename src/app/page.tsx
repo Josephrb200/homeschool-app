@@ -54,9 +54,9 @@ export default async function Home() {
       <section className="panel stack" aria-labelledby="cov">
         <h2 id="cov">What&apos;s available now</h2>
         <p>
-          This is an early version. It currently covers one maths topic, <strong>fractions</strong>, as a chain of {SKILLS.length} skills
-          from equivalent fractions to multiplying and dividing. The lessons are in draft and are being checked by a qualified teacher. English
-          and more maths topics come next. We will only list topics here once they are finished and checked.
+          This is an early version. It covers two maths topics: <strong>area of shapes</strong> (rectangles, triangles, parallelograms,
+          trapeziums and L-shapes) and <strong>fractions</strong> (from equivalent fractions to multiplying and dividing), {SKILLS.length} skills
+          in all. The lessons are drafts and still need checking by a qualified maths teacher. English and more maths topics come later.
         </p>
       </section>
       <p className="small muted">

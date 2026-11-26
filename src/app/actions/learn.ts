@@ -5,7 +5,7 @@ import { z } from "zod";
 import { supabaseServer } from "@/lib/supabase/server";
 import { getViewer } from "@/lib/learner";
 import { LESSONS, MISCONCEPTIONS, SKILL_BY_ID } from "@/content";
-import { makeQuestion, questionFromId, type Tier } from "@/content/maths/fractions/generators";
+import { makeQuestion, questionFromId, type Tier } from "@/content/questions";
 import { markAnswer } from "@/engine/marking";
 import { newSeed } from "@/engine/random";
 import { show } from "@/engine/fraction";

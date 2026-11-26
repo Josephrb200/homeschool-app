@@ -6,7 +6,7 @@ import { MISCONCEPTIONS, SKILLS, SKILL_BY_ID } from "@/content";
 import { computeMastery, fmtDate } from "@/engine/mastery";
 import { contentBreakdown, parentInsights } from "@/engine/insights";
 import { reviewState } from "@/engine/scheduler";
-import { questionFromId } from "@/content/maths/fractions/generators";
+import { questionFromId } from "@/content/questions";
 import { Level } from "@/components/Level";
 import { MathText } from "@/components/MathText";
 import { ActionForm, Submit } from "@/components/Forms";
@@ -54,7 +54,7 @@ export default async function ChildPage({ params }: { params: Promise<{ id: stri
       </section>
 
       <section className="panel stack" aria-labelledby="mastery-title">
-        <h2 id="mastery-title">Fractions: skill by skill</h2>
+        <h2 id="mastery-title">Skill by skill</h2>
         <ol className="skill-map">
           {SKILLS.map((s) => {
             const m = computeMastery(s.id, events);

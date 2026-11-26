@@ -10,10 +10,12 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { newCheckId, recordLesson, skillStatus } from "@/app/actions/learn";
-import type { Lesson, Stage } from "@/content/maths/fractions/lessons";
-import { STAGES, STAGE_LABELS } from "@/content/maths/fractions/lessons";
+import type { Lesson, Stage } from "@/content/lesson-types";
+import { STAGES, STAGE_LABELS } from "@/content/lesson-types";
 import type { MasteryLevel, Skill } from "@/engine/types";
-import { Demo } from "./FractionDemos";
+import { Demo } from "./Demos";
+import { ShapeDiagram } from "./ShapeDiagram";
+import type { ShapeSpec } from "@/engine/types";
 import { Level } from "./Level";
 import { MathText } from "./MathText";
 import { Practice, type RunResult } from "./Practice";
@@ -58,7 +60,7 @@ export function LessonPlayer({ skill, lesson, startStage, level: initialLevel, p
       <div className="stack">
         <div className="row between">
           <p className="eyebrow">
-            Fractions · Step {idx + 1} of {STAGES.length}
+            {skill.topic} · Step {idx + 1} of {STAGES.length}
           </p>
           {lesson.status !== "verified" && (
             <span className="badge badge-draft" title="This lesson hasn't been checked by a qualified teacher yet.">
@@ -137,7 +139,7 @@ export function LessonPlayer({ skill, lesson, startStage, level: initialLevel, p
             <Demo kind={lesson.teaching.demo} />
             <h3>Worked examples</h3>
             {lesson.teaching.examples.map((ex) => (
-              <WorkedExample key={ex.question} question={ex.question} steps={ex.steps} />
+              <WorkedExample key={ex.question} question={ex.question} steps={ex.steps} shape={ex.shape} />
             ))}
             <div>
               <button className="btn btn-primary" onClick={() => finish("teaching")}>
@@ -178,13 +180,14 @@ export function LessonPlayer({ skill, lesson, startStage, level: initialLevel, p
   );
 }
 
-function WorkedExample({ question, steps }: { question: string; steps: string[] }) {
+function WorkedExample({ question, steps, shape }: { question: string; steps: string[]; shape?: ShapeSpec }) {
   const [shown, setShown] = useState(1);
   return (
     <div className="panel-sunk stack">
       <p style={{ fontWeight: 600 }}>
         <MathText text={question} />
       </p>
+      {shape && <ShapeDiagram shape={shape} maxWidth={360} maxHeight={220} />}
       <ol className="solution" aria-live="polite">
         {steps.slice(0, shown).map((s, i) => (
           <li key={i}>

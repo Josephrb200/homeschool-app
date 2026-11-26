@@ -82,12 +82,30 @@ await page.fill("#identifier", child.user);
 await page.fill("#password", child.pw);
 await page.click("button:has-text('Log in')");
 await page.waitForURL("**/learn");
+await page.waitForSelector("text=Start: Area of rectangles");
 await page.waitForSelector("text=Start: Equivalent fractions");
-ok("Child logged in; first recommendation is Equivalent fractions");
+ok("Child logged in; both topics are suggested (Area of rectangles, Equivalent fractions)");
 await page.screenshot({ path: `${SHOTS}/02-learn.png`, fullPage: true });
 
+// 3b. Area: teaching demo and a guided question answered from the diagram
+await page.goto(BASE + "/learn/area-rectangle");
+await page.click("button:has-text('Start the teaching')");
+await page.waitForSelector("h2:has-text('Teaching')");
+await page.locator("input[type=range]").first().fill("7");
+await page.waitForSelector("text=7 × 3 = 21 cm²");
+await page.screenshot({ path: `${SHOTS}/area-teaching.png`, fullPage: true });
+await page.click("button:has-text('ready to practise')");
+await page.waitForSelector("#prompt");
+const label = await page.locator("svg.shape-diagram").first().getAttribute("aria-label");
+const dims = /rectangle (\d+) cm wide and (\d+) cm tall/.exec(label);
+await page.fill("#answer", `${Number(dims[1]) * Number(dims[2])} cm²`);
+await page.getByRole("button", { name: "Check", exact: true }).click();
+await page.waitForSelector("text=Correct");
+await page.screenshot({ path: `${SHOTS}/area-practice.png`, fullPage: true });
+ok("Area lesson: demo responds, diagram drawn, answer with units marked correct");
+
 // 4. Full lesson
-await page.click("a:has-text('Open')");
+await page.goto(BASE + "/learn/frac-equivalent");
 await page.waitForLoadState("networkidle"); await page.screenshot({ path: `${SHOTS}/03a-lesson.png`, fullPage: true });
 await page.waitForSelector("h2:has-text('Introduction')");
 await page.click("button:has-text('Start the teaching')");

@@ -94,7 +94,7 @@ export default async function LearnHome() {
               <h2 id={`map-${chain.id}`}>{chain.name}</h2>
             </div>
             <p className="small muted">
-              {secure} of {chain.skillIds.length} secure
+              {chain.skillIds.filter((id) => levelRank(computeMastery(id, events).level) >= levelRank("secure")).length} of {chain.skillIds.length} secure
             </p>
           </div>
           <ol className="skill-map">
