@@ -35,7 +35,7 @@ export interface MapSkill {
   name: string;
   /** Typical school year (7-11). A label, never a gate. */
   typicalYear: number;
-  keyStage: "KS3" | "KS4";
+  keyStage: "KS2" | "KS3" | "KS4";
   /** DfE / AQA content codes this skill covers. */
   specRefs: string[];
   /** AQA's split of Foundation content: Basic or Additional (harder, still Foundation). */
@@ -57,7 +57,7 @@ export const BUILD_PHASES: Record<MapSkill["phase"], { name: string; why: string
   6: { name: "Grade 4-5 stretch", why: "The harder Additional Foundation content that separates grade 3 from grades 4 and 5." },
 };
 
-const ks = (year: number): "KS3" | "KS4" => (year <= 9 ? "KS3" : "KS4");
+const ks = (year: number): MapSkill["keyStage"] => (year <= 6 ? "KS2" : year <= 9 ? "KS3" : "KS4");
 
 function s(
   id: string,
