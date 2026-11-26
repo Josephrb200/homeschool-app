@@ -63,7 +63,7 @@ function EquivalentBars() {
       <FractionBar f={big} />
       <Slider label="Cut each piece into" value={k} min={1} max={6} onChange={setK} />
       <Readout>
-        <MathText text={`${show(base)} = ${big.n}/${big.d}`} /> — the top and bottom were both multiplied by {k}. The shaded amount
+        <MathText text={`${show(base)} = ${big.n}/${big.d}`} />. The top and bottom were both multiplied by {k}, and the shaded amount
         didn&apos;t change.
       </Readout>
     </>

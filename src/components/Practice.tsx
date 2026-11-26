@@ -232,7 +232,7 @@ export function Practice({
       {q && (
         <>
           <div className="row between" style={{ alignItems: "flex-start" }}>
-            <p className="question-prompt" id="prompt">
+            <p className="question-prompt" id="prompt" data-question-id={q.id}>
               <MathText text={q.prompt} />
             </p>
             <SpeakButton text={q.prompt} label="Hear it" auto={prefs.autoReadQuestions} />

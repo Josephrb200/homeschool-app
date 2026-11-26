@@ -14,6 +14,8 @@ import { supabaseServer } from "@/lib/supabase/server";
 const lexend = Lexend({ subsets: ["latin"], variable: "--font-lexend", display: "swap" });
 const atkinson = Atkinson_Hyperlegible({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-atkinson", display: "swap" });
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = { title: { default: BRAND.name, template: `%s · ${BRAND.name}` }, description: BRAND.tagline };
 export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover" };
 

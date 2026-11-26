@@ -235,6 +235,11 @@ describe("recommendations and parent insights", () => {
     const recs = recommend(FRACTION_SKILLS, [], MC, day(0));
     expect(recs[0]).toMatchObject({ kind: "start", skillId: "frac-equivalent" });
   });
+  it("unlocks the next skills once the prerequisite is demonstrated", () => {
+    const recs = recommend(FRACTION_SKILLS, check("frac-equivalent", day(0), 5), MC, day(0, 12));
+    expect(recs.map((r) => r.skillId)).toEqual(expect.arrayContaining(["frac-simplify", "frac-common-denominator", "frac-of-amount"]));
+    expect(recs.find((r) => r.skillId === "frac-add-sub")).toBeUndefined();
+  });
   it("puts due reviews first and explains gaps", () => {
     const ev = [
       ...check("frac-equivalent", day(0), 5),

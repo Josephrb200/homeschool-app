@@ -2,7 +2,7 @@
  * Recommendations: what to do next, always with a reason.
  *
  * Order: reviews that are due, then knowledge gaps, then work in progress,
- * then the next skill whose prerequisites are all secure. The student can
+ * then the next skill whose prerequisites have all been demonstrated. The student can
  * always choose something else; this is a suggestion, not a lock.
  */
 
@@ -70,7 +70,9 @@ export function recommend(
   for (const s of skills) {
     const lvl = computeMastery(s.id, events).level;
     if (lvl !== "not-started") continue;
-    const ready = s.prerequisites.every((p) => levelRank(computeMastery(p, events).level) >= levelRank("secure"));
+    // Unlock once every prerequisite has been demonstrated (passed its check).
+    // Waiting for Secure would mean waiting a day; reviews keep checking the earlier skills.
+    const ready = s.prerequisites.every((p) => levelRank(computeMastery(p, events).level) >= levelRank("demonstrated"));
     if (ready) {
       add({
         kind: "start",
@@ -79,7 +81,7 @@ export function recommend(
         reason:
           s.prerequisites.length === 0
             ? `This is the first skill in the chain.`
-            : `You're secure on ${s.prerequisites.map((p) => byId[p].name.toLowerCase()).join(" and ")}, which this builds on.`,
+            : `You've shown you understand ${s.prerequisites.map((p) => byId[p].name.toLowerCase()).join(" and ")}, which this builds on.`,
       });
     }
   }

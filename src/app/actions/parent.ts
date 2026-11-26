@@ -60,6 +60,8 @@ export async function createChild(_: FormState, form: FormData): Promise<FormSta
   if (error || !created.user) return { error: `Couldn't create the account: ${error?.message ?? "unknown error"}` };
 
   const id = created.user.id;
+  // Belt and braces: make sure the profile is a student even if the auth server wrote metadata late.
+  await admin.from("profiles").update({ role: "student", display_name: displayName }).eq("id", id);
   const s = await admin.from("students").insert({ id, username, created_by: parent.id });
   const l = await admin.from("guardian_links").insert({ guardian_id: parent.id, student_id: id });
   if (s.error || l.error) {

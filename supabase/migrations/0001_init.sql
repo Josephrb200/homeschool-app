@@ -55,6 +55,22 @@ create trigger on_auth_user_created
 after insert on auth.users
 for each row execute function public.handle_new_user();
 
+-- The auth server can write app_metadata just after the insert, so keep the
+-- role in step when the server changes it. Only app_metadata (server-only) counts.
+create function public.sync_user_role() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if new.raw_app_meta_data ->> 'role' in ('parent', 'student', 'editor')
+     and new.raw_app_meta_data ->> 'role' is distinct from old.raw_app_meta_data ->> 'role' then
+    update public.profiles set role = new.raw_app_meta_data ->> 'role' where id = new.id;
+  end if;
+  return new;
+end $$;
+
+create trigger on_auth_user_role_changed
+after update of raw_app_meta_data on auth.users
+for each row execute function public.sync_user_role();
+
 -- Is the current user a guardian of this student?
 create function public.is_guardian_of(p_student uuid) returns boolean
 language sql stable security definer set search_path = public as $$
