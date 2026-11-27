@@ -18,7 +18,7 @@ export type Tier = 1 | 2;
 type Q = Omit<Question, "id" | "skillId">;
 type Gen = (r: Rng, tier: Tier) => Q;
 
-const fracAnswer = (value: Fraction, requireSimplest = false): Question["answer"] => ({ kind: "fraction", value, requireSimplest });
+const fracAnswer = (value: Fraction, requireSimplest = false): Question["answer"] => (requireSimplest ? { kind: "fraction", value, requireSimplest } : { kind: "fraction", value, requireSimplest, form: "decimal" });
 
 const HELP_PCT = "Type a number like 35. The % sign is fine but not needed.";
 const HELP_DEC = "Type a decimal like 0.35.";

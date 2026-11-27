@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { equals, frac, parseAnswer, show } from "@/engine/fraction";
-import { markAnswer } from "@/engine/marking";
+import { answerText, markAnswer } from "@/engine/marking";
 import { makeQuestion, questionFromId } from "@/content/questions";
 import { LESSONS, MISCONCEPTIONS, SKILL_BY_ID } from "@/content";
 import { DECIMAL_GENERATORS } from "./generators";
@@ -53,6 +53,8 @@ describe("decimals and percentages generators", () => {
           // The answer as a student would type it: a fraction when simplest form is asked for, else a decimal.
           const typed = q.answer.requireSimplest ? show(v) : showDec(v);
           expect(markAnswer(q, typed, MISCONCEPTIONS).outcome, `${q.prompt} typed ${typed}`).toBe("correct");
+          // The answer shown to the student is written the way they were asked to type it.
+          expect(answerText(q)).toBe(typed);
           // Percentages can be typed with %, money with £.
           if (/percentage\.$/.test(q.prompt)) expect(markAnswer(q, `${typed}%`, MISCONCEPTIONS).correct).toBe(true);
           if (/pounds\?$/.test(q.prompt)) expect(markAnswer(q, `£${typed}`, MISCONCEPTIONS).correct).toBe(true);

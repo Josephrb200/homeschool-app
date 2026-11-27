@@ -125,3 +125,17 @@ export function parseAnswer(raw: string): ParseResult {
 
   return { ok: false, reason: "unrecognised" };
 }
+
+/** A fraction as a decimal, like 7/20 → "0.35", when it ends within 12 places; otherwise as a fraction. */
+export function showDecimal(f: Fraction): string {
+  const s = simplify(f);
+  for (let k = 0; k <= 12; k++) {
+    if ((10 ** k) % s.d !== 0) continue;
+    const units = Math.round((Math.abs(s.n) * 10 ** k) / s.d);
+    const sign = s.n < 0 ? "-" : "";
+    if (k === 0) return sign + String(units);
+    const str = String(units).padStart(k + 1, "0");
+    return `${sign}${str.slice(0, -k)}.${str.slice(-k)}`;
+  }
+  return show(s);
+}

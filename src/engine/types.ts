@@ -43,9 +43,15 @@ export type AnswerSpec =
        * with a nudge: "mixed" wants a mixed number like 2 3/4 (or a whole number),
        * "improper" wants a top-heavy fraction like 11/4.
        */
-      form?: "mixed" | "improper";
+      form?: "mixed" | "improper" | "decimal";
     }
   | { kind: "integer"; value: number }
+  /**
+   * An algebraic expression, compared mathematically (see engine/algebra.ts).
+   * `form` says how it must be written to count as fully correct:
+   * "notation" = algebra conventions (5n, x²), "simplified" = also expanded and collected.
+   */
+  | { kind: "expression"; value: string; form: "notation" | "simplified" }
   | { kind: "choice"; options: string[]; correctIndex: number };
 
 export interface Question {
@@ -54,15 +60,17 @@ export interface Question {
   skillId: SkillId;
   /** Plain text prompt. Fractions written as a/b; the UI renders them stacked. */
   prompt: string;
-  /** Optional visual: fraction bars, or a labelled shape diagram. */
-  visual?: { kind: "bars"; bars: Fraction[] } | { kind: "shape"; shape: ShapeSpec };
+  /** Optional visual: fraction bars, a labelled shape diagram, or a function machine. */
+  visual?: { kind: "bars"; bars: Fraction[] } | { kind: "shape"; shape: ShapeSpec } | { kind: "machine"; machine: MachineSpec };
   answer: AnswerSpec;
   /** Predicted wrong answers mapped to misconceptions (string form, compared exactly after parsing). */
   wrongAnswers: { value: Fraction | number; misconception: MisconceptionId }[];
+  /** Predicted wrong expressions (for "expression" answers), compared mathematically. */
+  wrongExpressions?: { value: string; misconception: MisconceptionId }[];
+  /** How to type the answer, shown under the answer box. Defaults to number help. */
+  answerHelp?: string;
   hints: string[];
   solution: string[];
-  /** Optional line under the answer box saying what to type (e.g. "a decimal like 0.35"). */
-  answerHelp?: string;
 }
 
 /**
@@ -82,6 +90,14 @@ export interface ShapeSpec {
   grid?: boolean;
   /** Words for screen readers, e.g. "A triangle with base 8 cm and perpendicular height 5 cm." */
   description: string;
+}
+
+/** A function machine: input → operations in order → output. "?" marks the unknown. */
+export interface MachineSpec {
+  input: string;
+  /** Operations as shown, e.g. ["× 3", "+ 4"]. */
+  steps: string[];
+  output: string;
 }
 
 export type AttemptMode = "guided" | "independent" | "check" | "review";

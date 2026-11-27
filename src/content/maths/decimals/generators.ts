@@ -30,7 +30,7 @@ export function big(f: Fraction): string {
   return s.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-const fracAnswer = (value: Fraction): Question["answer"] => ({ kind: "fraction", value, requireSimplest: false });
+const fracAnswer = (value: Fraction): Question["answer"] => ({ kind: "fraction", value, requireSimplest: false, form: "decimal" });
 
 // ------------------------------------------------------------ place value
 

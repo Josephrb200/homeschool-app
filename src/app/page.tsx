@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { BRAND } from "@/lib/brand";
 import { env } from "@/lib/env";
 import { getViewer } from "@/lib/learner";
-import { SKILLS } from "@/content";
+import { CHAINS, SKILLS } from "@/content";
 
 export default async function Home() {
   const viewer = env.configured() ? await getViewer() : null;
@@ -54,9 +54,14 @@ export default async function Home() {
       <section className="panel stack" aria-labelledby="cov">
         <h2 id="cov">What&apos;s available now</h2>
         <p>
-          This is an early version. It covers two maths topics: <strong>area of shapes</strong> (rectangles, triangles, parallelograms,
-          trapeziums and L-shapes) and <strong>fractions</strong> (from equivalent fractions to multiplying and dividing), {SKILLS.length} skills
-          in all. The lessons are drafts and still need checking by a qualified maths teacher. English and more maths topics come later.
+          This is an early version. It covers {CHAINS.length} maths topics, {SKILLS.length} skills in all:{" "}
+          {CHAINS.map((c, i) => (
+            <span key={c.id}>
+              {i > 0 && (i === CHAINS.length - 1 ? " and " : ", ")}
+              <strong>{c.name.toLowerCase()}</strong>
+            </span>
+          ))}
+          . The lessons are drafts and still need checking by a qualified maths teacher. English and more maths topics come later.
         </p>
       </section>
       <p className="small muted">
