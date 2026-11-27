@@ -6,6 +6,7 @@ import { SolidDiagram } from "./SolidDiagram";
 import { AngleDiagram } from "./AngleDiagram";
 import { SpinnerDiagram, TableDiagram, VennDiagram } from "./ProbabilityDiagrams";
 import { ChartDiagram } from "./ChartDiagram";
+import { PlaneDiagram } from "./PlaneDiagram";
 
 export function Visual({ visual, compact = false }: { visual: VisualSpec; compact?: boolean }) {
   if (visual.kind === "shape") return <ShapeDiagram shape={visual.shape} maxWidth={compact ? 360 : 420} maxHeight={compact ? 220 : 260} />;
@@ -16,5 +17,17 @@ export function Visual({ visual, compact = false }: { visual: VisualSpec; compac
   if (visual.kind === "table") return <TableDiagram table={visual.table} />;
   if (visual.kind === "venn") return <VennDiagram venn={visual.venn} maxWidth={compact ? 380 : 440} />;
   if (visual.kind === "chart") return <ChartDiagram chart={visual.chart} maxWidth={compact ? 380 : 440} />;
+  if (visual.kind === "plane") return <PlaneDiagram plane={visual.plane} maxWidth={compact ? 360 : 440} maxHeight={compact ? 280 : 340} />;
+  if (visual.kind === "panels")
+    return (
+      <div className="panels" role="group" aria-label={visual.description}>
+        {visual.panels.map((p) => (
+          <figure key={p.label} className="vis-panel">
+            <Visual visual={p.visual} compact />
+            <figcaption>{p.label}</figcaption>
+          </figure>
+        ))}
+      </div>
+    );
   return null;
 }

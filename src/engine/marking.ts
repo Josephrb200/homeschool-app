@@ -6,6 +6,7 @@
 import { equals, gcd, isSimplest, parseAnswer, show, showDecimal, showMixed, simplify, frac, type Fraction } from "./fraction";
 import { parseExpression, polyEquals, untidyReason, UNTIDY_FEEDBACK } from "./algebra";
 import { markStandardForm, showStandardForm } from "./standard-form";
+import { markPoint, showPoint } from "./point";
 import { factorsOf, fullForm, indexForm, isPrime, parseList, parseProduct } from "./primes";
 import type { MarkResult, Misconception, Question } from "./types";
 
@@ -16,6 +17,7 @@ export function answerText(q: Question): string {
   if (a.kind === "fraction") return a.form === "mixed" ? showMixed(a.value) : a.form === "decimal" ? showDecimal(a.value) : show(a.value);
   if (a.kind === "integer") return String(a.value);
   if (a.kind === "expression") return a.value;
+  if (a.kind === "point") return showPoint(a.value);
   if (a.kind === "decimal") return roundTo(a.exact, a.dp);
   if (a.kind === "ratio") return a.value.join(":");
   if (a.kind === "standard-form") return showStandardForm(a.mantissa, a.power);
@@ -42,6 +44,8 @@ export function markAnswer(
     const mc = q.wrongAnswers.find((w) => w.value === idx)?.misconception;
     return wrong(mc, misconceptions);
   }
+
+  if (a.kind === "point") return markPoint(q, a.value, raw, misconceptions, a.vector);
 
   if (a.kind === "expression") {
     const got = parseExpression(raw);

@@ -177,7 +177,7 @@ export function Practice({
           {finished.map((f, i) => (
             <li key={f.id}>
               <p>
-                <MathText text={f.prompt} /> {results[i]?.correct ? "(correct)" : `(answer: ${f.answer})`}
+                <MathText text={f.prompt} /> {results[i]?.correct ? "(correct)" : <>(answer: <MathText text={f.answer} />)</>}
               </p>
               {!results[i]?.correct && (
                 <ol className="solution small muted">
@@ -270,7 +270,7 @@ export function Practice({
                     disabled={busy || (!!answered && !retrying)}
                     onClick={() => submit(undefined, o)}
                   >
-                    {o}
+                    <MathText text={o} />
                   </button>
                 ))}
               </div>

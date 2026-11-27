@@ -66,6 +66,11 @@ export type AnswerSpec =
    */
   | { kind: "expression"; value: string; form: "notation" | "simplified" }
   /**
+   * A coordinate pair (x, y), e.g. (3, −2). Order matters. See engine/point.ts.
+   * `vector` marks a column vector instead: feedback says "top number" and "bottom number".
+   */
+  | { kind: "point"; value: [number, number]; vector?: boolean }
+  /**
    * A number in standard form, mantissa × 10^power with 1 ≤ mantissa < 10
    * (see engine/standard-form.ts). The right value written another way is "not-simplified".
    */
@@ -135,7 +140,38 @@ export type Visual =
   | { kind: "chart"; chart: ChartSpec }
   | { kind: "spinner"; spinner: SpinnerSpec }
   | { kind: "table"; table: TableSpec }
-  | { kind: "venn"; venn: VennSpec };
+  | { kind: "venn"; venn: VennSpec }
+  | { kind: "plane"; plane: PlaneSpec }
+  | { kind: "panels"; panels: { label: string; visual: Visual }[]; description: string };
+
+/**
+ * A flat drawing on a coordinate plane, drawn to scale (equal units on both
+ * axes): grids and axes, labelled polygons, straight lines, circles and arcs,
+ * points and arrows. Used for transformations, constructions and loci.
+ */
+export interface PlaneSpec {
+  /** The window to draw, in real units: [min, max] on each axis. */
+  x: [number, number];
+  y: [number, number];
+  /** Unit squares behind everything. */
+  grid?: boolean;
+  /** x and y axes through (0, 0), numbered every `axisStep` (default 1). */
+  axes?: boolean;
+  axisStep?: number;
+  /** Polygons. "object" is shaded, "image" is shaded in the second colour, "region" is a pale wash with no outline, "outline" is unfilled. */
+  shapes?: { points: [number, number][]; label?: string; tone?: "object" | "image" | "region" | "outline"; dashed?: boolean }[];
+  /** Straight lines from a to b. "mirror" lines are drawn bold in the highlight colour. */
+  lines?: { a: [number, number]; b: [number, number]; label?: string; dashed?: boolean; tone?: "mirror" | "ink" | "faint" }[];
+  /** Circles (no from/to) or arcs from angle `from` to `to`, degrees anticlockwise from east. */
+  arcs?: { c: [number, number]; r: number; from?: number; to?: number; dashed?: boolean; faint?: boolean }[];
+  /** Dots, with an optional letter or coordinate label. */
+  points?: { at: [number, number]; label?: string; hollow?: boolean }[];
+  /** Arrows from one point to another (e.g. a translation). */
+  arrows?: { from: [number, number]; to: [number, number] }[];
+  /** Length labels beside a segment. */
+  lengths?: { a: [number, number]; b: [number, number]; text: string }[];
+  description: string;
+}
 
 /** A fair spinner with equal sections, each labelled (a colour word or a number). */
 export interface SpinnerSpec {

@@ -177,6 +177,10 @@ ol.solution { margin: 0; padding-left: 1.3rem; display: grid; gap: 4px; }
 .frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; line-height: 1.05; margin: 0 0.12em; font-variant-numeric: tabular-nums; }
 .frac .num { border-bottom: 2px solid currentColor; padding: 0 0.15em; }
 .frac .den { padding: 0 0.15em; }
+.colvec { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; line-height: 1.1; margin: 0 0.15em; padding: 0.05em 0.45em; border-left: 2px solid currentColor; border-right: 2px solid currentColor; border-radius: 0.7em; font-variant-numeric: tabular-nums; }
+.panels { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; width: 100%; }
+.vis-panel { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.vis-panel figcaption { font-weight: 700; font-size: 1.1rem; }
 
 .speaking { background: var(--accent-soft); border-radius: 4px; box-shadow: 0 0 0 2px var(--accent-soft); }
 
