@@ -1,13 +1,11 @@
 /**
- * The probability chain (KS3, GCSE Foundation, DfE codes P2-P7, N5): the
+ * The probability chain (KS3, GCSE Foundation, DfE codes P1-P8, N5): the
  * probability scale, single events, probabilities that add up to 1,
- * relative frequency and expected outcomes, sample spaces and Venn diagrams.
+ * relative frequency and expected outcomes, sample spaces, frequency trees,
+ * Venn diagrams, and tree diagrams with and without replacement.
  *
  * Prerequisites copy the GCSE Foundation topic map exactly. Any that aren't
  * built yet are dropped by the content registry until they go live.
- *
- * Not built yet in this strand: frequency trees, and tree diagrams (with and
- * without replacement).
  *
  * STATUS: Draft. Written by the build team; needs review by a qualified maths
  * teacher before it is marked Verified.
@@ -62,6 +60,15 @@ export const PROBABILITY_SKILLS: Skill[] = [
     prerequisites: ["prob-single-event"],
   },
   {
+    id: "prob-frequency-trees",
+    topic: "Combined events",
+    name: "Frequency trees",
+    objective: "I can fill in a frequency tree from the facts I'm given, and use it to answer questions and find probabilities.",
+    typicalYear: 9,
+    gcseTier: "foundation",
+    prerequisites: ["prob-relative-frequency"],
+  },
+  {
     id: "prob-venn",
     topic: "Combined events",
     name: "Venn diagrams and set notation",
@@ -69,6 +76,24 @@ export const PROBABILITY_SKILLS: Skill[] = [
     typicalYear: 9,
     gcseTier: "foundation",
     prerequisites: ["prob-single-event"],
+  },
+  {
+    id: "prob-tree-independent",
+    topic: "Combined events",
+    name: "Tree diagrams for independent events",
+    objective: "I can complete a probability tree diagram, multiply along the branches, and add the routes that give the outcome I want.",
+    typicalYear: 10,
+    gcseTier: "foundation",
+    prerequisites: ["prob-sample-space", "frac-mul-div"],
+  },
+  {
+    id: "prob-tree-dependent",
+    topic: "Combined events",
+    name: "Tree diagrams without replacement",
+    objective: "I can draw a tree diagram when the first item isn't put back, changing the second branches, and use it to find probabilities.",
+    typicalYear: 11,
+    gcseTier: "foundation",
+    prerequisites: ["prob-tree-independent"],
   },
 ];
 
@@ -239,5 +264,93 @@ export const PROBABILITY_MISCONCEPTIONS: Record<string, Misconception> = {
     label: "Mixed up ∩ (both) and ∪ (either)",
     explanation:
       "∩ means \"and\": in both circles, so only the overlap. ∪ means \"or\": in either circle, so everything inside the circles. Tip: ∪ looks like a cup that holds everything.",
+  },
+  "ftree-added": {
+    id: "ftree-added",
+    label: "Added instead of taking away",
+    explanation:
+      "In a frequency tree, each box splits into the boxes after it. So the two boxes after a box add up to it. To find a missing one, take the other one away.",
+  },
+  "ftree-wrong-parent": {
+    id: "ftree-wrong-parent",
+    label: "Took away from the wrong box",
+    explanation:
+      "The two boxes at the end of a branch add up to the box they come from, not to the very first total. Find the box just before them and take away from that.",
+  },
+  "ftree-prob-wrong-total": {
+    id: "ftree-prob-wrong-total",
+    label: "Used the wrong total for the probability",
+    explanation:
+      "Check who is being chosen from. If one is picked from everyone, the bottom of the fraction is the number at the very start of the tree.",
+  },
+  "ftree-one-branch": {
+    id: "ftree-one-branch",
+    label: "Only counted one branch",
+    explanation:
+      "There is a box for this on each branch of the tree. Find both of them, then add them together.",
+  },
+  "ftree-given-wrong-group": {
+    id: "ftree-given-wrong-group",
+    label: "Divided by the wrong group",
+    explanation:
+      "\"Of the people who ...\" tells you the group you are choosing from. Add up that group from both branches first: that total goes on the bottom.",
+  },
+  "tree-added-along": {
+    id: "tree-added-along",
+    label: "Added along the branches instead of multiplying",
+    explanation:
+      "To find the probability of one thing and then another, multiply along the branches. Adding along a route can give an answer bigger than 1.",
+  },
+  "tree-first-branch-only": {
+    id: "tree-first-branch-only",
+    label: "Used only the first branch",
+    explanation: "That's just the first part of the route. Carry on along the second branch too, and multiply the two probabilities.",
+  },
+  "tree-multiplied-wrongly": {
+    id: "tree-multiplied-wrongly",
+    label: "Added the bottoms when multiplying fractions",
+    explanation: "To multiply fractions, multiply the tops together and multiply the bottoms together. For example, 3/5 × 2/5 = 6/25.",
+    pointsTo: "frac-mul-div",
+  },
+  "tree-one-path": {
+    id: "tree-one-path",
+    label: "Only used one route",
+    explanation:
+      "More than one route gives this result, for example red then blue, and blue then red. Multiply along each route, then add the answers together.",
+  },
+  "tree-at-least-one-both": {
+    id: "tree-at-least-one-both",
+    label: "Found \"both\" instead of \"at least one\"",
+    explanation:
+      "\"At least one\" means one or more, so it includes the routes with exactly one as well as both. The quick way: 1 − P(none).",
+  },
+  "tree-at-least-one-exactly": {
+    id: "tree-at-least-one-exactly",
+    label: "Found \"exactly one\" instead of \"at least one\"",
+    explanation:
+      "\"At least one\" also includes the route where both happen. The quick way: work out P(none) and take it away from 1.",
+  },
+  "tree-replaced": {
+    id: "tree-replaced",
+    label: "Treated it as if the first one was put back",
+    explanation:
+      "The first one isn't put back, so the second pick has one fewer altogether: the bottom goes down by 1. If the first was the same colour, the top goes down by 1 too.",
+  },
+  "tree-only-bottom-changed": {
+    id: "tree-only-bottom-changed",
+    label: "Took one off the total but not off that colour",
+    explanation:
+      "If the first one was that colour, there is one fewer of that colour left as well as one fewer altogether. Take 1 off the top and 1 off the bottom.",
+  },
+  "tree-only-top-changed": {
+    id: "tree-only-top-changed",
+    label: "Took one off that colour but not off the total",
+    explanation: "After one is taken out, there is one fewer altogether too. Take 1 off the bottom as well as the top.",
+  },
+  "tree-wrong-colour-changed": {
+    id: "tree-wrong-colour-changed",
+    label: "Took one off the wrong colour",
+    explanation:
+      "The first one taken was the other colour, so this colour still has all of its items. Only the total goes down by 1.",
   },
 };

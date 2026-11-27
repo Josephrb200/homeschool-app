@@ -6,6 +6,7 @@ import { SolidDiagram } from "./SolidDiagram";
 import { AngleDiagram } from "./AngleDiagram";
 import { SpinnerDiagram, TableDiagram, VennDiagram } from "./ProbabilityDiagrams";
 import { ChartDiagram } from "./ChartDiagram";
+import { TreeDiagram } from "./TreeDiagram";
 
 export function Visual({ visual, compact = false }: { visual: VisualSpec; compact?: boolean }) {
   if (visual.kind === "shape") return <ShapeDiagram shape={visual.shape} maxWidth={compact ? 360 : 420} maxHeight={compact ? 220 : 260} />;
@@ -15,6 +16,7 @@ export function Visual({ visual, compact = false }: { visual: VisualSpec; compac
   if (visual.kind === "spinner") return <SpinnerDiagram spinner={visual.spinner} maxWidth={compact ? 220 : 260} />;
   if (visual.kind === "table") return <TableDiagram table={visual.table} />;
   if (visual.kind === "venn") return <VennDiagram venn={visual.venn} maxWidth={compact ? 380 : 440} />;
+  if (visual.kind === "tree") return <TreeDiagram tree={visual.tree} maxWidth={compact ? 440 : 500} />;
   if (visual.kind === "chart") return <ChartDiagram chart={visual.chart} maxWidth={compact ? 380 : 440} />;
   return null;
 }
