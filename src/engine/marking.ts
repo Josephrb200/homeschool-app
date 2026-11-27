@@ -14,6 +14,7 @@ export function answerText(q: Question): string {
   if (a.kind === "fraction") return a.form === "mixed" ? showMixed(a.value) : a.form === "decimal" ? showDecimal(a.value) : show(a.value);
   if (a.kind === "integer") return String(a.value);
   if (a.kind === "expression") return a.value;
+  if (a.kind === "decimal") return roundTo(a.exact, a.dp);
   if (a.kind === "ratio") return a.value.join(":");
   return a.options[a.correctIndex] ?? "";
 }
@@ -26,7 +27,9 @@ export function markAnswer(
   const a = q.answer;
 
   if (a.kind === "choice") {
-    const idx = Number(raw);
+    // The app sends the option's text (so the record is readable); an index also works.
+    const byText = a.options.findIndex((o) => o.toLowerCase() === raw.trim().toLowerCase());
+    const idx = byText >= 0 ? byText : Number(raw);
     if (!Number.isInteger(idx) || idx < 0 || idx >= a.options.length) {
       return { outcome: "unreadable", correct: false, feedback: "Choose one of the options." };
     }
@@ -73,6 +76,29 @@ export function markAnswer(
     };
   }
   const v = parsed.value;
+
+  if (a.kind === "decimal") {
+    const x = v.n / v.d;
+    const tol = decimalTolerance(a.exact, a.dp);
+    if (Math.abs(x - a.exact) <= tol) {
+      const typedDp = /\.(\d+)/.exec(raw)?.[1].length ?? 0;
+      const rounded = roundTo(a.exact, a.dp);
+      return {
+        outcome: "correct",
+        correct: true,
+        feedback:
+          typedDp > a.dp
+            ? `Correct. The question asks for ${a.dp} decimal place${a.dp === 1 ? "" : "s"}, so write it as ${rounded}.`
+            : "Correct.",
+      };
+    }
+    for (const w of q.wrongAnswers) {
+      if (Array.isArray(w.value)) continue;
+      const t = typeof w.value === "number" ? w.value : w.value.n / w.value.d;
+      if (Math.abs(x - t) <= decimalTolerance(t, a.dp)) return wrong(w.misconception, misconceptions);
+    }
+    return wrong(undefined, misconceptions);
+  }
 
   if (a.kind === "integer") {
     if (equals(v, frac(a.value))) return { outcome: "correct", correct: true, feedback: "Correct." };
@@ -127,6 +153,19 @@ function wrong(mcId: string | undefined, misconceptions: Record<string, Misconce
     misconception: mc?.id,
     feedback: mc ? mc.explanation : "Not quite. Look at the hint, or check each step.",
   };
+}
+
+/** Round to dp decimal places and show it, e.g. roundTo(31.4159, 1) = "31.4". */
+export function roundTo(x: number, dp: number): string {
+  return (Math.round(x * 10 ** dp) / 10 ** dp).toFixed(dp);
+}
+
+/**
+ * How far from the exact value a rounded answer may be: half a unit in the last
+ * place (rounding), plus 0.06% for using 3.14 instead of π.
+ */
+export function decimalTolerance(exact: number, dp: number): number {
+  return 0.5 * 10 ** -dp + Math.abs(exact) * 0.0006 + 1e-9;
 }
 
 /**

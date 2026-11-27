@@ -192,7 +192,7 @@ export const GCSE_FOUNDATION_MAP: MapSkill[] = [
   s("geo-circle-composite", "Geometry", "Circles", "Semicircles, quarter circles and composite shapes", 9, ["G17"], "basic", "medium", 4, ["geo-circle-area", "geo-circumference", "area-compound"]),
   s("geo-arcs-sectors", "Geometry", "Circles", "Arc length and sector area", 10, ["G18"], "additional", "medium", 6, ["geo-circle-composite", "frac-of-amount"]),
   s("geo-volume-cuboid", "Geometry", "Volume and surface area", "Volume of cuboids", 7, ["G16"], "basic", "high", 4, ["area-rectangle"]),
-  s("geo-volume-prism", "Geometry", "Volume and surface area", "Volume of prisms and cylinders", 8, ["G16", "G17"], "basic", "high", 4, ["geo-volume-cuboid", "area-compound", "geo-circle-area"]),
+  s("geo-volume-prism", "Geometry", "Volume and surface area", "Volume of prisms and cylinders", 8, ["G16", "G17"], "basic", "high", 4, ["geo-volume-cuboid", "area-triangle", "geo-circle-area"]),
   s("geo-surface-area", "Geometry", "Volume and surface area", "Surface area of cuboids, prisms and cylinders", 8, ["G16", "G17"], "basic", "medium", 4, ["geo-3d-shapes", "area-triangle", "geo-circumference"]),
   s("geo-spheres-cones-pyramids", "Geometry", "Volume and surface area", "Volume and surface area of spheres, cones and pyramids", 11, ["G17"], "additional", "low", 6, ["geo-volume-prism", "geo-surface-area"], "Formulae are given in the question at Foundation."),
   s("geo-area-volume-units", "Geometry", "Volume and surface area", "Converting area and volume units, and litres", 9, ["G14", "N13"], "basic", "medium", 4, ["num-units", "geo-volume-cuboid"]),
