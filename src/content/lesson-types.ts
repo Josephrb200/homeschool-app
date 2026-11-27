@@ -67,7 +67,16 @@ export type DemoKind =
   | "shape-sorter"
   | "triangle-sum"
   | "parallel-lines"
-  | "polygon-split";
+  | "polygon-split"
+  | "decimal-compare"
+  | "grid-multiply"
+  | "bus-stop-division"
+  | "time-number-line"
+  | "unit-staircase"
+  | "estimate-compare"
+  | "error-interval-line"
+  | "listing-grid"
+  | "sf-multiply";
 
 export type ContentStatus = "draft" | "in-review" | "verified";
 

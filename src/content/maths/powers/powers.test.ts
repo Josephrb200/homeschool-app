@@ -133,7 +133,8 @@ describe("read-aloud", () => {
 describe("negatives, powers and BIDMAS content", () => {
   it("every skill has a draft lesson, a generator and live prerequisites, in one chain", () => {
     const chain = CHAINS.find((c) => c.id === "powers")!;
-    expect(chain.skillIds).toEqual(POWERS_SKILLS.map((s) => s.id));
+    // Calculating with standard form (built with the calculation skills) follows on at the end.
+    expect(chain.skillIds.slice(0, POWERS_SKILLS.length)).toEqual(POWERS_SKILLS.map((s) => s.id));
     for (const s of POWERS_SKILLS) {
       expect(LESSONS[s.id]?.status).toBe("draft");
       expect(POWERS_GENERATORS[s.id]).toBeDefined();

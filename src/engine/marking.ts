@@ -91,7 +91,7 @@ export function markAnswer(
 
   if (a.kind === "decimal") {
     const x = v.n / v.d;
-    const tol = decimalTolerance(a.exact, a.dp);
+    const tol = decimalTolerance(a.exact, a.dp, a.noPi);
     if (Math.abs(x - a.exact) <= tol) {
       const typedDp = /\.(\d+)/.exec(raw)?.[1].length ?? 0;
       const rounded = roundTo(a.exact, a.dp);
@@ -107,7 +107,7 @@ export function markAnswer(
     for (const w of q.wrongAnswers) {
       if (Array.isArray(w.value)) continue;
       const t = typeof w.value === "number" ? w.value : w.value.n / w.value.d;
-      if (Math.abs(x - t) <= decimalTolerance(t, a.dp)) return wrong(w.misconception, misconceptions);
+      if (Math.abs(x - t) <= decimalTolerance(t, a.dp, a.noPi)) return wrong(w.misconception, misconceptions);
     }
     return wrong(undefined, misconceptions);
   }
@@ -183,8 +183,8 @@ export function roundTo(x: number, dp: number): string {
  * How far from the exact value a rounded answer may be: half a unit in the last
  * place (rounding), plus 0.06% for using 3.14 instead of π.
  */
-export function decimalTolerance(exact: number, dp: number): number {
-  return 0.5 * 10 ** -dp + Math.abs(exact) * 0.0006 + 1e-9;
+export function decimalTolerance(exact: number, dp: number, noPi = false): number {
+  return 0.5 * 10 ** -dp + (noPi ? 0 : Math.abs(exact) * 0.0006) + 1e-9;
 }
 
 /**

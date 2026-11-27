@@ -58,7 +58,13 @@ export type AnswerSpec =
    * true value. Marking accepts the correctly rounded value, and also answers
    * that come from using 3.14 for π (as GCSE mark schemes do).
    */
-  | { kind: "decimal"; exact: number; dp: number }
+  | {
+      kind: "decimal";
+      exact: number;
+      dp: number;
+      /** True when π isn't involved (money, speeds): only rounding to `dp` places is allowed for. */
+      noPi?: boolean;
+    }
   /**
    * An algebraic expression, compared mathematically (see engine/algebra.ts).
    * `form` says how it must be written to count as fully correct:
