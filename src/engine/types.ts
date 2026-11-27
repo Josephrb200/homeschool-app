@@ -120,7 +120,8 @@ export type Visual =
   | { kind: "shape"; shape: ShapeSpec }
   | { kind: "circle"; circle: CircleSpec }
   | { kind: "solid"; solid: SolidSpec }
-  | { kind: "machine"; machine: MachineSpec };
+  | { kind: "machine"; machine: MachineSpec }
+  | { kind: "chart"; chart: ChartSpec };
 
 export type CirclePart = "centre" | "radius" | "diameter" | "chord" | "tangent" | "arc" | "sector" | "segment" | "circumference";
 
@@ -155,6 +156,64 @@ export type SolidSpec =
       /** Label the radius or the diameter on the top face. */
       label: { on: "radius" | "diameter"; text: string };
       hText: string;
+      description: string;
+    };
+
+/**
+ * A statistics chart or table. Drawn exactly from the numbers given, so the
+ * student reads the values off it. `description` is for screen readers.
+ */
+export type ChartSpec =
+  | {
+      type: "table";
+      headers: string[];
+      rows: (string | number)[][];
+      /** Draw this column's numbers as tally marks instead of digits. */
+      tallyColumn?: number;
+      description: string;
+    }
+  | {
+      type: "bar";
+      categories: string[];
+      values: number[];
+      xLabel: string;
+      yLabel: string;
+      /** Gap between labelled gridlines. */
+      yStep: number;
+      description: string;
+    }
+  | {
+      type: "pictogram";
+      categories: string[];
+      values: number[];
+      /** What one whole symbol stands for (an even number, so half a symbol is a whole number). */
+      perSymbol: number;
+      /** What is being counted, for the key: "people". */
+      unit: string;
+      description: string;
+    }
+  | {
+      type: "pie";
+      /** Sectors in order clockwise from 12 o'clock. Angles add to 360. */
+      sectors: { label: string; angle: number }[];
+      /** Write each angle in its sector. A sector in `hideAngle` shows "?" instead. */
+      showAngles: boolean;
+      hideAngle?: number;
+      description: string;
+    }
+  | {
+      type: "scatter";
+      points: [number, number][];
+      xLabel: string;
+      yLabel: string;
+      xMax: number;
+      yMax: number;
+      xStep: number;
+      yStep: number;
+      /** Letters to write beside some points, by index. */
+      letters?: { i: number; text: string }[];
+      /** One point circled, by index. */
+      highlight?: number;
       description: string;
     };
 

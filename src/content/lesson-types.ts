@@ -44,7 +44,13 @@ export type DemoKind =
   | "factor-tree"
   | "prime-venn"
   | "percent-of-whole"
-  | "percent-change-find";
+  | "percent-change-find"
+  | "tally-counter"
+  | "bar-pictogram"
+  | "pie-builder"
+  | "averages-explorer"
+  | "freq-table-expand"
+  | "scatter-correlation";
 
 export type ContentStatus = "draft" | "in-review" | "verified";
 
