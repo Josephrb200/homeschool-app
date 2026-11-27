@@ -6,6 +6,7 @@
 import { equals, gcd, isSimplest, parseAnswer, show, showDecimal, showMixed, simplify, frac, type Fraction } from "./fraction";
 import { parseExpression, polyEquals, untidyReason, UNTIDY_FEEDBACK } from "./algebra";
 import { markStandardForm, showStandardForm } from "./standard-form";
+import { factorsOf, fullForm, indexForm, isPrime, parseList, parseProduct } from "./primes";
 import type { MarkResult, Misconception, Question } from "./types";
 
 /** The correct answer as text, for showing after an attempt. */
@@ -18,6 +19,8 @@ export function answerText(q: Question): string {
   if (a.kind === "decimal") return roundTo(a.exact, a.dp);
   if (a.kind === "ratio") return a.value.join(":");
   if (a.kind === "standard-form") return showStandardForm(a.mantissa, a.power);
+  if (a.kind === "list") return [...a.value].sort((x, y) => x - y).join(", ");
+  if (a.kind === "product") return a.index ? indexForm(a.value) : fullForm(a.value);
   return a.options[a.correctIndex] ?? "";
 }
 
@@ -64,8 +67,9 @@ export function markAnswer(
   }
 
   if (a.kind === "standard-form") return markStandardForm(q, a.mantissa, a.power, raw, misconceptions);
-
   if (a.kind === "ratio") return markRatio(q, a.value, a.requireSimplest, raw, misconceptions);
+  if (a.kind === "list") return markList(q, a, raw, misconceptions);
+  if (a.kind === "product") return markProduct(q, a, raw, misconceptions);
 
   // "x = 4" is a fine way to give a number answer to an equation.
   const parsed = parseAnswer(a.kind === "integer" ? raw.replace(/^\s*[a-zA-Z]\s*=\s*/, "") : raw);
@@ -235,4 +239,76 @@ function markRatio(
   }
   const mc = q.wrongAnswers.find((w) => Array.isArray(w.value) && sameRatio(typed, w.value.map((n) => frac(n))))?.misconception;
   return wrong(mc, misconceptions);
+}
+
+const sameSet = (x: number[], y: number[]) => {
+  const a = new Set(x);
+  const b = new Set(y);
+  return a.size === b.size && [...a].every((v) => b.has(v));
+};
+
+const andList = (xs: number[]) => (xs.length <= 1 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`);
+
+function markList(
+  q: Question,
+  a: Extract<Question["answer"], { kind: "list" }>,
+  raw: string,
+  misconceptions: Record<string, Misconception>,
+): MarkResult {
+  const typed = parseList(raw);
+  if (!typed) {
+    return { outcome: "unreadable", correct: false, feedback: "Type whole numbers with commas between them, like 1, 2, 3, 6." };
+  }
+  if (sameSet(typed, a.value)) return { outcome: "correct", correct: true, feedback: "Correct." };
+  // A predicted wrong list (e.g. multiples given instead of factors).
+  const predicted = q.wrongAnswers.find((w) => Array.isArray(w.value) && sameSet(typed, w.value))?.misconception;
+  if (predicted) return wrong(predicted, misconceptions);
+
+  const want = new Set(a.value);
+  const got = new Set(typed);
+  const extra = [...got].filter((v) => !want.has(v)).sort((x, y) => x - y);
+  const missing = [...want].filter((v) => !got.has(v));
+  if (extra.length > 0) {
+    const mc = a.extraMisconception ? misconceptions[a.extraMisconception] : undefined;
+    const which = `${andList(extra)} ${extra.length === 1 ? "doesn't" : "don't"} belong in this list.`;
+    return { outcome: "incorrect", correct: false, misconception: mc?.id, feedback: mc ? `${which} ${mc.explanation}` : `${which} Check each number again.` };
+  }
+  const mc = a.missingMisconception ? misconceptions[a.missingMisconception] : undefined;
+  const found = `Everything you wrote is right, but there ${missing.length === 1 ? "is 1 more" : `are ${missing.length} more`} ${missing.length === 1 ? a.noun.replace(/s$/, "") : a.noun} to find.`;
+  return { outcome: "incorrect", correct: false, misconception: mc?.id, feedback: mc ? `${found} ${mc.explanation}` : found };
+}
+
+function markProduct(
+  q: Question,
+  a: Extract<Question["answer"], { kind: "product" }>,
+  raw: string,
+  misconceptions: Record<string, Misconception>,
+): MarkResult {
+  const typed = parseProduct(raw);
+  if (!typed) {
+    return { outcome: "unreadable", correct: false, feedback: "Type the primes with × or x between them, like 2 × 2 × 3. For powers, type 2^2 or 2²." };
+  }
+  if (typed.value === a.value) {
+    if (typed.factors.some((f) => f.base === 1)) {
+      return { outcome: "not-simplified", correct: false, feedback: `1 isn't a prime number, so leave it out. The answer is ${answerText(q)}.` };
+    }
+    const notPrime = typed.factors.map((f) => f.base).filter((b) => !isPrime(b));
+    if (notPrime.length > 0) {
+      const b = notPrime[0];
+      const split = factorsOf(b).find((k) => k > 1 && k < b)!;
+      return {
+        outcome: "not-simplified",
+        correct: false,
+        feedback: `That does multiply to ${a.value}, but ${b} isn't prime: ${b} = ${split} × ${b / split}. Keep splitting until every number is prime. The answer is ${answerText(q)}.`,
+      };
+    }
+    if (a.index && !typed.usedIndex && typed.factors.length > new Set(typed.factors.map((f) => f.base)).size) {
+      return { outcome: "not-simplified", correct: false, feedback: `Those are the right primes. The question asks for index form, so group repeated primes with a power: ${indexForm(a.value)}.` };
+    }
+    return { outcome: "correct", correct: true, feedback: "Correct." };
+  }
+  const mc = matchWrong(q, frac(typed.value));
+  const check = `Your numbers multiply to ${typed.value}, not ${a.value}.`;
+  const m = mc ? misconceptions[mc] : undefined;
+  return { outcome: "incorrect", correct: false, misconception: m?.id, feedback: m ? `${check} ${m.explanation}` : `${check} Multiply your answer back out to check it.` };
 }
