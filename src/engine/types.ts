@@ -64,7 +64,21 @@ export type AnswerSpec =
    * `form` says how it must be written to count as fully correct:
    * "notation" = algebra conventions (5n, x²), "simplified" = also expanded and collected.
    */
-  | { kind: "expression"; value: string; form: "notation" | "simplified" }
+  | {
+      kind: "expression";
+      value: string;
+      form: "notation" | "simplified";
+      /**
+       * The answer is an equation like "y = 3x − 2": `lhs` is "y", `value` the right-hand side.
+       * Typing "y =" is expected; leaving it out gets a nudge ("not-simplified").
+       */
+      lhs?: string;
+    }
+  /**
+   * A coordinate pair (x, y), e.g. (3, −2). Order matters. See engine/point.ts.
+   * `vector` marks a column vector instead: feedback says "top number" and "bottom number".
+   */
+  | { kind: "point"; value: [number, number]; vector?: boolean }
   /**
    * A number in standard form, mantissa × 10^power with 1 ≤ mantissa < 10
    * (see engine/standard-form.ts). The right value written another way is "not-simplified".
@@ -135,7 +149,36 @@ export type Visual =
   | { kind: "chart"; chart: ChartSpec }
   | { kind: "spinner"; spinner: SpinnerSpec }
   | { kind: "table"; table: TableSpec }
-  | { kind: "venn"; venn: VennSpec };
+  | { kind: "venn"; venn: VennSpec }
+  | { kind: "graph"; graph: GraphSpec };
+
+/**
+ * A coordinate grid with axes, drawn to scale: lines and curves (as lists of
+ * points), and labelled points. Used for coordinates, straight-line, quadratic
+ * and real-life graphs. Axes sit at 0 when 0 is in range, otherwise on the edge.
+ */
+export interface GraphSpec {
+  x: GraphAxis;
+  y: GraphAxis;
+  /** Lines and curves, each drawn through its points in order (clipped to the grid). */
+  curves?: { points: [number, number][]; label?: { text: string; at: [number, number] }; dashed?: boolean; highlight?: boolean }[];
+  /** Points marked with a cross, with an optional letter. */
+  points?: { at: [number, number]; label?: string }[];
+  /** The student answers by clicking a grid point (its coordinates fill the answer box). */
+  pick?: boolean;
+  description: string;
+}
+
+export interface GraphAxis {
+  min: number;
+  max: number;
+  /** Gap between gridlines. */
+  step: number;
+  /** Gap between numbered gridlines (default: every gridline). */
+  labelStep?: number;
+  /** Axis title, e.g. "Time (minutes)". Defaults to the letter x or y. */
+  label?: string;
+}
 
 /** A fair spinner with equal sections, each labelled (a colour word or a number). */
 export interface SpinnerSpec {
