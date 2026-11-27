@@ -6,9 +6,8 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { getViewer } from "@/lib/learner";
 import { LESSONS, MISCONCEPTIONS, SKILL_BY_ID } from "@/content";
 import { makeQuestion, questionFromId, type Tier } from "@/content/questions";
-import { markAnswer } from "@/engine/marking";
+import { answerText, markAnswer } from "@/engine/marking";
 import { newSeed } from "@/engine/random";
-import { show } from "@/engine/fraction";
 import type { Question } from "@/engine/types";
 
 /** What the browser is allowed to see before answering: no answer, no solution. */
@@ -18,6 +17,7 @@ export interface PublicQuestion {
   prompt: string;
   visual?: Question["visual"];
   hints: string[];
+  answerHelp?: string;
 }
 
 async function requireStudent() {
@@ -27,7 +27,7 @@ async function requireStudent() {
 }
 
 function publicPart(q: Question): PublicQuestion {
-  return { id: q.id, skillId: q.skillId, prompt: q.prompt, visual: q.visual, hints: q.hints };
+  return { id: q.id, skillId: q.skillId, prompt: q.prompt, visual: q.visual, hints: q.hints, answerHelp: q.answerHelp };
 }
 
 export async function nextQuestion(skillId: string, tier: Tier): Promise<PublicQuestion> {
@@ -93,14 +93,12 @@ export async function submitAnswer(input: z.infer<typeof AnswerInput>): Promise<
     check_id: a.mode === "check" ? a.checkId ?? null : null,
     duration_ms: a.durationMs ?? null,
   });
-  const answerText =
-    q.answer.kind === "fraction" ? show(q.answer.value) : q.answer.kind === "integer" ? String(q.answer.value) : "";
   return {
     outcome: mark.outcome,
     correct: mark.correct,
     feedback: mark.feedback,
     misconceptionLabel: mark.misconception ? MISCONCEPTIONS[mark.misconception]?.label : undefined,
-    correctAnswer: a.mode === "check" ? undefined : answerText,
+    correctAnswer: a.mode === "check" ? undefined : answerText(q),
     solution: a.mode === "check" ? undefined : q.solution,
     saved: !error,
   };
@@ -110,7 +108,7 @@ export async function submitAnswer(input: z.infer<typeof AnswerInput>): Promise<
 export async function revealSolution(questionId: string): Promise<{ solution: string[]; answer: string }> {
   await requireStudent();
   const q = questionFromId(questionId);
-  const answer = q.answer.kind === "fraction" ? show(q.answer.value) : q.answer.kind === "integer" ? String(q.answer.value) : "";
+  const answer = answerText(q);
   return { solution: q.solution, answer };
 }
 
@@ -119,7 +117,7 @@ export async function checkReview(questionIds: string[]) {
   await requireStudent();
   return questionIds.slice(0, 10).map((id) => {
     const q = questionFromId(id);
-    const answer = q.answer.kind === "fraction" ? show(q.answer.value) : q.answer.kind === "integer" ? String(q.answer.value) : "";
+    const answer = answerText(q);
     return { id, prompt: q.prompt, answer, solution: q.solution };
   });
 }

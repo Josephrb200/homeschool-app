@@ -14,7 +14,13 @@ export type DemoKind =
   | "triangle-half"
   | "parallelogram-shear"
   | "trapezium-double"
-  | "compound-split";
+  | "compound-split"
+  | "notation-meaning"
+  | "like-terms-sort"
+  | "substitute-swap"
+  | "expand-area"
+  | "function-machine"
+  | "balance-solve";
 
 export type ContentStatus = "draft" | "in-review" | "verified";
 

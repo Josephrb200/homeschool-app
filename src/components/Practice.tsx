@@ -17,6 +17,7 @@ import {
 } from "@/app/actions/learn";
 import { FractionBar } from "./FractionDemos";
 import { ShapeDiagram } from "./ShapeDiagram";
+import { FunctionMachine } from "./FunctionMachine";
 import { MathText } from "./MathText";
 import { SpeakButton } from "./Speak";
 import { usePrefs } from "./PrefsProvider";
@@ -243,6 +244,7 @@ export function Practice({
               <ShapeDiagram shape={q.visual.shape} />
             </div>
           )}
+          {q.visual?.kind === "machine" && <FunctionMachine machine={q.visual.machine} />}
           {q.visual?.kind === "bars" && mode !== "check" && (
             <div className="stack optional">
               {q.visual.bars.slice(0, 1).map((b, i) => (
@@ -264,6 +266,9 @@ export function Practice({
               disabled={!!answered && !retrying}
               aria-describedby="prompt answer-help"
               inputMode="text"
+              autoCapitalize="off"
+              autoCorrect="off"
+              spellCheck={false}
             />
             {(!answered || retrying) && (
               <button className="btn btn-primary" type="submit" disabled={busy || !answer.trim()}>
@@ -282,7 +287,9 @@ export function Practice({
             )}
           </form>
           <p id="answer-help" className="hint">
-            {q.visual?.kind === "shape"
+            {q.answerHelp
+              ? q.answerHelp
+              : q.visual?.kind === "shape"
               ? "Type a number like 24 or 7.5. Units like cm² are fine but not needed."
               : "Type a whole number like 12, a fraction like 3/4, or a mixed number like 1 1/2."}
             {mode === "check" && " This is a skill check, so there are no hints. Answers are explained at the end."}
