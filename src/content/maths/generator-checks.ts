@@ -123,6 +123,14 @@ export function checkQuestion(q: Question) {
         expectWrong((w.value as number[]).join(", "), w.misconception);
       }
       break;
+    case "pi":
+      expectRight(answerText(q));
+      expectRight(`${a.coeff} pi`);
+      for (const w of q.wrongAnswers) {
+        mc(w.misconception);
+        expectWrong(`${w.value}π`, w.misconception);
+      }
+      break;
     default:
       throw new Error(`unexpected answer kind ${a.kind} in ${q.id}`);
   }

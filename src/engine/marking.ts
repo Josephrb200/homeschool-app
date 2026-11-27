@@ -3,6 +3,7 @@
  * mathematically, and matches predictable wrong answers to misconceptions.
  */
 
+import { markPi, showPi } from "./pi";
 import { equals, gcd, isSimplest, parseAnswer, show, showDecimal, showMixed, simplify, frac, type Fraction } from "./fraction";
 import { leftoverFactor, parseExpression, polyEquals, untidyReason, UNTIDY_FEEDBACK } from "./algebra";
 import { markStandardForm, showStandardForm } from "./standard-form";
@@ -19,6 +20,7 @@ export function answerText(q: Question): string {
   if (a.kind === "integer") return String(a.value);
   if (a.kind === "expression") return a.lhs ? `${a.lhs} = ${a.value}` : a.value;
   if (a.kind === "point") return showPoint(a.value);
+  if (a.kind === "pi") return showPi(a.coeff);
   if (a.kind === "decimal") return roundTo(a.exact, a.dp);
   if (a.kind === "ratio") return a.value.join(":");
   if (a.kind === "standard-form") return showStandardForm(a.mantissa, a.power);
@@ -50,6 +52,7 @@ export function markAnswer(
     return wrong(mc, misconceptions);
   }
 
+  if (a.kind === "pi") return markPi(q, a.coeff, raw, misconceptions);
   if (a.kind === "point") return markPoint(q, a.value, raw, misconceptions, a.vector);
 
   if (a.kind === "expression") {

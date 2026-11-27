@@ -172,6 +172,11 @@ export function PlaneDiagram({ plane, maxWidth = 440, maxHeight = 340 }: { plane
         return <Num key={`pl${k}`} x={px + 8} y={py - 12} text={p.label} size={font} bold anchor="start" />;
       })}
 
+      {plane.texts?.map((t, k) => {
+        const [tx, ty] = S(t.at);
+        return <Num key={`tx${k}`} x={tx} y={ty} text={t.text} size={font} bold />;
+      })}
+
       {plane.shapes?.map((s, k) => {
         if (!s.label) return null;
         const [cx, cy] = S(labelSpot(s.points));
