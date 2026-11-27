@@ -7,6 +7,7 @@ import { AngleDiagram } from "./AngleDiagram";
 import { SpinnerDiagram, TableDiagram, VennDiagram } from "./ProbabilityDiagrams";
 import { ChartDiagram } from "./ChartDiagram";
 import { PlaneDiagram } from "./PlaneDiagram";
+import { NumberLine } from "./NumberLine";
 import { GraphDiagram } from "./GraphDiagram";
 
 export function Visual({ visual, compact = false }: { visual: VisualSpec; compact?: boolean }) {
@@ -30,6 +31,7 @@ export function Visual({ visual, compact = false }: { visual: VisualSpec; compac
         ))}
       </div>
     );
+  if (visual.kind === "numberline") return <NumberLine line={visual.line} maxWidth={compact ? 380 : 460} />;
   if (visual.kind === "graph") return <GraphDiagram graph={visual.graph} maxWidth={compact ? 380 : 440} />;
   return null;
 }

@@ -67,7 +67,7 @@ export type AnswerSpec =
   | {
       kind: "expression";
       value: string;
-      form: "notation" | "simplified";
+      form: "notation" | "simplified" | "factorised";
       /**
        * The answer is an equation like "y = 3x − 2": `lhs` is "y", `value` the right-hand side.
        * Typing "y =" is expected; leaving it out gets a nudge ("not-simplified").
@@ -79,6 +79,30 @@ export type AnswerSpec =
    * `vector` marks a column vector instead: feedback says "top number" and "bottom number".
    */
   | { kind: "point"; value: [number, number]; vector?: boolean }
+  /**
+   * An inequality such as x < 4 or −2 < x ≤ 3 (see engine/equations.ts). Any
+   * equivalent way of writing it is accepted (4 > x). The optional
+   * misconceptions name the near misses: < for ≤ (or the reverse), the sign
+   * pointing the wrong way, and "x = 4" given instead of an inequality.
+   */
+  | {
+      kind: "inequality";
+      variable: string;
+      value: Interval;
+      inclusiveMisconception?: MisconceptionId;
+      directionMisconception?: MisconceptionId;
+      equalsMisconception?: MisconceptionId;
+    }
+  /** All the solutions of an equation (a quadratic), in any order: "x = 2 or x = −5". */
+  | { kind: "roots"; variable: string; values: number[]; missingMisconception?: MisconceptionId }
+  /** One value for each letter, e.g. simultaneous equations: { x: 3, y: −2 }. `wrongAnswers` lists values in letter order. */
+  | { kind: "assignment"; values: Record<string, number> }
+  /**
+   * A formula rearranged to make `subject` the subject, e.g. subject "x",
+   * value "(y − c)/m". Any equivalent form is accepted; wrongExpressions are
+   * compared the same way.
+   */
+  | { kind: "formula"; subject: string; value: string }
   /**
    * A number in standard form, mantissa × 10^power with 1 ≤ mantissa < 10
    * (see engine/standard-form.ts). The right value written another way is "not-simplified".
@@ -98,6 +122,17 @@ export type AnswerSpec =
    * `index` asks for index form: the right primes written out in full get a nudge.
    */
   | { kind: "product"; value: number; index: boolean };
+
+/** One end of an inequality: the number, and whether it is included (≤, ≥) or not (<, >). */
+export interface Bound {
+  value: Fraction;
+  inclusive: boolean;
+}
+/** x between two bounds; a missing bound means no limit that way. */
+export interface Interval {
+  lower?: Bound;
+  upper?: Bound;
+}
 
 export interface Question {
   /** Stable id: skill + generator + seed. Lets us rebuild the exact question later. */
@@ -152,7 +187,22 @@ export type Visual =
   | { kind: "venn"; venn: VennSpec }
   | { kind: "plane"; plane: PlaneSpec }
   | { kind: "panels"; panels: { label: string; visual: Visual }[]; description: string }
+  | { kind: "numberline"; line: NumberLineSpec }
   | { kind: "graph"; graph: GraphSpec };
+
+/**
+ * A number line from min to max (whole numbers marked), optionally showing an
+ * inequality: a circle at each bound (filled = included, open = not) and a
+ * thick line over the values that fit, with an arrow if it goes on forever.
+ */
+export interface NumberLineSpec {
+  min: number;
+  max: number;
+  /** Bounds use whole numbers so they sit on a tick. */
+  lower?: { value: number; inclusive: boolean };
+  upper?: { value: number; inclusive: boolean };
+  description: string;
+}
 
 /**
  * A coordinate grid with axes, drawn to scale: lines and curves (as lists of
