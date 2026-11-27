@@ -39,7 +39,13 @@ export type DemoKind =
   | "rounding-line"
   | "hundred-grid"
   | "percent-bar"
-  | "percent-change";
+  | "percent-change"
+  | "probability-scale"
+  | "counter-bag"
+  | "probability-bar"
+  | "experiment-trials"
+  | "sample-space-grid"
+  | "venn-sort";
 
 export type ContentStatus = "draft" | "in-review" | "verified";
 

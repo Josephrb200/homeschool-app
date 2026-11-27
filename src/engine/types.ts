@@ -44,6 +44,11 @@ export type AnswerSpec =
        * "improper" wants a top-heavy fraction like 11/4.
        */
       form?: "mixed" | "improper" | "decimal";
+      /**
+       * Probability answers: "40%" means 0.4 (not 40), and typing 40 when the
+       * answer is 0.4 gets a nudge to add the % sign instead of being marked wrong.
+       */
+      percentAllowed?: boolean;
     }
   | { kind: "integer"; value: number }
   /** A ratio such as 3:2 or 2:3:5. Any equivalent ratio is accepted unless requireSimplest. */
@@ -107,7 +112,45 @@ export type Visual =
   | { kind: "shape"; shape: ShapeSpec }
   | { kind: "circle"; circle: CircleSpec }
   | { kind: "solid"; solid: SolidSpec }
-  | { kind: "machine"; machine: MachineSpec };
+  | { kind: "machine"; machine: MachineSpec }
+  | { kind: "spinner"; spinner: SpinnerSpec }
+  | { kind: "table"; table: TableSpec }
+  | { kind: "venn"; venn: VennSpec };
+
+/** A fair spinner with equal sections, each labelled (a colour word or a number). */
+export interface SpinnerSpec {
+  sections: string[];
+  description: string;
+}
+
+/**
+ * A table: a header row, then rows whose first cell is a row header.
+ * Used for sample space diagrams, frequency tables and probability tables.
+ * A cell of "?" is drawn as a blank to find. `highlight` marks [row, col] body cells.
+ */
+export interface TableSpec {
+  corner?: string;
+  columns: string[];
+  rows: { head: string; cells: string[] }[];
+  highlight?: [number, number][];
+  description: string;
+}
+
+/**
+ * A two-set Venn diagram. Each region holds text: a count ("7"), a list of
+ * members ("2, 4, 8") or "?" for the value to find.
+ */
+export interface VennSpec {
+  a: string;
+  b: string;
+  onlyA: string;
+  both: string;
+  onlyB: string;
+  neither: string;
+  /** Regions to shade, to show what a question means. */
+  shade?: ("onlyA" | "both" | "onlyB" | "neither")[];
+  description: string;
+}
 
 export type CirclePart = "centre" | "radius" | "diameter" | "chord" | "tangent" | "arc" | "sector" | "segment" | "circumference";
 
