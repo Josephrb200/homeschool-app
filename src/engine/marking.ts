@@ -3,14 +3,14 @@
  * mathematically, and matches predictable wrong answers to misconceptions.
  */
 
-import { equals, isSimplest, parseAnswer, show, simplify, frac } from "./fraction";
+import { equals, isSimplest, parseAnswer, show, showMixed, simplify, frac } from "./fraction";
 import { parseExpression, polyEquals, untidyReason, UNTIDY_FEEDBACK } from "./algebra";
 import type { MarkResult, Misconception, Question } from "./types";
 
 /** The correct answer as text, for showing after an attempt. */
 export function answerText(q: Question): string {
   const a = q.answer;
-  if (a.kind === "fraction") return show(a.value);
+  if (a.kind === "fraction") return a.form === "mixed" ? showMixed(a.value) : show(a.value);
   if (a.kind === "integer") return String(a.value);
   if (a.kind === "expression") return a.value;
   return a.options[a.correctIndex] ?? "";
@@ -77,12 +77,28 @@ export function markAnswer(
 
   // fraction answer
   if (equals(v, a.value)) {
+    if (a.form === "mixed" && a.value.d !== 1 && Math.abs(a.value.n) > a.value.d && parsed.form !== "mixed") {
+      return {
+        outcome: "not-simplified",
+        correct: false,
+        feedback: `That's the right amount. Now write it as a mixed number: a whole number and a fraction, like ${showMixed(a.value)}.`,
+      };
+    }
+    if (a.form === "improper" && parsed.form !== "fraction") {
+      return {
+        outcome: "not-simplified",
+        correct: false,
+        feedback: `That's the right amount. Now write it as an improper (top-heavy) fraction, like ${show(a.value)}.`,
+      };
+    }
     // Decimals and integers are already exact; only typed fractions can be unsimplified.
     if (a.requireSimplest && (parsed.form === "fraction" || parsed.form === "mixed") && !isSimplest(v)) {
       return {
         outcome: "not-simplified",
         correct: false,
-        feedback: `That's the right amount, but it can be simplified. ${show(v)} = ${show(simplify(v))}.`,
+        feedback: parsed.form === "mixed"
+          ? `That's the right amount, but the fraction part can be simplified. ${raw.trim()} = ${showMixed(v)}.`
+          : `That's the right amount, but it can be simplified. ${show(v)} = ${show(simplify(v))}.`,
       };
     }
     return { outcome: "correct", correct: true, feedback: "Correct." };

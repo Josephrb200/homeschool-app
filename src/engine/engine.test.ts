@@ -22,7 +22,15 @@ function check(skillId: string, at: Date, right: number, id = "c1"): AttemptEven
   );
 }
 const answerString = (q: Question) =>
-  q.answer.kind === "fraction" ? show(q.answer.value) : q.answer.kind === "integer" ? String(q.answer.value) : q.answer.kind === "expression" ? q.answer.value : String(q.answer.correctIndex);
+  q.answer.kind === "fraction"
+    ? q.answer.form === "mixed"
+      ? showMixed(q.answer.value)
+      : show(q.answer.value)
+    : q.answer.kind === "integer"
+      ? String(q.answer.value)
+      : q.answer.kind === "expression"
+        ? q.answer.value
+        : String(q.answer.correctIndex);
 
 describe("parseAnswer", () => {
   it.each([

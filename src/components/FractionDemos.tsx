@@ -8,7 +8,7 @@
  */
 
 import { useId, useState } from "react";
-import { frac, gcd, lcm, show, simplify, type Fraction } from "@/engine/fraction";
+import { frac, gcd, lcm, show, showMixed, simplify, type Fraction } from "@/engine/fraction";
 import { MathText } from "./MathText";
 
 export function FractionBar({ f, label, width = 480 }: { f: Fraction; label?: string; width?: number }) {
@@ -29,6 +29,26 @@ export function FractionBar({ f, label, width = 480 }: { f: Fraction; label?: st
         />
       ))}
     </svg>
+  );
+}
+
+/** Any fraction as bars: one bar per whole, so 11/4 draws as two full bars and 3/4 of a third. */
+export function FractionBars({ f, width = 480 }: { f: Fraction; width?: number }) {
+  const wholes = Math.floor(f.n / f.d);
+  const rest = f.n % f.d;
+  const bars = [...Array.from({ length: wholes }, () => frac(f.d, f.d)), ...(rest || wholes === 0 ? [frac(rest, f.d)] : [])];
+  const label =
+    wholes === 0
+      ? `${f.n} out of ${f.d} equal parts shaded`
+      : `${wholes} whole bar${wholes > 1 ? "s" : ""}${rest ? ` and ${rest} out of ${f.d} parts of another` : ""}, ${f.n} parts of size 1/${f.d} in all`;
+  return (
+    <div className="stack" role="img" aria-label={label} style={{ gap: "0.35rem" }}>
+      {bars.map((b, i) => (
+        <div key={i} aria-hidden="true">
+          <FractionBar f={b} width={width} />
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -169,6 +189,82 @@ function AmountBar() {
   );
 }
 
+function MultiplyDivide() {
+  const [mode, setMode] = useState<"multiply" | "divide">("multiply");
+  return (
+    <>
+      <div className="choice-row" role="group" aria-label="Choose what to explore">
+        <button type="button" className="choice" aria-pressed={mode === "multiply"} onClick={() => setMode("multiply")}>
+          Multiplying
+        </button>
+        <button type="button" className="choice" aria-pressed={mode === "divide"} onClick={() => setMode("divide")}>
+          Dividing
+        </button>
+      </div>
+      {mode === "multiply" ? <MultiplyGrid /> : <DivideBars />}
+    </>
+  );
+}
+
+function DivideBars() {
+  const [w, setW] = useState(3);
+  const [d, setD] = useState(2);
+  return (
+    <>
+      <p>
+        Dividing asks <em>how many fit in?</em> How many pieces of size <MathText text={`1/${d}`} /> fit into {w} whole
+        {w > 1 ? "s" : ""}?
+      </p>
+      <div className="grid-2">
+        <Slider label="Wholes" value={w} min={1} max={4} onChange={setW} />
+        <Slider label="Piece size: 1 over" value={d} min={2} max={5} onChange={setD} />
+      </div>
+      <FractionBars f={frac(w * d, d)} />
+      <Readout>
+        Each whole holds {d} pieces, so {w} whole{w > 1 ? "s" : ""} hold {w} × {d} = <strong>{w * d}</strong>.{" "}
+        <MathText text={`${w} ÷ 1/${d} = ${w} × ${d}/1 = ${w * d}`} />. Dividing by a fraction is the same as multiplying by it flipped.
+      </Readout>
+    </>
+  );
+}
+
+function MixedNumberBars() {
+  const [d, setD] = useState(4);
+  const [n, setN] = useState(11);
+  const nn = Math.min(n, 4 * d);
+  const f = frac(nn, d);
+  const wholes = Math.floor(nn / d);
+  const rest = nn % d;
+  return (
+    <>
+      <p>Choose the size of the pieces, then add pieces. Every time a bar fills up, that&apos;s one whole.</p>
+      <div className="grid-2">
+        <Slider label="Pieces in one whole (denominator)" value={d} min={2} max={6} onChange={setD} />
+        <Slider label="Number of pieces (numerator)" value={nn} min={1} max={4 * d} onChange={setN} />
+      </div>
+      <FractionBars f={f} />
+      <Readout>
+        <MathText text={`${nn}/${d}`} />
+        {wholes === 0 ? (
+          <> is less than one whole, so it stays as a fraction.</>
+        ) : (
+          <>
+            : {nn} ÷ {d} = {wholes}
+            {rest ? ` remainder ${rest}` : ""}. That&apos;s {wholes} whole{wholes > 1 ? "s" : ""}
+            {rest ? (
+              <>
+                {" "}and <MathText text={`${rest}/${d}`} /> more, so <MathText text={`${nn}/${d} = ${showMixed(f)}`} />.
+              </>
+            ) : (
+              <> exactly, so <MathText text={`${nn}/${d}`} /> = {wholes}.</>
+            )}
+          </>
+        )}
+      </Readout>
+    </>
+  );
+}
+
 function MultiplyGrid() {
   const [a, setA] = useState(2);
   const [c, setC] = useState(3);
@@ -219,5 +315,6 @@ export const FRACTION_DEMOS = {
   "common-denominator-bars": CommonDenominatorBars,
   "add-bars": AddBars,
   "amount-bar": AmountBar,
-  "multiply-grid": MultiplyGrid,
+  "multiply-grid": MultiplyDivide,
+  "mixed-number-bars": MixedNumberBars,
 };
