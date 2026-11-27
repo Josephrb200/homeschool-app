@@ -65,7 +65,20 @@ export type AnswerSpec =
    * "notation" = algebra conventions (5n, x²), "simplified" = also expanded and collected.
    */
   | { kind: "expression"; value: string; form: "notation" | "simplified" }
-  | { kind: "choice"; options: string[]; correctIndex: number };
+  | { kind: "choice"; options: string[]; correctIndex: number }
+  /**
+   * A list of whole numbers in any order, e.g. "the factors of 12" (1, 2, 3, 4, 6, 12).
+   * Repeats are ignored. `noun` names the items in feedback ("factors").
+   * A list missing some items gets `missingMisconception`; one with items that
+   * don't belong gets `extraMisconception`, and feedback names those items.
+   */
+  | { kind: "list"; value: number[]; noun: string; missingMisconception?: MisconceptionId; extraMisconception?: MisconceptionId }
+  /**
+   * A number written as a product of primes, e.g. 60 = 2 × 2 × 3 × 5 or 2² × 3 × 5.
+   * Any order. Right product with a non-prime (or a 1) is "not-simplified".
+   * `index` asks for index form: the right primes written out in full get a nudge.
+   */
+  | { kind: "product"; value: number; index: boolean };
 
 export interface Question {
   /** Stable id: skill + generator + seed. Lets us rebuild the exact question later. */
@@ -113,6 +126,7 @@ export type Visual =
   | { kind: "circle"; circle: CircleSpec }
   | { kind: "solid"; solid: SolidSpec }
   | { kind: "machine"; machine: MachineSpec }
+  | { kind: "chart"; chart: ChartSpec }
   | { kind: "spinner"; spinner: SpinnerSpec }
   | { kind: "table"; table: TableSpec }
   | { kind: "venn"; venn: VennSpec };
@@ -185,6 +199,64 @@ export type SolidSpec =
       /** Label the radius or the diameter on the top face. */
       label: { on: "radius" | "diameter"; text: string };
       hText: string;
+      description: string;
+    };
+
+/**
+ * A statistics chart or table. Drawn exactly from the numbers given, so the
+ * student reads the values off it. `description` is for screen readers.
+ */
+export type ChartSpec =
+  | {
+      type: "table";
+      headers: string[];
+      rows: (string | number)[][];
+      /** Draw this column's numbers as tally marks instead of digits. */
+      tallyColumn?: number;
+      description: string;
+    }
+  | {
+      type: "bar";
+      categories: string[];
+      values: number[];
+      xLabel: string;
+      yLabel: string;
+      /** Gap between labelled gridlines. */
+      yStep: number;
+      description: string;
+    }
+  | {
+      type: "pictogram";
+      categories: string[];
+      values: number[];
+      /** What one whole symbol stands for (an even number, so half a symbol is a whole number). */
+      perSymbol: number;
+      /** What is being counted, for the key: "people". */
+      unit: string;
+      description: string;
+    }
+  | {
+      type: "pie";
+      /** Sectors in order clockwise from 12 o'clock. Angles add to 360. */
+      sectors: { label: string; angle: number }[];
+      /** Write each angle in its sector. A sector in `hideAngle` shows "?" instead. */
+      showAngles: boolean;
+      hideAngle?: number;
+      description: string;
+    }
+  | {
+      type: "scatter";
+      points: [number, number][];
+      xLabel: string;
+      yLabel: string;
+      xMax: number;
+      yMax: number;
+      xStep: number;
+      yStep: number;
+      /** Letters to write beside some points, by index. */
+      letters?: { i: number; text: string }[];
+      /** One point circled, by index. */
+      highlight?: number;
       description: string;
     };
 
