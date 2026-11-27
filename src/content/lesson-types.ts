@@ -93,7 +93,17 @@ export type DemoKind =
   | "estimate-compare"
   | "error-interval-line"
   | "listing-grid"
-  | "sf-multiply";
+  | "sf-multiply"
+  | "map-scale"
+  | "pay-rate"
+  | "inverse-workers"
+  | "interest-simple"
+  | "reverse-percent-bar"
+  | "interest-compound"
+  | "speed-journey"
+  | "dt-graph-builder"
+  | "density-blocks"
+  | "unit-rate-convert";
 
 export type ContentStatus = "draft" | "in-review" | "verified";
 

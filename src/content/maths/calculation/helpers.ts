@@ -6,7 +6,7 @@
 import { equals, frac, type Fraction } from "@/engine/fraction";
 import type { Rng } from "@/engine/random";
 import type { Question } from "@/engine/types";
-import { showDec } from "../decimals/dec";
+import { showDec, terminates } from "../decimals/dec";
 
 export type Tier = 1 | 2;
 export type Q = Omit<Question, "id" | "skillId">;
@@ -17,7 +17,10 @@ export type Wrong = Question["wrongAnswers"][number];
 export function num(x: number | Fraction): string {
   const f = typeof x === "number" ? frac(x) : x;
   const neg = f.n < 0;
-  const s = showDec(neg ? frac(-f.n, f.d) : f);
+  const pos = neg ? frac(-f.n, f.d) : f;
+  // Thirds and the like don't end as decimals: show them as fractions (drawn stacked).
+  if (!terminates(pos)) return `${neg ? "−" : ""}${pos.n}/${pos.d}`;
+  const s = showDec(pos);
   const [w, p] = s.split(".");
   const whole = w.length > 4 ? w.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : w;
   return `${neg ? "−" : ""}${whole}${p ? `.${p}` : ""}`;
