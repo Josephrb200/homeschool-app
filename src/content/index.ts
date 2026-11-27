@@ -16,12 +16,14 @@ import { PERCENT_MISCONCEPTIONS, PERCENT_SKILLS } from "./maths/percentages/skil
 import { PERCENT_LESSONS } from "./maths/percentages/lessons";
 import { RATIO_MISCONCEPTIONS, RATIO_SKILLS } from "./maths/ratio/skills";
 import { RATIO_LESSONS } from "./maths/ratio/lessons";
+import { FACTOR_MISCONCEPTIONS, FACTOR_SKILLS } from "./maths/factors/skills";
+import { FACTOR_LESSONS } from "./maths/factors/lessons";
 import { STATS_MISCONCEPTIONS, STATS_SKILLS } from "./maths/statistics/skills";
 import { STATS_LESSONS } from "./maths/statistics/lessons";
 import type { Skill } from "@/engine/types";
 
 /** Every skill exactly as its chain writes it (prerequisites copy the topic map). */
-const ALL_SKILLS: Skill[] = [...AREA_SKILLS, ...FRACTION_SKILLS, ...MEASURES_SKILLS, ...ALGEBRA_SKILLS, ...RATIO_SKILLS, ...DECIMAL_SKILLS, ...PERCENT_SKILLS, ...STATS_SKILLS];
+const ALL_SKILLS: Skill[] = [...AREA_SKILLS, ...FRACTION_SKILLS, ...MEASURES_SKILLS, ...ALGEBRA_SKILLS, ...RATIO_SKILLS, ...DECIMAL_SKILLS, ...PERCENT_SKILLS, ...FACTOR_SKILLS, ...STATS_SKILLS];
 const LIVE_IDS = new Set(ALL_SKILLS.map((s) => s.id));
 
 /**
@@ -30,8 +32,8 @@ const LIVE_IDS = new Set(ALL_SKILLS.map((s) => s.id));
  */
 export const SKILLS: Skill[] = ALL_SKILLS.map((s) => ({ ...s, prerequisites: s.prerequisites.filter((p) => LIVE_IDS.has(p)) }));
 export const SKILL_BY_ID: Record<string, Skill> = Object.fromEntries(SKILLS.map((s) => [s.id, s]));
-export const MISCONCEPTIONS = { ...FRACTION_MISCONCEPTIONS, ...AREA_MISCONCEPTIONS, ...MEASURES_MISCONCEPTIONS, ...ALGEBRA_MISCONCEPTIONS, ...RATIO_MISCONCEPTIONS, ...DECIMAL_MISCONCEPTIONS, ...PERCENT_MISCONCEPTIONS, ...STATS_MISCONCEPTIONS };
-export const LESSONS = { ...FRACTION_LESSONS, ...AREA_LESSONS, ...MEASURES_LESSONS, ...ALGEBRA_LESSONS, ...RATIO_LESSONS, ...DECIMAL_LESSONS, ...PERCENT_LESSONS, ...STATS_LESSONS };
+export const MISCONCEPTIONS = { ...FRACTION_MISCONCEPTIONS, ...AREA_MISCONCEPTIONS, ...MEASURES_MISCONCEPTIONS, ...ALGEBRA_MISCONCEPTIONS, ...RATIO_MISCONCEPTIONS, ...DECIMAL_MISCONCEPTIONS, ...PERCENT_MISCONCEPTIONS, ...FACTOR_MISCONCEPTIONS, ...STATS_MISCONCEPTIONS };
+export const LESSONS = { ...FRACTION_LESSONS, ...AREA_LESSONS, ...MEASURES_LESSONS, ...ALGEBRA_LESSONS, ...RATIO_LESSONS, ...DECIMAL_LESSONS, ...PERCENT_LESSONS, ...FACTOR_LESSONS, ...STATS_LESSONS };
 
 export const CHAINS = [
   {
@@ -46,6 +48,7 @@ export const CHAINS = [
   { id: "fractions", subject: "Maths", strand: "Number", name: "Fractions", skillIds: FRACTION_SKILLS.map((s) => s.id) },
   { id: "algebra", subject: "Maths", strand: "Algebra", name: "Starting algebra", skillIds: ALGEBRA_SKILLS.map((s) => s.id) },
   { id: "ratio", subject: "Maths", strand: "Ratio", name: "Ratio and proportion", skillIds: RATIO_SKILLS.map((s) => s.id) },
+  { id: "factors", subject: "Maths", strand: "Number", name: "Factors and primes", skillIds: FACTOR_SKILLS.map((s) => s.id) },
   { id: "decimals", subject: "Maths", strand: "Number", name: "Decimals and rounding", skillIds: DECIMAL_SKILLS.map((s) => s.id) },
   { id: "percentages", subject: "Maths", strand: "Number", name: "Percentages", skillIds: PERCENT_SKILLS.map((s) => s.id) },
   { id: "statistics", subject: "Maths", strand: "Statistics", name: "Statistics", skillIds: STATS_SKILLS.map((s) => s.id) },

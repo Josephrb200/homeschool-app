@@ -60,7 +60,20 @@ export type AnswerSpec =
    * "notation" = algebra conventions (5n, x²), "simplified" = also expanded and collected.
    */
   | { kind: "expression"; value: string; form: "notation" | "simplified" }
-  | { kind: "choice"; options: string[]; correctIndex: number };
+  | { kind: "choice"; options: string[]; correctIndex: number }
+  /**
+   * A list of whole numbers in any order, e.g. "the factors of 12" (1, 2, 3, 4, 6, 12).
+   * Repeats are ignored. `noun` names the items in feedback ("factors").
+   * A list missing some items gets `missingMisconception`; one with items that
+   * don't belong gets `extraMisconception`, and feedback names those items.
+   */
+  | { kind: "list"; value: number[]; noun: string; missingMisconception?: MisconceptionId; extraMisconception?: MisconceptionId }
+  /**
+   * A number written as a product of primes, e.g. 60 = 2 × 2 × 3 × 5 or 2² × 3 × 5.
+   * Any order. Right product with a non-prime (or a 1) is "not-simplified".
+   * `index` asks for index form: the right primes written out in full get a nudge.
+   */
+  | { kind: "product"; value: number; index: boolean };
 
 export interface Question {
   /** Stable id: skill + generator + seed. Lets us rebuild the exact question later. */

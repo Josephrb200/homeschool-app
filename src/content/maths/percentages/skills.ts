@@ -1,6 +1,7 @@
 /**
  * The percentages chain: converting between fractions, decimals and
- * percentages, percentages of amounts, and percentage increase and decrease.
+ * percentages, percentages of amounts, percentage increase and decrease,
+ * one amount as a percentage of another, and percentage change.
  * KS3, GCSE Foundation (DfE N10, N12, R9).
  *
  * STATUS: Draft. Written by the build team; needs review by a qualified maths
@@ -36,6 +37,24 @@ export const PERCENT_SKILLS: Skill[] = [
     typicalYear: 8,
     gcseTier: "foundation",
     prerequisites: ["pct-of-amount"],
+  },
+  {
+    id: "pct-one-of-another",
+    topic: "Percentages",
+    name: "One amount as a percentage of another",
+    objective: "I can write one amount as a percentage of another, like 18 out of 25 = 72%, making the units the same first.",
+    typicalYear: 8,
+    gcseTier: "foundation",
+    prerequisites: ["num-fdp", "ratio-fraction-of-another"],
+  },
+  {
+    id: "pct-change",
+    topic: "Percentages",
+    name: "Percentage change",
+    objective: "I can find a percentage increase, decrease, profit or loss: the change divided by the original amount, times 100.",
+    typicalYear: 9,
+    gcseTier: "foundation",
+    prerequisites: ["pct-one-of-another"],
   },
 ];
 
@@ -127,5 +146,40 @@ export const PERCENT_MISCONCEPTIONS: Record<string, Misconception> = {
     explanation:
       "5% is 0.05, so 105% is 1.05, not 1.5 (which is 150%). Write the new percentage, then divide by 100.",
     pointsTo: "num-fdp",
+  },
+  "pct-just-part": {
+    id: "pct-just-part",
+    label: "Gave the amount, not the percentage",
+    explanation:
+      "That's how many, not what percentage. Write it as a fraction (the part over the total), then make it out of 100, or divide and multiply by 100.",
+  },
+  "pct-upside-down": {
+    id: "pct-upside-down",
+    label: "Divided the wrong way round",
+    explanation:
+      "'A as a percentage of B' means A ÷ B × 100. The part goes on top and the total goes on the bottom. A part of something is less than 100%, so an answer over 100% is a warning sign.",
+    pointsTo: "ratio-fraction-of-another",
+  },
+  "pct-units": {
+    id: "pct-units",
+    label: "Didn't make the units the same",
+    explanation: "Change both amounts into the same units first. £3 is 300p, so 45p out of £3 is 45/300, which is 15%.",
+  },
+  "pct-change-amount": {
+    id: "pct-change-amount",
+    label: "Gave the change, not the percentage change",
+    explanation:
+      "You found how much it changed by, which is the first step. Now divide that change by the original amount and multiply by 100.",
+  },
+  "pct-change-divided-new": {
+    id: "pct-change-divided-new",
+    label: "Divided by the new amount instead of the original",
+    explanation: "Always compare with where you started. Percentage change = change ÷ original amount × 100. Use the old price, not the new one.",
+  },
+  "pct-change-new-percent": {
+    id: "pct-change-new-percent",
+    label: "Gave the new amount as a percentage of the old",
+    explanation:
+      "That's the new amount as a percentage of the original. The change is the difference from 100%: 125% means a 25% increase, and 80% means a 20% decrease.",
   },
 };
