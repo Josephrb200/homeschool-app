@@ -129,7 +129,17 @@ export type DemoKind =
   | "sequence-builder"
   | "special-sequences-dots"
   | "nth-term-builder"
-  | "other-sequences-explorer";
+  | "other-sequences-explorer"
+  | "map-scale"
+  | "pay-rate"
+  | "inverse-workers"
+  | "interest-simple"
+  | "reverse-percent-bar"
+  | "interest-compound"
+  | "speed-journey"
+  | "dt-graph-builder"
+  | "density-blocks"
+  | "unit-rate-convert";
 
 export type ContentStatus = "draft" | "in-review" | "verified";
 
