@@ -107,7 +107,8 @@ export type Visual =
   | { kind: "shape"; shape: ShapeSpec }
   | { kind: "circle"; circle: CircleSpec }
   | { kind: "solid"; solid: SolidSpec }
-  | { kind: "machine"; machine: MachineSpec };
+  | { kind: "machine"; machine: MachineSpec }
+  | { kind: "angles"; angles: AngleSpec };
 
 export type CirclePart = "centre" | "radius" | "diameter" | "chord" | "tangent" | "arc" | "sector" | "segment" | "circumference";
 
@@ -144,6 +145,46 @@ export type SolidSpec =
       hText: string;
       description: string;
     };
+
+/**
+ * An angle diagram: named points (real units, y up), lines between them, and
+ * angle marks. Drawn to scale, so a marked 40° really is 40°.
+ * Also draws shapes with equal-side ticks, parallel arrows and right angles.
+ */
+export interface AngleSpec {
+  points: Record<string, [number, number]>;
+  /** Straight lines between named points. */
+  segments: [string, string][];
+  /** Angle marks at a vertex, between the rays to `from` and `to`. */
+  angles: AngleMark[];
+  /** Points (in order) of a shape to shade. */
+  polygon?: string[];
+  /** Equal-length marks: n small ticks across the middle of a segment. */
+  ticks?: { a: string; b: string; n: number }[];
+  /** Parallel marks: n arrowheads on a segment, pointing from a to b. */
+  arrows?: { a: string; b: string; n: number }[];
+  /** Length labels on segments. */
+  lengths?: { a: string; b: string; text: string }[];
+  /** Point names to show as letters. */
+  labels?: string[];
+  /** Points to mark with a dot. */
+  dots?: string[];
+  description: string;
+}
+
+export interface AngleMark {
+  at: string;
+  from: string;
+  to: string;
+  /** "65°", "x" or "?". Left out for an unlabelled arc. */
+  text?: string;
+  /** Mark the larger (reflex) angle instead of the smaller one. */
+  reflex?: boolean;
+  /** Draw a right-angle square instead of an arc. */
+  right?: boolean;
+  /** Draw it bold in the highlight colour. */
+  highlight?: boolean;
+}
 
 /** A function machine: input → operations in order → output. "?" marks the unknown. */
 export interface MachineSpec {

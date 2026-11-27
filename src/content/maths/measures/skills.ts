@@ -3,7 +3,7 @@
  * Foundation). Skill ids match the GCSE Foundation topic map.
  *
  * Prerequisites list only skills that are live in the app. The map also names
- * prerequisites that are not built yet (geo-shape-properties, geo-3d-shapes);
+ * prerequisites that are not built yet (geo-3d-shapes);
  * add them here when those lessons exist.
  *
  * STATUS: Draft. Written by the build team; needs review by a qualified maths
@@ -32,7 +32,7 @@ export const CIRCLE_SKILLS: Skill[] = [
     objective: "I can name the parts of a circle and use diameter = 2 × radius.",
     typicalYear: 8,
     gcseTier: "foundation",
-    prerequisites: [],
+    prerequisites: ["geo-shape-properties"],
   },
   {
     id: "geo-circumference",

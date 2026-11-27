@@ -16,10 +16,12 @@ import { PERCENT_MISCONCEPTIONS, PERCENT_SKILLS } from "./maths/percentages/skil
 import { PERCENT_LESSONS } from "./maths/percentages/lessons";
 import { RATIO_MISCONCEPTIONS, RATIO_SKILLS } from "./maths/ratio/skills";
 import { RATIO_LESSONS } from "./maths/ratio/lessons";
+import { ANGLE_MISCONCEPTIONS, ANGLE_SKILLS } from "./maths/angles/skills";
+import { ANGLE_LESSONS } from "./maths/angles/lessons";
 import type { Skill } from "@/engine/types";
 
 /** Every skill exactly as its chain writes it (prerequisites copy the topic map). */
-const ALL_SKILLS: Skill[] = [...AREA_SKILLS, ...FRACTION_SKILLS, ...MEASURES_SKILLS, ...ALGEBRA_SKILLS, ...RATIO_SKILLS, ...DECIMAL_SKILLS, ...PERCENT_SKILLS];
+const ALL_SKILLS: Skill[] = [...AREA_SKILLS, ...FRACTION_SKILLS, ...MEASURES_SKILLS, ...ALGEBRA_SKILLS, ...RATIO_SKILLS, ...DECIMAL_SKILLS, ...PERCENT_SKILLS, ...ANGLE_SKILLS];
 const LIVE_IDS = new Set(ALL_SKILLS.map((s) => s.id));
 
 /**
@@ -28,8 +30,8 @@ const LIVE_IDS = new Set(ALL_SKILLS.map((s) => s.id));
  */
 export const SKILLS: Skill[] = ALL_SKILLS.map((s) => ({ ...s, prerequisites: s.prerequisites.filter((p) => LIVE_IDS.has(p)) }));
 export const SKILL_BY_ID: Record<string, Skill> = Object.fromEntries(SKILLS.map((s) => [s.id, s]));
-export const MISCONCEPTIONS = { ...FRACTION_MISCONCEPTIONS, ...AREA_MISCONCEPTIONS, ...MEASURES_MISCONCEPTIONS, ...ALGEBRA_MISCONCEPTIONS, ...RATIO_MISCONCEPTIONS, ...DECIMAL_MISCONCEPTIONS, ...PERCENT_MISCONCEPTIONS };
-export const LESSONS = { ...FRACTION_LESSONS, ...AREA_LESSONS, ...MEASURES_LESSONS, ...ALGEBRA_LESSONS, ...RATIO_LESSONS, ...DECIMAL_LESSONS, ...PERCENT_LESSONS };
+export const MISCONCEPTIONS = { ...FRACTION_MISCONCEPTIONS, ...AREA_MISCONCEPTIONS, ...MEASURES_MISCONCEPTIONS, ...ALGEBRA_MISCONCEPTIONS, ...RATIO_MISCONCEPTIONS, ...DECIMAL_MISCONCEPTIONS, ...PERCENT_MISCONCEPTIONS, ...ANGLE_MISCONCEPTIONS };
+export const LESSONS = { ...FRACTION_LESSONS, ...AREA_LESSONS, ...MEASURES_LESSONS, ...ALGEBRA_LESSONS, ...RATIO_LESSONS, ...DECIMAL_LESSONS, ...PERCENT_LESSONS, ...ANGLE_LESSONS };
 
 export const CHAINS = [
   {
@@ -39,6 +41,7 @@ export const CHAINS = [
     name: "Perimeter and area",
     skillIds: [...PERIMETER_SKILLS, ...AREA_SKILLS].map((s) => s.id),
   },
+  { id: "angles", subject: "Maths", strand: "Geometry", name: "Angles and shapes", skillIds: ANGLE_SKILLS.map((s) => s.id) },
   { id: "circles", subject: "Maths", strand: "Geometry", name: "Circles", skillIds: CIRCLE_SKILLS.map((s) => s.id) },
   { id: "volume", subject: "Maths", strand: "Geometry", name: "Volume and surface area", skillIds: VOLUME_SKILLS.map((s) => s.id) },
   { id: "fractions", subject: "Maths", strand: "Number", name: "Fractions", skillIds: FRACTION_SKILLS.map((s) => s.id) },

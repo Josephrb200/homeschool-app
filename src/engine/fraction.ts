@@ -85,6 +85,8 @@ export function parseAnswer(raw: string): ParseResult {
     .trim()
     // Units are welcome but not needed: "24 cm²", "24cm2", "24 square metres", "24 units", "60 cm³", "60 cubic cm".
     .replace(/\s*(square\s+|sq\.?\s*|cubic\s+|cu\.?\s*)?(millimet(re|er)s?|centimet(re|er)s?|kilomet(re|er)s?|met(re|er)s?|mm|cm|km|m|units?)\s*(²|³|\^?[23]|squared|cubed)?\.?$/i, "")
+    // Angles: "65°", "65 degrees", "65 deg".
+    .replace(/\s*(°|degrees?|degs?)\.?$/i, "")
     // "35%" and "35 %" mean 35 when a percentage is asked for.
     .replace(/\s*%$/, "")
     .replace(/[£,]/g, "")

@@ -27,6 +27,8 @@ export function speakable(text: string) {
     .replace(/(\d+)\/\?/g, "$1 over blank")
     .replace(/(\d+)\/(\d+)/g, "$1 over $2")
     .replace(/−/g, " minus ")
+    .replace(/(\d)°/g, "$1 degrees")
+    .replace(/∠/g, "angle ")
     .replace(/×/g, " times ")
     .replace(/÷/g, " divided by ")
     .replace(/£(\d+)/g, "$1 pounds")

@@ -39,7 +39,13 @@ export type DemoKind =
   | "rounding-line"
   | "hundred-grid"
   | "percent-bar"
-  | "percent-change";
+  | "percent-change"
+  | "angle-turn"
+  | "angle-facts-explore"
+  | "shape-sorter"
+  | "triangle-sum"
+  | "parallel-lines"
+  | "polygon-split";
 
 export type ContentStatus = "draft" | "in-review" | "verified";
 
