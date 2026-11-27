@@ -6,6 +6,7 @@
 import { equals, gcd, isSimplest, parseAnswer, show, showDecimal, showMixed, simplify, frac, type Fraction } from "./fraction";
 import { leftoverFactor, parseExpression, polyEquals, untidyReason, UNTIDY_FEEDBACK } from "./algebra";
 import { markStandardForm, showStandardForm } from "./standard-form";
+import { markPoint, showPoint } from "./point";
 import { factorsOf, fullForm, indexForm, isPrime, parseList, parseProduct } from "./primes";
 import { markAssignment, markFormula, markInequality, markRoots, showInterval, showNum } from "./equations";
 import type { MarkResult, Misconception, Question } from "./types";
@@ -16,7 +17,8 @@ export function answerText(q: Question): string {
   const a = q.answer;
   if (a.kind === "fraction") return a.form === "mixed" ? showMixed(a.value) : a.form === "decimal" ? showDecimal(a.value) : show(a.value);
   if (a.kind === "integer") return String(a.value);
-  if (a.kind === "expression") return a.value;
+  if (a.kind === "expression") return a.lhs ? `${a.lhs} = ${a.value}` : a.value;
+  if (a.kind === "point") return showPoint(a.value);
   if (a.kind === "decimal") return roundTo(a.exact, a.dp);
   if (a.kind === "ratio") return a.value.join(":");
   if (a.kind === "standard-form") return showStandardForm(a.mantissa, a.power);
@@ -48,7 +50,16 @@ export function markAnswer(
     return wrong(mc, misconceptions);
   }
 
+  if (a.kind === "point") return markPoint(q, a.value, raw, misconceptions, a.vector);
+
   if (a.kind === "expression") {
+    // An equation answer like "y = 3x − 2": the "y =" is expected, then the right-hand side is marked.
+    let missingLhs = false;
+    if (a.lhs) {
+      const lhs = new RegExp(`^\\s*${a.lhs}\\s*=`, "i");
+      if (lhs.test(raw)) raw = raw.replace(lhs, "");
+      else missingLhs = true;
+    }
     const got = parseExpression(raw);
     if (!got.ok) {
       return {
@@ -66,10 +77,13 @@ export function markAnswer(
         return {
           outcome: "not-simplified",
           correct: false,
-          feedback: `Good start, but it isn't fully factorised: every term inside the bracket can still be divided by ${f}. Take ${f} outside too. The answer is ${a.value}.`,
+          feedback: `Good start, but it isn't fully factorised: every term inside the bracket can still be divided by ${f}. Take ${f} outside too. The answer is ${answerText(q)}.`,
         };
       }
-      if (why) return { outcome: "not-simplified", correct: false, feedback: `${UNTIDY_FEEDBACK[why]} The answer is ${a.value}.` };
+      if (why) return { outcome: "not-simplified", correct: false, feedback: `${UNTIDY_FEEDBACK[why]} The answer is ${answerText(q)}.` };
+      if (missingLhs) {
+        return { outcome: "not-simplified", correct: false, feedback: `That's the right expression. Write it as an equation, starting with ${a.lhs} =. The answer is ${answerText(q)}.` };
+      }
       return { outcome: "correct", correct: true, feedback: "Correct." };
     }
     const mc = q.wrongExpressions?.find((w) => {
