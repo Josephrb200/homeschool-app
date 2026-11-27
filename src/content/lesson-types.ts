@@ -61,7 +61,13 @@ export type DemoKind =
   | "square-cube-builder"
   | "bidmas-steps"
   | "index-expand"
-  | "standard-form-slider";
+  | "standard-form-slider"
+  | "angle-turn"
+  | "angle-facts-explore"
+  | "shape-sorter"
+  | "triangle-sum"
+  | "parallel-lines"
+  | "polygon-split";
 
 export type ContentStatus = "draft" | "in-review" | "verified";
 
