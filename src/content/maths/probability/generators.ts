@@ -11,7 +11,7 @@
 
 import { equals, frac, lcm, simplify, show, showDecimal, type Fraction } from "@/engine/fraction";
 import type { Rng } from "@/engine/random";
-import type { AnswerSpec, Question, TableSpec, VennSpec } from "@/engine/types";
+import type { AnswerSpec, Question, TableSpec, TreeSpec, VennSpec, Visual } from "@/engine/types";
 
 export type Tier = 1 | 2;
 type Gen = (r: Rng, tier: Tier) => Omit<Question, "id" | "skillId">;
@@ -1106,6 +1106,540 @@ const venn: Gen = (r, tier) => {
   };
 };
 
+// ------------------------------------------------ frequency trees
+
+interface FreqTreeCtx {
+  intro: (T: number) => string;
+  first: [string, string];
+  second: [string, string];
+  stages: [string, string];
+  /** "How many Year 10 students passed?" */
+  count: (i: number, j: number) => string;
+  /** "a Year 10 student who passed" */
+  one: (i: number, j: number) => string;
+  pick: string;
+  /** For words questions: "45 of the students are in Year 10." etc. */
+  firstFact: (k: number) => string;
+  leafFact: (i: number, j: number, k: number) => string;
+  /** "How many students failed altogether?" */
+  secondTotal: (j: number) => string;
+  /** "Of the students who passed, what fraction were in Year 11?" */
+  given: (j: number, i: number) => string;
+}
+
+const FREQ_TREES: FreqTreeCtx[] = [
+  {
+    intro: (T) => `${T} students took a test. Some were in Year 10 and the rest were in Year 11.`,
+    first: ["Year 10", "Year 11"],
+    second: ["Pass", "Fail"],
+    stages: ["Year", "Result"],
+    count: (i, j) => `How many Year ${10 + i} students ${j === 0 ? "passed" : "failed"}?`,
+    one: (i, j) => `a Year ${10 + i} student who ${j === 0 ? "passed" : "failed"}`,
+    pick: "student",
+    firstFact: (k) => `${k} of them were in Year 10.`,
+    leafFact: (i, j, k) => `${k} of the Year ${10 + i} students ${j === 0 ? "passed" : "failed"}.`,
+    secondTotal: (j) => `How many students ${j === 0 ? "passed" : "failed"} altogether?`,
+    given: (j, i) => `Of the students who ${j === 0 ? "passed" : "failed"}, what fraction were in Year ${10 + i}?`,
+  },
+  {
+    intro: (T) => `${T} people went to the cinema. Each was an adult or a child.`,
+    first: ["Adults", "Children"],
+    second: ["Popcorn", "No popcorn"],
+    stages: ["Age", "Bought popcorn?"],
+    count: (i, j) => `How many ${["adults", "children"][i]} ${j === 0 ? "bought popcorn" : "did not buy popcorn"}?`,
+    one: (i, j) => `${["an adult", "a child"][i]} who ${j === 0 ? "bought popcorn" : "did not buy popcorn"}`,
+    pick: "person",
+    firstFact: (k) => `${k} of them were adults.`,
+    leafFact: (i, j, k) => `${k} of the ${["adults", "children"][i]} ${j === 0 ? "bought popcorn" : "did not buy popcorn"}.`,
+    secondTotal: (j) => `How many people ${j === 0 ? "bought popcorn" : "did not buy popcorn"} altogether?`,
+    given: (j, i) => `Of the people who ${j === 0 ? "bought popcorn" : "did not buy popcorn"}, what fraction were ${["adults", "children"][i]}?`,
+  },
+  {
+    intro: (T) => `Kai recorded the weather and whether the school bus was late on ${T} school days.`,
+    first: ["Rain", "No rain"],
+    second: ["Late", "On time"],
+    stages: ["Weather", "Bus"],
+    count: (i, j) => `On how many ${["rainy", "dry"][i]} days was the bus ${["late", "on time"][j]}?`,
+    one: (i, j) => `a ${["rainy", "dry"][i]} day when the bus was ${["late", "on time"][j]}`,
+    pick: "day",
+    firstFact: (k) => `It rained on ${k} of the days.`,
+    leafFact: (i, j, k) => `On ${k} of the ${["rainy", "dry"][i]} days, the bus was ${["late", "on time"][j]}.`,
+    secondTotal: (j) => `On how many days was the bus ${["late", "on time"][j]} altogether?`,
+    given: (j, i) => `Of the days when the bus was ${["late", "on time"][j]}, what fraction were ${["rainy", "dry"][i]}?`,
+  },
+];
+
+const frequencyTrees: Gen = (r, tier) => {
+  const ctx = r.pick(FREQ_TREES);
+  let L: number[][];
+  for (;;) {
+    L = [0, 1].map(() => [0, 1].map(() => r.int(4, tier === 1 ? 25 : 30)));
+    const all = L.flat();
+    if (new Set(all).size === 4) break;
+  }
+  const F = L.map((row) => row[0] + row[1]);
+  const T = F[0] + F[1];
+  const tree = (show_: (where: string) => boolean, hl?: number[]): Visual => {
+    const v = (where: string, n: number) => (show_(where) ? String(n) : "?");
+    const t: TreeSpec = {
+      root: v("root", T),
+      stages: ctx.stages,
+      branches: [0, 1].map((i) => ({
+        label: ctx.first[i],
+        count: v(`f${i}`, F[i]),
+        children: [0, 1].map((j) => ({ label: ctx.second[j], count: v(`l${i}${j}`, L[i][j]) })),
+      })),
+      highlight: hl,
+      description: "",
+    };
+    t.description = `Frequency tree. Start: ${t.root === "?" ? "missing" : T}. ${t.branches
+      .map((b) => `${b.label}: ${b.count === "?" ? "missing" : b.count}, splitting into ${b.children!.map((c) => `${c.label} ${c.count === "?" ? "missing" : c.count}`).join(" and ")}`)
+      .join(". ")}.`;
+    return { kind: "tree", tree: t };
+  };
+  const i = r.int(0, 1);
+  const j = r.int(0, 1);
+
+  if (tier === 1) {
+    const kind = r.pick(["first", "leaf", "leaf", "prob"] as const);
+    if (kind === "first") {
+      return {
+        prompt: `${ctx.intro(T)} The frequency tree shows the results. One of the numbers in the first set of branches is missing. Work it out.`,
+        visual: tree((w) => w !== `f${i}`),
+        answerHelp: COUNT_HELP,
+        answer: { kind: "integer", value: F[i] },
+        wrongAnswers: cleanWrong(F[i], [
+          { value: T + F[1 - i], misconception: "ftree-added" },
+          { value: T - L[i][0], misconception: "ftree-wrong-parent" },
+        ]),
+        hints: [`The two first branches split all ${T} into two groups.`, `So ${ctx.first[i]} = ${T} − ${F[1 - i]}. (Or add the two numbers on its own branches.)`],
+        solution: [`The first branches add up to ${T}.`, `${T} − ${F[1 - i]} = ${F[i]}`, `Answer: ${F[i]}`],
+      };
+    }
+    if (kind === "leaf") {
+      return {
+        prompt: `${ctx.intro(T)} The frequency tree shows the results. ${ctx.count(i, j)}`,
+        visual: tree((w) => w !== `l${i}${j}`),
+        answerHelp: COUNT_HELP,
+        answer: { kind: "integer", value: L[i][j] },
+        wrongAnswers: cleanWrong(L[i][j], [
+          { value: T - L[i][1 - j], misconception: "ftree-wrong-parent" },
+          { value: F[i] + L[i][1 - j], misconception: "ftree-added" },
+        ]),
+        hints: [`The ${ctx.first[i]} box (${F[i]}) splits into the two boxes after it.`, `${F[i]} − ${L[i][1 - j]}`],
+        solution: [`${ctx.first[i]}: ${F[i]}. It splits into ${ctx.second[1 - j]} (${L[i][1 - j]}) and ${ctx.second[j]}.`, `${F[i]} − ${L[i][1 - j]} = ${L[i][j]}`, `Answer: ${L[i][j]}`],
+      };
+    }
+    const ans = frac(L[i][j], T);
+    return {
+      prompt: `${ctx.intro(T)} The frequency tree shows the results. One ${ctx.pick} is chosen at random. What is the probability that it is ${ctx.one(i, j)}?`,
+      visual: tree(() => true, [i * 2 + j]),
+      answerHelp: PROB_HELP,
+      answer: prob(ans),
+      wrongAnswers: cleanWrong(ans, [
+        { value: frac(L[i][j], F[i]), misconception: "ftree-prob-wrong-total" },
+        { value: L[i][j], misconception: "prob-gave-count" },
+      ]),
+      hints: [`The ${ctx.pick} is chosen from all ${T}, so ${T} goes on the bottom.`, `Follow the route ${ctx.first[i]} then ${ctx.second[j]} to find the number on top.`],
+      solution: [`${ctx.first[i]} then ${ctx.second[j]}: ${L[i][j]}.`, `Out of everyone: ${T}.`, `P = ${show(ans)}`],
+    };
+  }
+
+  const kind = r.pick(["words", "given", "two-step"] as const);
+  if (kind === "words") {
+    const ans = L[0][1] + L[1][1];
+    return {
+      prompt: `${ctx.intro(T)} ${ctx.firstFact(F[0])} ${ctx.leafFact(0, 0, L[0][0])} ${ctx.leafFact(1, 0, L[1][0])} ${ctx.secondTotal(1)}`,
+      answerHelp: COUNT_HELP,
+      answer: { kind: "integer", value: ans },
+      wrongAnswers: cleanWrong(ans, [
+        { value: L[0][1], misconception: "ftree-one-branch" },
+        { value: L[1][1], misconception: "ftree-one-branch" },
+        { value: L[0][0] + L[1][0], misconception: "ftree-wrong-parent" },
+      ]),
+      hints: [
+        `Draw a frequency tree: ${T} at the start, then ${ctx.first[0]} and ${ctx.first[1]}, then ${ctx.second[0]} and ${ctx.second[1]} on each.`,
+        `Fill in ${ctx.first[1]} first: ${T} − ${F[0]}. Then the ${ctx.second[1]} box on each branch.`,
+      ],
+      solution: [
+        `${ctx.first[1]}: ${T} − ${F[0]} = ${F[1]}.`,
+        `${ctx.first[0]}, ${ctx.second[1]}: ${F[0]} − ${L[0][0]} = ${L[0][1]}. ${ctx.first[1]}, ${ctx.second[1]}: ${F[1]} − ${L[1][0]} = ${L[1][1]}.`,
+        `Both ${ctx.second[1]} boxes: ${L[0][1]} + ${L[1][1]} = ${ans}.`,
+        `Answer: ${ans}`,
+      ],
+    };
+  }
+  if (kind === "given") {
+    const col = L[0][j] + L[1][j];
+    const ans = frac(L[i][j], col);
+    return {
+      prompt: `${ctx.intro(T)} The frequency tree shows the results. ${ctx.given(j, i)}`,
+      visual: tree(() => true, [j, 2 + j]),
+      answerHelp: PROB_HELP,
+      answer: prob(ans),
+      wrongAnswers: cleanWrong(ans, [
+        { value: frac(L[i][j], T), misconception: "ftree-prob-wrong-total" },
+        { value: frac(L[i][j], F[i]), misconception: "ftree-given-wrong-group" },
+      ]),
+      hints: [`First find everyone in a ${ctx.second[j]} box: there's one on each branch. ${L[0][j]} + ${L[1][j]}.`, `That total goes on the bottom. The ${ctx.first[i]} part of it goes on top.`],
+      solution: [`${ctx.second[j]} altogether: ${L[0][j]} + ${L[1][j]} = ${col}.`, `Of those, ${ctx.first[i]}: ${L[i][j]}.`, `Answer: ${show(ans)}`],
+    };
+  }
+  // Fill in two boxes, then find a probability.
+  const ans = frac(L[i][j], T);
+  return {
+    prompt: `${ctx.intro(T)} Some numbers are missing from the frequency tree. One ${ctx.pick} is chosen at random. What is the probability that it is ${ctx.one(i, j)}?`,
+    visual: tree((w) => w !== `f${i}` && w !== `l${i}${j}`),
+    answerHelp: PROB_HELP,
+    answer: prob(ans),
+    wrongAnswers: cleanWrong(ans, [
+      { value: frac(L[i][j], F[i]), misconception: "ftree-prob-wrong-total" },
+      { value: L[i][j], misconception: "prob-gave-count" },
+    ]),
+    hints: [`Fill in the ${ctx.first[i]} box first: ${T} − ${F[1 - i]}.`, `Then the ${ctx.second[j]} box after it. The probability is that number out of ${T}.`],
+    solution: [`${ctx.first[i]}: ${T} − ${F[1 - i]} = ${F[i]}.`, `${ctx.first[i]}, ${ctx.second[j]}: ${F[i]} − ${L[i][1 - j]} = ${L[i][j]}.`, `${L[i][j]} out of ${T}: P = ${show(ans)}`],
+  };
+};
+
+// ------------------------------------------------ tree diagrams (shared)
+
+/** A two-stage probability tree. p[i] is the first branch; q[i][j] the second branch after first i. */
+function probTree(labels: [string, string], stages: [string, string], p: [string, string], q: [[string, string], [string, string]], hl: number[] | undefined, words: string): Visual {
+  const short = labels.every((l) => l.length <= 6);
+  return {
+    kind: "tree",
+    tree: {
+      stages,
+      branches: [0, 1].map((i) => ({
+        label: labels[i],
+        p: p[i],
+        // Outcome names after each route, unless the labels are long enough to squash the picture.
+        children: [0, 1].map((j) => ({ label: labels[j], p: q[i][j], end: short ? `${labels[i]}, ${labels[j]}` : undefined })),
+      })),
+      highlight: hl,
+      description: words,
+    },
+  };
+}
+const treeWords = (labels: [string, string], p: [string, string], q: [[string, string], [string, string]]) =>
+  `Tree diagram. First: ${labels[0]} ${p[0] === "?" ? "missing" : p[0]}, ${labels[1]} ${p[1] === "?" ? "missing" : p[1]}. ${[0, 1]
+    .map((i) => `After ${labels[i]}: ${labels[0]} ${q[i][0] === "?" ? "missing" : q[i][0]}, ${labels[1]} ${q[i][1] === "?" ? "missing" : q[i][1]}`)
+    .join(". ")}.`;
+
+const fs = (f: Fraction) => `${f.n}/${f.d}`;
+const fmul = (a: Fraction, b: Fraction) => frac(a.n * b.n, a.d * b.d);
+const fadd = (a: Fraction, b: Fraction) => (a.d === b.d ? frac(a.n + b.n, a.d) : frac(a.n * b.d + b.n * a.d, a.d * b.d));
+const fsub1 = (a: Fraction) => frac(a.d - a.n, a.d);
+/** 0.3 → "0.3"; tenths and hundredths only. */
+const d1 = (f: Fraction) => dec(f);
+
+// ------------------------------------------------ tree diagrams for independent events
+
+interface IndepCtx {
+  labels: [string, string];
+  stages: [string, string];
+  intro: string;
+  p1: Fraction;
+  p2: Fraction;
+  decimal: boolean;
+  /** "both red", "red then blue" */
+  say: (i: number, j: number) => string;
+  /** "one red and one blue (in either order)" */
+  mixed: string;
+  /** "at least one red" */
+  atLeast: string;
+  same: string;
+}
+
+function indepContext(r: Rng): IndepCtx {
+  const kind = r.pick(["bag", "spinner", "tests"] as const);
+  if (kind === "bag") {
+    const [c1, c2] = shuffle(r, ["red", "blue", "green", "yellow"]).slice(0, 2);
+    const n = r.int(5, 10);
+    const k = r.int(2, n - 2);
+    const L: [string, string] = [cap(c1), cap(c2)];
+    return {
+      labels: L,
+      stages: ["First counter", "Second counter"],
+      intro: `A bag has ${k} ${c1} and ${n - k} ${c2} counters. Ana takes a counter at random, notes its colour and puts it back. Then she takes a second counter.`,
+      p1: frac(k, n),
+      p2: frac(k, n),
+      decimal: false,
+      say: (i, j) => (i === j ? `both counters are ${[c1, c2][i]}` : `the first is ${[c1, c2][i]} and the second is ${[c1, c2][j]}`),
+      mixed: `she gets one ${c1} and one ${c2} counter (in either order)`,
+      atLeast: `at least one counter is ${c1}`,
+      same: "both counters are the same colour",
+    };
+  }
+  if (kind === "spinner") {
+    const p = frac(r.int(1, 9), 10);
+    if (p.n === 5) p.n = 3;
+    return {
+      labels: ["Green", "Not green"],
+      stages: ["First spin", "Second spin"],
+      intro: `A spinner lands on green with probability ${d1(p)}. Ben spins it twice.`,
+      p1: p,
+      p2: p,
+      decimal: true,
+      say: (i, j) => (i === 0 && j === 0 ? "it lands on green both times" : i === 1 && j === 1 ? "it doesn't land on green either time" : i === 0 ? "it lands on green the first time but not the second" : "it lands on green the second time but not the first"),
+      mixed: "it lands on green exactly once",
+      atLeast: "it lands on green at least once",
+      same: "both spins give the same result (green both times, or not green both times)",
+    };
+  }
+  const a = frac(r.int(5, 9), 10);
+  let b = frac(r.int(4, 9), 10);
+  if (b.n === a.n) b = frac(a.n === 9 ? 8 : a.n + 1, 10);
+  return {
+    labels: ["Pass", "Fail"],
+    stages: ["Theory test", "Practical test"],
+    intro: `The probability that Cara passes her theory test is ${d1(a)}. The probability that she passes her practical test is ${d1(b)}. The two tests are independent.`,
+    p1: a,
+    p2: b,
+    decimal: true,
+    say: (i, j) => (i === 0 && j === 0 ? "she passes both tests" : i === 1 && j === 1 ? "she fails both tests" : i === 0 ? "she passes the theory test but fails the practical" : "she fails the theory test but passes the practical"),
+    mixed: "she passes exactly one of the two tests",
+    atLeast: "she passes at least one test",
+    same: "she passes both or fails both",
+  };
+}
+
+/** Decimal answers are shown as decimals ("0.48"), so the worked solution ends with what the student typed. */
+const treeIndependent: Gen = (r, tier) => {
+  const q = treeIndependentRaw(r, tier);
+  if (q.answer.kind === "fraction" && q.answer.form === "decimal") q.answerText = dec(simplify(q.answer.value));
+  return q;
+};
+
+const treeIndependentRaw: Gen = (r, tier) => {
+  const c = indepContext(r);
+  const P1: [Fraction, Fraction] = [c.p1, fsub1(c.p1)];
+  const P2: [Fraction, Fraction] = [c.p2, fsub1(c.p2)];
+  const say = (f: Fraction) => (c.decimal ? d1(f) : fs(f));
+  const p: [string, string] = [say(P1[0]), say(P1[1])];
+  const q: [[string, string], [string, string]] = [
+    [say(P2[0]), say(P2[1])],
+    [say(P2[0]), say(P2[1])],
+  ];
+  const leaf = (i: number, j: number) => fmul(P1[i], P2[j]);
+  const answer = (f: Fraction) => (c.decimal ? probDecimal(f) : prob(f));
+  const showAns = (f: Fraction) => (c.decimal ? dec(simplify(f)) : show(f));
+  const path = (i: number, j: number) => `${say(P1[i])} × ${say(P2[j])}`;
+
+  if (tier === 1) {
+    const kind = r.pick(["missing", "both", "both"] as const);
+    if (kind === "missing") {
+      // One second-stage branch is missing.
+      const a = r.int(0, 1);
+      const b = r.int(0, 1);
+      const qq: [[string, string], [string, string]] = [
+        [...q[0]],
+        [...q[1]],
+      ];
+      qq[a][b] = "?";
+      const ans = P2[b];
+      return {
+        prompt: `${c.intro} Complete the tree diagram: what probability goes on the branch marked ?`,
+        visual: probTree(c.labels, c.stages, p, qq, undefined, treeWords(c.labels, p, qq)),
+        answerHelp: PROB_HELP,
+        answer: answer(ans),
+        wrongAnswers: cleanWrong(ans, [{ value: P2[1 - b], misconception: "prob-complement-same" }]),
+        hints: ["The two branches coming out of the same point add up to 1.", `So the missing one is 1 − ${q[a][1 - b]}.`],
+        solution: [`Branches from one point add up to 1.`, `1 − ${q[a][1 - b]} = ${say(ans)}`, `P = ${showAns(ans)}`],
+      };
+    }
+    const i = r.int(0, 1);
+    const ans = leaf(i, i);
+    return {
+      prompt: `${c.intro} Use the tree diagram to find the probability that ${c.say(i, i)}.`,
+      visual: probTree(c.labels, c.stages, p, q, [i * 3], treeWords(c.labels, p, q)),
+      answerHelp: PROB_HELP,
+      answer: answer(ans),
+      wrongAnswers: cleanWrong(ans, [
+        { value: fadd(P1[i], P2[i]), misconception: "tree-added-along" },
+        { value: P1[i], misconception: "tree-first-branch-only" },
+        ...(c.decimal ? [] : [{ value: frac(P1[i].n * P2[i].n, P1[i].d + P2[i].d), misconception: "tree-multiplied-wrongly" }]),
+      ]),
+      hints: [`Follow the route ${c.labels[i]} then ${c.labels[i]}.`, "Multiply the probabilities along the branches."],
+      solution: [`Route: ${c.labels[i]}, then ${c.labels[i]}.`, `${path(i, i)} = ${say(ans)}`, `P = ${showAns(ans)}`],
+    };
+  }
+
+  const kind = r.pick(["mixed", "at-least", "same"] as const);
+  if (kind === "mixed") {
+    const ans = fadd(leaf(0, 1), leaf(1, 0));
+    return {
+      prompt: `${c.intro} Use the tree diagram to find the probability that ${c.mixed}.`,
+      visual: probTree(c.labels, c.stages, p, q, [1, 2], treeWords(c.labels, p, q)),
+      answerHelp: PROB_HELP,
+      answer: answer(ans),
+      wrongAnswers: cleanWrong(ans, [
+        { value: leaf(0, 1), misconception: "tree-one-path" },
+        { value: leaf(1, 0), misconception: "tree-one-path" },
+        { value: fadd(P1[0], P2[1]), misconception: "tree-added-along" },
+      ]),
+      hints: [`Two routes work: ${c.labels[0]} then ${c.labels[1]}, and ${c.labels[1]} then ${c.labels[0]}.`, "Multiply along each route, then add the two answers."],
+      solution: [`${c.labels[0]}, ${c.labels[1]}: ${path(0, 1)} = ${say(leaf(0, 1))}.`, `${c.labels[1]}, ${c.labels[0]}: ${path(1, 0)} = ${say(leaf(1, 0))}.`, `Add: ${say(leaf(0, 1))} + ${say(leaf(1, 0))} = ${say(ans)}`, `P = ${showAns(ans)}`],
+    };
+  }
+  if (kind === "same") {
+    const ans = fadd(leaf(0, 0), leaf(1, 1));
+    return {
+      prompt: `${c.intro} Use the tree diagram to find the probability that ${c.same}.`,
+      visual: probTree(c.labels, c.stages, p, q, [0, 3], treeWords(c.labels, p, q)),
+      answerHelp: PROB_HELP,
+      answer: answer(ans),
+      wrongAnswers: cleanWrong(ans, [
+        { value: leaf(0, 0), misconception: "tree-one-path" },
+        { value: leaf(1, 1), misconception: "tree-one-path" },
+      ]),
+      hints: [`Two routes work: ${c.labels[0]} then ${c.labels[0]}, and ${c.labels[1]} then ${c.labels[1]}.`, "Multiply along each route, then add."],
+      solution: [`${c.labels[0]}, ${c.labels[0]}: ${path(0, 0)} = ${say(leaf(0, 0))}.`, `${c.labels[1]}, ${c.labels[1]}: ${path(1, 1)} = ${say(leaf(1, 1))}.`, `Add: ${say(leaf(0, 0))} + ${say(leaf(1, 1))} = ${say(ans)}`, `P = ${showAns(ans)}`],
+    };
+  }
+  const none = leaf(1, 1);
+  const ans = fsub1(none);
+  return {
+    prompt: `${c.intro} Use the tree diagram to find the probability that ${c.atLeast}.`,
+    visual: probTree(c.labels, c.stages, p, q, [0, 1, 2], treeWords(c.labels, p, q)),
+    answerHelp: PROB_HELP,
+    answer: answer(ans),
+    wrongAnswers: cleanWrong(ans, [
+      { value: leaf(0, 0), misconception: "tree-at-least-one-both" },
+      { value: fadd(leaf(0, 1), leaf(1, 0)), misconception: "tree-at-least-one-exactly" },
+      { value: none, misconception: "prob-complement-same" },
+    ]),
+    hints: [`"At least one" means one or two. The only route that doesn't count is ${c.labels[1]} then ${c.labels[1]}.`, `Work out ${c.labels[1]}, ${c.labels[1]} and take it away from 1.`],
+    solution: [`${c.labels[1]}, ${c.labels[1]}: ${path(1, 1)} = ${say(none)}.`, `Every other route has at least one ${c.labels[0]}.`, `1 − ${say(none)} = ${say(ans)}`, `P = ${showAns(ans)}`],
+  };
+};
+
+// ------------------------------------------------ tree diagrams without replacement
+
+const DEPENDENT = [
+  { a: "red", b: "blue", L: ["Red", "Blue"], stages: ["First counter", "Second counter"], intro: (x: number, y: number) => `A bag has ${x} red and ${y} blue counters. Two counters are taken at random, one after the other, without putting the first one back.`, item: "counter", one: ["red", "blue"], many: ["red counters", "blue counters"] },
+  { a: "strawberry", b: "lemon", L: ["Strawberry", "Lemon"], stages: ["First sweet", "Second sweet"], intro: (x: number, y: number) => `A bag has ${x} strawberry and ${y} lemon sweets. Lily takes a sweet at random and eats it. Then she takes another one.`, item: "sweet", one: ["strawberry", "lemon"], many: ["strawberry sweets", "lemon sweets"] },
+  { a: "black", b: "white", L: ["Black", "White"], stages: ["First sock", "Second sock"], intro: (x: number, y: number) => `A drawer has ${x} black and ${y} white socks. Two socks are taken out at random, one after the other.`, item: "sock", one: ["black", "white"], many: ["black socks", "white socks"] },
+  { a: "girl", b: "boy", L: ["Girl", "Boy"], stages: ["First pick", "Second pick"], intro: (x: number, y: number) => `A group has ${x} girls and ${y} boys. Two of them are picked at random, one after the other, to be team captains.`, item: "pick", one: ["a girl", "a boy"], many: ["girls", "boys"] },
+] as const;
+
+const treeDependent: Gen = (r, tier) => {
+  const c = r.pick(DEPENDENT);
+  const n = r.int(5, 10);
+  const x = r.int(2, n - 2);
+  const y = n - x;
+  const cnt = [x, y];
+  const names = [c.a, c.b];
+  const L: [string, string] = [c.L[0], c.L[1]];
+  const P1: [Fraction, Fraction] = [frac(x, n), frac(y, n)];
+  // Second pick after first i: one fewer of colour i, one fewer altogether.
+  const P2 = (i: number, j: number) => frac(cnt[j] - (i === j ? 1 : 0), n - 1);
+  const p: [string, string] = [fs(P1[0]), fs(P1[1])];
+  const q: [[string, string], [string, string]] = [
+    [fs(P2(0, 0)), fs(P2(0, 1))],
+    [fs(P2(1, 0)), fs(P2(1, 1))],
+  ];
+  const leaf = (i: number, j: number) => fmul(P1[i], P2(i, j));
+  const leafRep = (i: number, j: number) => fmul(P1[i], P1[j]);
+  const path = (i: number, j: number) => `${fs(P1[i])} × ${fs(P2(i, j))}`;
+  const both = (i: number) => (c.a === "girl" ? `both captains are ${names[i]}s` : `both ${c.item}s are ${names[i]}`);
+  const intro = c.intro(x, y);
+
+  if (tier === 1) {
+    if (r.next() < 0.5) {
+      const i = r.int(0, 1);
+      const j = r.int(0, 1);
+      const qq: [[string, string], [string, string]] = [[...q[0]], [...q[1]]];
+      qq[i][j] = "?";
+      const ans = P2(i, j);
+      const wrong: Wrong[] =
+        i === j
+          ? [
+              { value: P1[j], misconception: "tree-replaced" },
+              { value: frac(cnt[j], n - 1), misconception: "tree-only-bottom-changed" },
+              { value: frac(cnt[j] - 1, n), misconception: "tree-only-top-changed" },
+            ]
+          : [
+              { value: P1[j], misconception: "tree-replaced" },
+              { value: frac(cnt[j] - 1, n - 1), misconception: "tree-wrong-colour-changed" },
+            ];
+      return {
+        prompt: `${intro} What probability goes on the branch marked ? (The second ${c.item} is ${c.one[j]}, after the first was ${c.one[i]}.)`,
+        visual: probTree(L, [c.stages[0], c.stages[1]], p, qq, [i * 2 + j], treeWords(L, p, qq)),
+        answerHelp: PROB_HELP,
+        answer: prob(ans),
+        wrongAnswers: cleanWrong(ans, wrong),
+        hints: [`After the first is taken, how many are left altogether? How many ${c.many[j]} are left?`, `There are ${n - 1} left. ${i === j ? `One of the ${c.many[j]} has gone, so ${cnt[j] - 1} are left.` : `None of the ${c.many[j]} has gone, so there are still ${cnt[j]}.`}`],
+        solution: [`After the first is taken: ${n - 1} left altogether.`, `${cap(c.many[j])} left: ${cnt[j] - (i === j ? 1 : 0)}.`, `P = ${show(ans)}`],
+      };
+    }
+    const i = r.int(0, 1);
+    const ans = leaf(i, i);
+    return {
+      prompt: `${intro} Use the tree diagram to find the probability that ${both(i)}.`,
+      visual: probTree(L, [c.stages[0], c.stages[1]], p, q, [i * 3], treeWords(L, p, q)),
+      answerHelp: PROB_HELP,
+      answer: prob(ans),
+      wrongAnswers: cleanWrong(ans, [
+        { value: leafRep(i, i), misconception: "tree-replaced" },
+        { value: fadd(P1[i], P2(i, i)), misconception: "tree-added-along" },
+        { value: frac(P1[i].n * P2(i, i).n, P1[i].d + P2(i, i).d), misconception: "tree-multiplied-wrongly" },
+      ]),
+      hints: [`Follow the route ${L[i]} then ${L[i]}. Notice the second branch has ${n - 1} on the bottom.`, "Multiply along the branches: tops times tops, bottoms times bottoms."],
+      solution: [`${L[i]}, then ${L[i]}: ${path(i, i)}.`, `= ${fs(ans)}`, `P = ${show(ans)}`],
+    };
+  }
+
+  const kind = r.pick(["mixed", "same", "at-least"] as const);
+  if (kind === "mixed") {
+    const ans = fadd(leaf(0, 1), leaf(1, 0));
+    return {
+      prompt: `${intro} Use the tree diagram to find the probability of getting one ${names[0]} and one ${names[1]}, in either order.`,
+      visual: probTree(L, [c.stages[0], c.stages[1]], p, q, [1, 2], treeWords(L, p, q)),
+      answerHelp: PROB_HELP,
+      answer: prob(ans),
+      wrongAnswers: cleanWrong(ans, [
+        { value: fadd(leafRep(0, 1), leafRep(1, 0)), misconception: "tree-replaced" },
+        { value: leaf(0, 1), misconception: "tree-one-path" },
+      ]),
+      hints: [`Two routes: ${L[0]} then ${L[1]}, and ${L[1]} then ${L[0]}.`, "Multiply along each route, then add. The bottoms are already the same, so just add the tops."],
+      solution: [`${L[0]}, ${L[1]}: ${path(0, 1)} = ${fs(leaf(0, 1))}.`, `${L[1]}, ${L[0]}: ${path(1, 0)} = ${fs(leaf(1, 0))}.`, `Add: ${fs(ans)}`, `P = ${show(ans)}`],
+    };
+  }
+  if (kind === "same") {
+    const ans = fadd(leaf(0, 0), leaf(1, 1));
+    return {
+      prompt: `${intro} Use the tree diagram to find the probability that both ${c.item === "pick" ? "captains are girls or both are boys" : `${c.item}s are the same ${c.item === "sweet" ? "flavour" : "colour"}`}.`,
+      visual: probTree(L, [c.stages[0], c.stages[1]], p, q, [0, 3], treeWords(L, p, q)),
+      answerHelp: PROB_HELP,
+      answer: prob(ans),
+      wrongAnswers: cleanWrong(ans, [
+        { value: fadd(leafRep(0, 0), leafRep(1, 1)), misconception: "tree-replaced" },
+        { value: leaf(0, 0), misconception: "tree-one-path" },
+        { value: leaf(1, 1), misconception: "tree-one-path" },
+      ]),
+      hints: [`Two routes: ${L[0]} then ${L[0]}, and ${L[1]} then ${L[1]}.`, "Multiply along each route, then add the two answers."],
+      solution: [`${L[0]}, ${L[0]}: ${path(0, 0)} = ${fs(leaf(0, 0))}.`, `${L[1]}, ${L[1]}: ${path(1, 1)} = ${fs(leaf(1, 1))}.`, `Add: ${fs(ans)}`, `P = ${show(ans)}`],
+    };
+  }
+  const none = leaf(1, 1);
+  const ans = fsub1(none);
+  const atLeast = c.a === "girl" ? "at least one captain is a girl" : `at least one ${c.item} is ${names[0]}`;
+  return {
+    prompt: `${intro} Use the tree diagram to find the probability that ${atLeast}.`,
+    visual: probTree(L, [c.stages[0], c.stages[1]], p, q, [0, 1, 2], treeWords(L, p, q)),
+    answerHelp: PROB_HELP,
+    answer: prob(ans),
+    wrongAnswers: cleanWrong(ans, [
+      { value: leaf(0, 0), misconception: "tree-at-least-one-both" },
+      { value: fsub1(leafRep(1, 1)), misconception: "tree-replaced" },
+      { value: fadd(leaf(0, 1), leaf(1, 0)), misconception: "tree-at-least-one-exactly" },
+    ]),
+    hints: [`"At least one ${names[0]}" covers every route except ${L[1]} then ${L[1]}.`, `Work out ${L[1]}, ${L[1]} and take it away from 1.`],
+    solution: [`${L[1]}, ${L[1]}: ${path(1, 1)} = ${fs(none)}.`, `1 − ${fs(none)} = ${fs(ans)}`, `P = ${show(ans)}`],
+  };
+};
+
 export const PROBABILITY_GENERATORS: Record<string, Gen> = {
   "prob-scale": probScale,
   "prob-single-event": singleEvent,
@@ -1113,4 +1647,7 @@ export const PROBABILITY_GENERATORS: Record<string, Gen> = {
   "prob-relative-frequency": relativeFrequency,
   "prob-sample-space": sampleSpace,
   "prob-venn": venn,
+  "prob-frequency-trees": frequencyTrees,
+  "prob-tree-independent": treeIndependent,
+  "prob-tree-dependent": treeDependent,
 };

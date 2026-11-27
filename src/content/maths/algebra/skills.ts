@@ -58,7 +58,7 @@ export const ALGEBRA_SKILLS: Skill[] = [
     objective: "I can find the output of a function machine, and work backwards to find the input.",
     typicalYear: 7,
     gcseTier: "foundation",
-    prerequisites: [],
+    prerequisites: ["num-inverse-operations"],
   },
   {
     id: "alg-solve-simple",

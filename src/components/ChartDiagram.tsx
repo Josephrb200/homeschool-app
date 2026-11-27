@@ -1,6 +1,7 @@
 /**
  * Draws a statistics chart or table exactly from its numbers: a table (with
- * optional tally marks), bar chart, pictogram, pie chart or scatter graph.
+ * optional tally marks), bar chart, pictogram, pie chart, scatter graph (with
+ * optional lines of best fit) or line graph.
  * Tables are real HTML tables so screen readers can move around them; charts
  * are SVGs labelled by their description. Shapes and labels carry the
  * meaning, never colour alone.
@@ -14,6 +15,7 @@ export function ChartDiagram({ chart, maxWidth = 440 }: { chart: ChartSpec; maxW
   if (chart.type === "bar") return <BarChart chart={chart} maxWidth={maxWidth} />;
   if (chart.type === "pictogram") return <Pictogram chart={chart} maxWidth={maxWidth} />;
   if (chart.type === "pie") return <PieChart chart={chart} maxWidth={Math.min(maxWidth, 360)} />;
+  if (chart.type === "line") return <LineGraph chart={chart} maxWidth={maxWidth} />;
   return <ScatterGraph chart={chart} maxWidth={maxWidth} />;
 }
 
@@ -276,6 +278,25 @@ function ScatterGraph({ chart, maxWidth }: { chart: Of<"scatter">; maxWidth: num
           <line x1={x(px) - 5} y1={y(py) + 5} x2={x(px) + 5} y2={y(py) - 5} />
         </g>
       ))}
+      {chart.fits?.map((f, i) => {
+        // Generators give end points inside the axes, so the line stays on the graph.
+        const [x1, y1] = f.from;
+        const [x2, y2] = f.to;
+        // The letter sits near the right-hand end of the line, just above it, with a halo so gridlines don't cross it.
+        const t = 0.86;
+        const lx = x(x1 + (x2 - x1) * t);
+        const ly = y(y1 + (y2 - y1) * t);
+        return (
+          <g key={`fit${i}`}>
+            <line x1={x(x1)} y1={y(y1)} x2={x(x2)} y2={y(y2)} stroke="var(--accent)" strokeWidth={2.5} strokeLinecap="round" />
+            {f.label && (
+              <text x={lx} y={Math.max(T + 14, ly - 9)} textAnchor="middle" fontSize={17} fontWeight={700} fill="var(--accent)" stroke="var(--surface)" strokeWidth={4} paintOrder="stroke">
+                {f.label}
+              </text>
+            )}
+          </g>
+        );
+      })}
       {chart.highlight !== undefined && chart.points[chart.highlight] && (
         <circle cx={x(chart.points[chart.highlight][0])} cy={y(chart.points[chart.highlight][1])} r={11} fill="none" stroke="var(--accent)" strokeWidth={3} />
       )}
@@ -288,6 +309,71 @@ function ScatterGraph({ chart, maxWidth }: { chart: Of<"scatter">; maxWidth: num
           </text>
         );
       })}
+      <text x={L + plotW / 2} y={H - 10} textAnchor="middle" fontSize={14} fontWeight={600} fill="var(--ink)">
+        {chart.xLabel}
+      </text>
+      <text x={16} y={T + plotH / 2} textAnchor="middle" fontSize={14} fontWeight={600} fill="var(--ink)" transform={`rotate(-90 16 ${T + plotH / 2})`}>
+        {chart.yLabel}
+      </text>
+    </svg>
+  );
+}
+
+// ------------------------------------------------------------------ line graph
+
+function LineGraph({ chart, maxWidth }: { chart: Of<"line">; maxWidth: number }) {
+  const W = 440;
+  const H = 290;
+  const L = 56;
+  const R = 16;
+  const T = 14;
+  const B = 62;
+  const top = niceMax(Math.max(...chart.values) + chart.yStep / 2, chart.yStep);
+  const plotH = H - T - B;
+  const plotW = W - L - R;
+  const y = (v: number) => T + plotH - (v / top) * plotH;
+  const n = chart.labels.length;
+  const slot = plotW / n;
+  const x = (i: number) => L + slot * i + slot / 2;
+  const minor = chart.yStep % 2 === 0 ? chart.yStep / 2 : 0;
+  const lines: number[] = [];
+  for (let v = 0; v <= top + 1e-9; v += minor || chart.yStep) lines.push(v);
+  const small = n > 8;
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ maxWidth }} role="img" aria-label={chart.description} className="shape-diagram chart-diagram">
+      {lines.map((v) => {
+        const major = Math.abs(v / chart.yStep - Math.round(v / chart.yStep)) < 1e-9;
+        return (
+          <g key={v}>
+            <line x1={L} x2={W - R} y1={y(v)} y2={y(v)} stroke="var(--line)" strokeWidth={major ? 1.2 : 0.6} strokeDasharray={major ? undefined : "3 3"} />
+            {major && (
+              <text x={L - 8} y={y(v) + 5} textAnchor="end" fontSize={14} fill="var(--ink)">
+                {v}
+              </text>
+            )}
+          </g>
+        );
+      })}
+      {chart.labels.map((lab, i) => (
+        <g key={i}>
+          <line x1={x(i)} x2={x(i)} y1={T} y2={y(0)} stroke="var(--line)" strokeWidth={0.6} />
+          <text x={x(i)} y={H - B + 20} textAnchor="middle" fontSize={small ? 12 : 14} fill="var(--ink)">
+            {lab}
+          </text>
+        </g>
+      ))}
+      <polyline points={chart.values.map((v, i) => `${x(i)},${y(v)}`).join(" ")} fill="none" stroke="var(--accent)" strokeWidth={2.5} strokeLinejoin="round" />
+      {chart.values.map((v, i) => (
+        <g key={`p${i}`} stroke="var(--ink)" strokeWidth={2.2} strokeLinecap="round">
+          <line x1={x(i) - 5} y1={y(v) - 5} x2={x(i) + 5} y2={y(v) + 5} />
+          <line x1={x(i) - 5} y1={y(v) + 5} x2={x(i) + 5} y2={y(v) - 5} />
+        </g>
+      ))}
+      {chart.highlight !== undefined && chart.values[chart.highlight] !== undefined && (
+        <circle cx={x(chart.highlight)} cy={y(chart.values[chart.highlight])} r={11} fill="none" stroke="var(--accent)" strokeWidth={3} />
+      )}
+      <line x1={L} x2={L} y1={T} y2={y(0)} stroke="var(--ink)" strokeWidth={2} />
+      <line x1={L} x2={W - R} y1={y(0)} y2={y(0)} stroke="var(--ink)" strokeWidth={2} />
       <text x={L + plotW / 2} y={H - 10} textAnchor="middle" fontSize={14} fontWeight={600} fill="var(--ink)">
         {chart.xLabel}
       </text>

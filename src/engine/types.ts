@@ -58,7 +58,16 @@ export type AnswerSpec =
    * true value. Marking accepts the correctly rounded value, and also answers
    * that come from using 3.14 for π (as GCSE mark schemes do).
    */
-  | { kind: "decimal"; exact: number; dp: number }
+  | {
+      kind: "decimal";
+      exact: number;
+      dp: number;
+      /**
+       * Strict rounding only: no extra allowance for π = 3.14. Used where π
+       * isn't involved (Pythagoras, trigonometry), so 10.4 isn't accepted for 10.3.
+       */
+      strict?: boolean;
+    }
   /**
    * An algebraic expression, compared mathematically (see engine/algebra.ts).
    * `form` says how it must be written to count as fully correct:
@@ -185,8 +194,11 @@ export type Visual =
   | { kind: "spinner"; spinner: SpinnerSpec }
   | { kind: "table"; table: TableSpec }
   | { kind: "venn"; venn: VennSpec }
+  | { kind: "plane"; plane: PlaneSpec }
+  | { kind: "panels"; panels: { label: string; visual: Visual }[]; description: string }
   | { kind: "numberline"; line: NumberLineSpec }
-  | { kind: "graph"; graph: GraphSpec };
+  | { kind: "graph"; graph: GraphSpec }
+  | { kind: "tree"; tree: TreeSpec };
 
 /**
  * A number line from min to max (whole numbers marked), optionally showing an
@@ -228,6 +240,66 @@ export interface GraphAxis {
   labelStep?: number;
   /** Axis title, e.g. "Time (minutes)". Defaults to the letter x or y. */
   label?: string;
+}
+
+/**
+ * A tree diagram, drawn left to right with two stages.
+ * Frequency trees put a count in every box (the starting box holds `root`).
+ * Probability trees write a probability on each branch and leave out `root`.
+ * "?" marks a value to find.
+ */
+export interface TreeSpec {
+  /** The count in the starting box (frequency trees). Left out for probability trees. */
+  root?: string;
+  /** First-stage branches, top to bottom. Each has its own second-stage branches. */
+  branches: TreeNode[];
+  /** Headings over each stage, e.g. ["First counter", "Second counter"]. */
+  stages?: [string, string];
+  /** Leaves (numbered top to bottom from 0) whose whole route is drawn bold. */
+  highlight?: number[];
+  description: string;
+}
+
+export interface TreeNode {
+  /** What happened, e.g. "Red" or "Adults". */
+  label: string;
+  /** A count shown under the label (frequency trees). */
+  count?: string;
+  /** The probability written on the branch leading here, e.g. "3/10" or "0.4". */
+  p?: string;
+  children?: TreeNode[];
+  /** Text after a leaf, e.g. "Red, Blue". */
+  end?: string;
+}
+
+
+/**
+ * A flat drawing on a coordinate plane, drawn to scale (equal units on both
+ * axes): grids and axes, labelled polygons, straight lines, circles and arcs,
+ * points and arrows. Used for transformations, constructions and loci.
+ */
+export interface PlaneSpec {
+  /** The window to draw, in real units: [min, max] on each axis. */
+  x: [number, number];
+  y: [number, number];
+  /** Unit squares behind everything. */
+  grid?: boolean;
+  /** x and y axes through (0, 0), numbered every `axisStep` (default 1). */
+  axes?: boolean;
+  axisStep?: number;
+  /** Polygons. "object" is shaded, "image" is shaded in the second colour, "region" is a pale wash with no outline, "outline" is unfilled. */
+  shapes?: { points: [number, number][]; label?: string; tone?: "object" | "image" | "region" | "outline"; dashed?: boolean }[];
+  /** Straight lines from a to b. "mirror" lines are drawn bold in the highlight colour. */
+  lines?: { a: [number, number]; b: [number, number]; label?: string; dashed?: boolean; tone?: "mirror" | "ink" | "faint" }[];
+  /** Circles (no from/to) or arcs from angle `from` to `to`, degrees anticlockwise from east. */
+  arcs?: { c: [number, number]; r: number; from?: number; to?: number; dashed?: boolean; faint?: boolean }[];
+  /** Dots, with an optional letter or coordinate label. */
+  points?: { at: [number, number]; label?: string; hollow?: boolean }[];
+  /** Arrows from one point to another (e.g. a translation). */
+  arrows?: { from: [number, number]; to: [number, number] }[];
+  /** Length labels beside a segment. */
+  lengths?: { a: [number, number]; b: [number, number]; text: string }[];
+  description: string;
 }
 
 /** A fair spinner with equal sections, each labelled (a colour word or a number). */
@@ -314,6 +386,13 @@ export interface AngleSpec {
   angles: AngleMark[];
   /** Points (in order) of a shape to shade. */
   polygon?: string[];
+  /**
+   * More shapes to shade, for diagrams with two shapes (congruent or similar
+   * triangles). Length labels and letters are pushed out from their own shape.
+   */
+  polygons?: string[][];
+  /** Draw it wider than usual (two shapes side by side). */
+  wide?: boolean;
   /** Equal-length marks: n small ticks across the middle of a segment. */
   ticks?: { a: string; b: string; n: number }[];
   /** Parallel marks: n arrowheads on a segment, pointing from a to b. */
@@ -394,6 +473,21 @@ export type ChartSpec =
       yStep: number;
       /** Letters to write beside some points, by index. */
       letters?: { i: number; text: string }[];
+      /** One point circled, by index. */
+      highlight?: number;
+      /** Straight lines drawn across the graph (a line of best fit), in axis units, each with an optional letter. */
+      fits?: { from: [number, number]; to: [number, number]; label?: string }[];
+      description: string;
+    }
+  | {
+      /** A line graph or time series: points joined by straight lines, equally spaced along the bottom. */
+      type: "line";
+      labels: string[];
+      values: number[];
+      xLabel: string;
+      yLabel: string;
+      /** Gap between labelled gridlines (dashed half-way lines appear when it is even). */
+      yStep: number;
       /** One point circled, by index. */
       highlight?: number;
       description: string;
