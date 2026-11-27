@@ -88,6 +88,8 @@ export type AnswerSpec =
    * `vector` marks a column vector instead: feedback says "top number" and "bottom number".
    */
   | { kind: "point"; value: [number, number]; vector?: boolean }
+  /** An exact answer in terms of π: coeff × π, typed like 25π (see engine/pi.ts). `wrongAnswers` give wrong coefficients. */
+  | { kind: "pi"; coeff: number }
   /**
    * An inequality such as x < 4 or −2 < x ≤ 3 (see engine/equations.ts). Any
    * equivalent way of writing it is accepted (4 > x). The optional
@@ -329,6 +331,8 @@ export interface PlaneSpec {
   arrows?: { from: [number, number]; to: [number, number] }[];
   /** Length labels beside a segment. */
   lengths?: { a: [number, number]; b: [number, number]; text: string }[];
+  /** Free text centred at a point, e.g. an angle size inside a sector. */
+  texts?: { at: [number, number]; text: string }[];
   description: string;
 }
 
