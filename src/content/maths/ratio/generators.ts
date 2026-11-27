@@ -160,7 +160,7 @@ const simplifyRatio: Gen = (r, tier) => {
     const [a, b, c] = [x * k, y * k, z * k];
     return {
       prompt: `Write the ratio ${a}:${b}:${c} in its simplest form.`,
-      inputHint: "Type a ratio with colons, like 2:3:5.",
+      answerHelp: "Type a ratio with colons, like 2:3:5.",
       answer: { kind: "ratio", value: [x, y, z], requireSimplest: true },
       wrongAnswers: [],
       hints: [`Find the biggest number that divides into ${a}, ${b} and ${c}.`, `All three divide by ${k}.`],
@@ -179,7 +179,7 @@ const simplifyRatio: Gen = (r, tier) => {
     const ans = [S / g, whole / g];
     return {
       prompt: `Write the ratio ${S} ${u.small} : ${u.say(B)} in its simplest form.`,
-      inputHint: "Type a ratio with a colon, like 3:2. No units needed.",
+      answerHelp: "Type a ratio with a colon, like 3:2. No units needed.",
       answer: { kind: "ratio", value: ans, requireSimplest: true },
       wrongAnswers: cleanWrong(ans, [{ value: [S, B], misconception: "ratio-units-not-matched" }]),
       hints: [`Change both amounts to ${u.small} first. ${u.say(B)} = ${whole} ${u.small}.`, `Now simplify ${S}:${whole}.`],
@@ -203,7 +203,7 @@ const simplifyRatio: Gen = (r, tier) => {
     const ans = flip ? [y, x] : [x, y];
     return {
       prompt: `There are ${a} ${ctx[0]} and ${b} ${ctx[1]} ${ctx[2]}. Write the ratio of ${flip ? ctx[1] : ctx[0]} to ${flip ? ctx[0] : ctx[1]} in its simplest form.`,
-      inputHint: RATIO_HINT,
+      answerHelp: RATIO_HINT,
       answer: { kind: "ratio", value: ans, requireSimplest: true },
       wrongAnswers: cleanWrong(ans, [{ value: [ans[1], ans[0]], misconception: "ratio-reversed" }]),
       hints: [`Write the numbers in the same order as the words: ${flip ? ctx[1] : ctx[0]} first.`, `Then divide both numbers by ${k}.`],
@@ -217,7 +217,7 @@ const simplifyRatio: Gen = (r, tier) => {
 
   return {
     prompt: `Write the ratio ${a}:${b} in its simplest form.`,
-    inputHint: RATIO_HINT,
+    answerHelp: RATIO_HINT,
     answer: { kind: "ratio", value: [x, y], requireSimplest: true },
     wrongAnswers: cleanWrong([x, y], [{ value: [y, x], misconception: "ratio-reversed" }]),
     hints: [`Find a number that divides into both ${a} and ${b}.`, `The biggest one is ${k}. Divide both by ${k}.`],
@@ -243,7 +243,7 @@ const share: Gen = (r, tier) => {
   const m = (n: number) => (thing.noun === "money" ? `£${n}` : String(n));
   const done = (q: Omit<Question, "id" | "skillId">, ans: number): Omit<Question, "id" | "skillId"> => ({
     ...q,
-    ...(thing.hint ? { inputHint: thing.hint } : {}),
+    ...(thing.hint ? { answerHelp: thing.hint } : {}),
     ...(thing.noun === "money" ? { answerText: `£${ans}` } : {}),
   });
 
@@ -397,7 +397,7 @@ const ratioFractions: Gen = (r, tier) => {
   // Fraction to ratio.
   return {
     prompt: `In ${g[3]}, ${a}/${sum} of the ${g[2]} are ${g[0]}. The rest are ${g[1]}. Write the ratio of ${g[0]} to ${g[1]}.`,
-    inputHint: RATIO_HINT,
+    answerHelp: RATIO_HINT,
     answer: { kind: "ratio", value: [a, b], requireSimplest: false },
     wrongAnswers: cleanWrong([a, b], [
       { value: [a, sum], misconception: "ratio-used-whole" },
@@ -441,7 +441,7 @@ const unitary: Gen = (r, tier) => {
     const worse = Math.max(p1, p2);
     return {
       prompt: `A ${sizes[0]} g ${product} costs ${money(c1)}. A ${sizes[1]} g ${product} costs ${money(c2)}. Which is better value? Work out the price of 100 g for each, and type the price of 100 g for the better-value one, in pence.`,
-      inputHint: "Type a number of pence, like 45.",
+      answerHelp: "Type a number of pence, like 45.",
       answer: { kind: "integer", value: best },
       wrongAnswers: cleanWrong(frac(best), [{ value: worse, misconception: "prop-picked-dearer" }]),
       hints: [
@@ -467,7 +467,7 @@ const unitary: Gen = (r, tier) => {
     const ans = per * R;
     return {
       prompt: `A recipe for ${P} people uses ${Q} ${ing.unit} of ${ing.name}. How much ${ing.name} is needed for ${R} ${R === 1 ? "person" : "people"}?`,
-      inputHint: `Type a number of ${ing.unit === "g" ? "grams" : "millilitres"}, like 250.`,
+      answerHelp: `Type a number of ${ing.unit === "g" ? "grams" : "millilitres"}, like 250.`,
       answer: { kind: "integer", value: ans },
       wrongAnswers: cleanWrong(frac(ans), [
         { value: Q + (R - P), misconception: "prop-added-difference" },
@@ -489,7 +489,7 @@ const unitary: Gen = (r, tier) => {
   const ans = each * M;
   return {
     prompt: `${N} ${item} cost ${money(cost)}. How much do ${M} ${item} cost?`,
-    inputHint: MONEY_HINT,
+    answerHelp: MONEY_HINT,
     answerText: money(ans),
     answer: { kind: "fraction", value: poundsValue(ans), requireSimplest: false },
     wrongAnswers: cleanWrong(poundsValue(ans), [
@@ -523,7 +523,7 @@ const directProportion: Gen = (r, tier) => {
     if (tier === 2 && r.next() < 0.5) {
       return {
         prompt: `The exchange rate is £1 = ${rateText} ${c.name}. Change ${c.sym}${other} into pounds.`,
-        inputHint: "Type a number of pounds, like 60.",
+        answerHelp: "Type a number of pounds, like 60.",
         answer: { kind: "integer", value: pounds },
         wrongAnswers: cleanWrong(frac(pounds), [{ value: frac(other * c.rate, 100), misconception: "prop-wrong-way" }]),
         hints: [`Each £1 gives you ${rateText} ${c.name}, so you'll get fewer pounds than ${c.name}.`, `Divide: ${other} ÷ ${rateText}.`],
@@ -532,7 +532,7 @@ const directProportion: Gen = (r, tier) => {
     }
     return {
       prompt: `The exchange rate is £1 = ${rateText} ${c.name}. Change £${pounds} into ${c.name}.`,
-      inputHint: `Type a number of ${c.name}, like 46.`,
+      answerHelp: `Type a number of ${c.name}, like 46.`,
       answer: { kind: "integer", value: other },
       wrongAnswers: cleanWrong(frac(other), [{ value: frac(pounds * 100, c.rate), misconception: "prop-wrong-way" }]),
       hints: [`Each £1 is worth ${rateText} ${c.name}.`, `Multiply: ${pounds} × ${rateText}.`],

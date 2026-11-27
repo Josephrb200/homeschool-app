@@ -17,7 +17,7 @@ function typed(q: Question): string {
   if (a.kind === "ratio") return a.value.join(":");
   if (a.kind === "integer") return String(a.value);
   if (a.kind === "fraction") return show(a.value);
-  return String(a.correctIndex);
+  return answerText(q);
 }
 function typedWrong(v: Question["wrongAnswers"][number]["value"]): string {
   if (Array.isArray(v)) return v.join(":");
@@ -72,7 +72,7 @@ describe("ratio generators", () => {
     for (const skillId of Object.keys(RATIO_GENERATORS))
       for (const seed of seeds.slice(0, 80)) {
         const q = makeQuestion(skillId, 2, seed);
-        if (q.answer.kind === "ratio") expect(q.inputHint, q.prompt).toMatch(/colon/);
+        if (q.answer.kind === "ratio") expect(q.answerHelp, q.prompt).toMatch(/colon/);
       }
   });
 });

@@ -26,7 +26,13 @@ const answerString = (q: Question) =>
     ? q.answer.form === "mixed"
       ? showMixed(q.answer.value)
       : show(q.answer.value)
-    : q.answer.kind === "integer" ? String(q.answer.value) : q.answer.kind === "ratio" ? q.answer.value.join(":") : String(q.answer.correctIndex);
+    : q.answer.kind === "integer"
+      ? String(q.answer.value)
+      : q.answer.kind === "expression"
+        ? q.answer.value
+        : q.answer.kind === "ratio"
+          ? q.answer.value.join(":")
+          : String(q.answer.correctIndex);
 
 describe("parseAnswer", () => {
   it.each([

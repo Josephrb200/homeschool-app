@@ -30,12 +30,15 @@ describe("GCSE Foundation topic map", () => {
       for (const p of s.prerequisites) expect(byId.get(p)!.phase <= s.phase, `${s.id} (phase ${s.phase}) needs ${p} (phase ${byId.get(p)!.phase})`).toBe(true);
   });
 
-  it("includes every skill already in the app, with the map's prerequisites that are live", () => {
-    const liveIds = new Set(SKILLS.map((s) => s.id));
-    for (const live of SKILLS) {
-      const planned = byId.get(live.id);
-      expect(planned, live.id).toBeDefined();
-      expect([...planned!.prerequisites].filter((p) => liveIds.has(p)).sort()).toEqual([...live.prerequisites].sort());
+  it("includes every skill already in the app, with the map's prerequisites that are built so far", () => {
+    // A live skill lists every map prerequisite that is also live. Prerequisites
+    // not built yet are left out (the app can't link to them), and must be added
+    // once they are built.
+    const live = new Set(SKILLS.map((s) => s.id));
+    for (const s of SKILLS) {
+      const planned = byId.get(s.id);
+      expect(planned, s.id).toBeDefined();
+      expect([...s.prerequisites].sort(), s.id).toEqual(planned!.prerequisites.filter((p) => live.has(p)).sort());
     }
   });
 

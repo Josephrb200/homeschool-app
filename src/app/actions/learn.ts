@@ -17,7 +17,7 @@ export interface PublicQuestion {
   prompt: string;
   visual?: Question["visual"];
   hints: string[];
-  inputHint?: string;
+  answerHelp?: string;
 }
 
 async function requireStudent() {
@@ -27,7 +27,7 @@ async function requireStudent() {
 }
 
 function publicPart(q: Question): PublicQuestion {
-  return { id: q.id, skillId: q.skillId, prompt: q.prompt, visual: q.visual, hints: q.hints, ...(q.inputHint ? { inputHint: q.inputHint } : {}) };
+  return { id: q.id, skillId: q.skillId, prompt: q.prompt, visual: q.visual, hints: q.hints, answerHelp: q.answerHelp };
 }
 
 export async function nextQuestion(skillId: string, tier: Tier): Promise<PublicQuestion> {
@@ -93,13 +93,12 @@ export async function submitAnswer(input: z.infer<typeof AnswerInput>): Promise<
     check_id: a.mode === "check" ? a.checkId ?? null : null,
     duration_ms: a.durationMs ?? null,
   });
-  const correct = answerText(q);
   return {
     outcome: mark.outcome,
     correct: mark.correct,
     feedback: mark.feedback,
     misconceptionLabel: mark.misconception ? MISCONCEPTIONS[mark.misconception]?.label : undefined,
-    correctAnswer: a.mode === "check" ? undefined : correct,
+    correctAnswer: a.mode === "check" ? undefined : answerText(q),
     solution: a.mode === "check" ? undefined : q.solution,
     saved: !error,
   };
