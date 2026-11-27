@@ -7,6 +7,8 @@ import { AngleDiagram } from "./AngleDiagram";
 import { SpinnerDiagram, TableDiagram, VennDiagram } from "./ProbabilityDiagrams";
 import { ChartDiagram } from "./ChartDiagram";
 import { PlaneDiagram } from "./PlaneDiagram";
+import { ProtractorDiagram } from "./ProtractorDiagram";
+import { CubeStackDiagram } from "./CubeStackDiagram";
 import { NumberLine } from "./NumberLine";
 import { GraphDiagram } from "./GraphDiagram";
 
@@ -24,6 +26,8 @@ export function Visual({ visual, compact = false }: { visual: VisualSpec; compac
   if (visual.kind === "table") return <TableDiagram table={visual.table} />;
   if (visual.kind === "venn") return <VennDiagram venn={visual.venn} maxWidth={compact ? 380 : 440} />;
   if (visual.kind === "chart") return <ChartDiagram chart={visual.chart} maxWidth={compact ? 380 : 440} />;
+  if (visual.kind === "protractor") return <ProtractorDiagram spec={visual.protractor} maxWidth={compact ? 320 : 420} />;
+  if (visual.kind === "cubes") return <CubeStackDiagram spec={visual.cubes} maxWidth={compact ? 300 : 420} maxHeight={compact ? 220 : 280} />;
   if (visual.kind === "plane") return <PlaneDiagram plane={visual.plane} maxWidth={compact ? 360 : 440} maxHeight={compact ? 280 : 340} />;
   if (visual.kind === "panels")
     return (

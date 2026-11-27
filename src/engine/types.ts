@@ -197,7 +197,37 @@ export type Visual =
   | { kind: "plane"; plane: PlaneSpec }
   | { kind: "panels"; panels: { label: string; visual: Visual }[]; description: string }
   | { kind: "numberline"; line: NumberLineSpec }
-  | { kind: "graph"; graph: GraphSpec };
+  | { kind: "graph"; graph: GraphSpec }
+  | { kind: "protractor"; protractor: ProtractorSpec }
+  | { kind: "cubes"; cubes: CubeStackSpec };
+
+/**
+ * An angle with a protractor laid on it, drawn to scale. The protractor's
+ * inner scale reads 0 at direction `turn` (degrees anticlockwise from east)
+ * and its outer scale reads 0 at the opposite end. With `from: "inner"` the
+ * arms sit at `turn` and `turn + size`, so the inner scale reads the angle;
+ * with "outer" they sit at `turn + 180` and `turn + 180 − size`.
+ */
+export interface ProtractorSpec {
+  size: number;
+  turn: number;
+  from: "inner" | "outer";
+  /** Leave the protractor off and just draw the angle (for estimating). */
+  hideProtractor?: boolean;
+  description: string;
+}
+
+/**
+ * A solid made of unit cubes standing on a grid, drawn in oblique projection.
+ * heights[row][col]: row 0 is the front row; each column is a solid stack.
+ */
+export interface CubeStackSpec {
+  heights: number[][];
+  /** Label the front with an arrow ("Front"), and optionally the right side ("Side"). */
+  showFront?: boolean;
+  showSide?: boolean;
+  description: string;
+}
 
 /**
  * A number line from min to max (whole numbers marked), optionally showing an
@@ -340,7 +370,13 @@ export type SolidSpec =
       label: { on: "radius" | "diameter"; text: string };
       hText: string;
       description: string;
-    };
+    }
+  /** A pyramid on a square or triangular base, apex above the middle of the base. */
+  | { kind: "pyramid"; base: "square" | "triangle"; size: number; h: number; baseText?: string; hText?: string; slantText?: string; description: string }
+  /** A cone: radius r, perpendicular height h. Labels are optional. */
+  | { kind: "cone"; r: number; h: number; rText?: string; hText?: string; slantText?: string; description: string }
+  /** A sphere (or hemisphere) of radius r. */
+  | { kind: "sphere"; r: number; half?: boolean; rText?: string; description: string };
 
 /**
  * An angle diagram: named points (real units, y up), lines between them, and

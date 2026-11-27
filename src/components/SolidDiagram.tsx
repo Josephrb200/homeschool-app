@@ -6,6 +6,7 @@
  */
 import type { SolidSpec } from "@/engine/types";
 import { Label } from "./CircleDiagram";
+import { ConeDiagram, PyramidDiagram, SphereDiagram } from "./ExtraSolids";
 
 const PAD = 46;
 const PADX = 70; // room for side labels
@@ -17,6 +18,9 @@ const VY = Math.sin(ANGLE) * DEPTH;
 type P = [number, number];
 
 export function SolidDiagram({ solid, maxWidth = 420, maxHeight = 280 }: { solid: SolidSpec; maxWidth?: number; maxHeight?: number }) {
+  if (solid.kind === "pyramid") return <PyramidDiagram solid={solid} maxWidth={maxWidth} maxHeight={maxHeight} />;
+  if (solid.kind === "cone") return <ConeDiagram solid={solid} maxWidth={maxWidth} maxHeight={maxHeight} />;
+  if (solid.kind === "sphere") return <SphereDiagram solid={solid} maxWidth={maxWidth} />;
   return solid.kind === "cylinder" ? <Cylinder solid={solid} maxWidth={maxWidth} maxHeight={maxHeight} /> : <Prism solid={solid} maxWidth={maxWidth} maxHeight={maxHeight} />;
 }
 
