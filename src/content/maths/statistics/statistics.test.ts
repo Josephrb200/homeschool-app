@@ -22,6 +22,7 @@ function typedWrong(q: Question, v: Question["wrongAnswers"][number]["value"]): 
   if (q.answer.kind === "choice") return q.answer.options[v as number];
   if (Array.isArray(v)) return v.join(":");
   if (typeof v === "number") return String(v);
+  if (q.answer.kind === "fraction" && q.answer.form !== "decimal") return show(v);
   return showDecimal(v);
 }
 
@@ -131,7 +132,10 @@ describe("statistics content", () => {
         if (c?.type === "pie") expect(c.sectors.reduce((a, s) => a + s.angle, 0)).toBe(360);
         if (c?.type === "table" && c.rows.at(-1)?.[0] === "Total") {
           const body = c.rows.slice(0, -1);
-          for (let col = 1; col < c.headers.length; col++) expect(body.reduce((a, r) => a + Number(r[col]), 0)).toBe(c.rows.at(-1)![col]);
+          for (let col = 1; col < c.headers.length; col++) {
+            if (c.rows.at(-1)![col] === "") continue; // a column with no total, like midpoints
+            expect(body.reduce((a, r) => a + Number(r[col]), 0)).toBe(c.rows.at(-1)![col]);
+          }
         }
       }
   });
