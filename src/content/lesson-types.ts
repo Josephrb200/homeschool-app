@@ -84,7 +84,16 @@ export type DemoKind =
   | "trig-angle-finder"
   | "exact-trig-triangles"
   | "congruence-tests"
-  | "similar-scale";
+  | "similar-scale"
+  | "decimal-compare"
+  | "grid-multiply"
+  | "bus-stop-division"
+  | "time-number-line"
+  | "unit-staircase"
+  | "estimate-compare"
+  | "error-interval-line"
+  | "listing-grid"
+  | "sf-multiply";
 
 export type ContentStatus = "draft" | "in-review" | "verified";
 
