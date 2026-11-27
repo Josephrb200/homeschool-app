@@ -62,6 +62,15 @@ export const FRACTION_SKILLS: Skill[] = [
     gcseTier: "foundation",
     prerequisites: ["frac-simplify", "frac-of-amount"],
   },
+  {
+    id: "frac-mixed-numbers",
+    topic: "Fractions",
+    name: "Mixed numbers and improper fractions",
+    objective: "I can switch between mixed numbers and improper fractions, and add, subtract, multiply and divide with mixed numbers.",
+    typicalYear: 7,
+    gcseTier: "foundation",
+    prerequisites: ["frac-add-sub", "frac-mul-div"],
+  },
 ];
 
 export const FRACTION_MISCONCEPTIONS: Record<string, Misconception> = {
@@ -139,5 +148,63 @@ export const FRACTION_MISCONCEPTIONS: Record<string, Misconception> = {
     id: "flipped-wrong-fraction",
     label: "Flipped the first fraction instead of the second",
     explanation: "Keep the first fraction as it is. Flip the second one, then multiply.",
+  },
+  "simplified-one-part": {
+    id: "simplified-one-part",
+    label: "Divided only the top (or only the bottom) when simplifying",
+    explanation:
+      "To simplify, divide the top AND the bottom by the same number. Changing only one of them changes how big the fraction is.",
+    pointsTo: "frac-equivalent",
+  },
+  "multiplied-both-by-whole": {
+    id: "multiplied-both-by-whole",
+    label: "Multiplied the top and bottom by the whole number",
+    explanation:
+      "Multiplying the top and bottom by the same number just makes an equivalent fraction, so nothing changes. To multiply a fraction by a whole number, multiply only the top.",
+    pointsTo: "frac-equivalent",
+  },
+  "reverse-found-fraction": {
+    id: "reverse-found-fraction",
+    label: "Found a fraction of the part instead of the whole",
+    explanation:
+      "You know a part, and you need the whole. Divide by the top to find one part, then multiply by the bottom to find all the parts. The whole should be bigger than the part.",
+  },
+  "reverse-forgot-multiply": {
+    id: "reverse-forgot-multiply",
+    label: "Found one part but not the whole amount",
+    explanation:
+      "Dividing by the top gives one part. The bottom number tells you how many parts make the whole, so multiply by it.",
+    pointsTo: "frac-of-amount",
+  },
+  "mixed-added-whole": {
+    id: "mixed-added-whole",
+    label: "Added the whole number to the numerator",
+    explanation:
+      "Each whole is worth as many pieces as the denominator. Multiply the whole number by the denominator first, then add the numerator. For 2 3/4: 2 × 4 = 8 quarters, plus 3 = 11/4.",
+  },
+  "mixed-wrong-multiply": {
+    id: "mixed-wrong-multiply",
+    label: "Multiplied the whole by the numerator instead of the denominator",
+    explanation:
+      "Multiply the whole number by the denominator (the bottom), because that's how many pieces are in one whole. Then add the numerator.",
+  },
+  "mixed-swapped-parts": {
+    id: "mixed-swapped-parts",
+    label: "Swapped the whole number and the remainder",
+    explanation:
+      "Divide the top by the bottom. How many times it goes in is the whole number. What's left over is the new numerator.",
+    pointsTo: "frac-equivalent",
+  },
+  "mixed-split-parts": {
+    id: "mixed-split-parts",
+    label: "Multiplied or divided the wholes and fractions separately",
+    explanation:
+      "That works for adding, but not for multiplying or dividing. Turn each mixed number into an improper fraction first, then multiply or divide.",
+  },
+  "mixed-subtracted-backwards": {
+    id: "mixed-subtracted-backwards",
+    label: "Took the smaller fraction from the bigger one, whichever came first",
+    explanation:
+      "When the second fraction is bigger, you can't just swap them round. Turn both mixed numbers into improper fractions first, or borrow 1 whole from the whole numbers.",
   },
 };

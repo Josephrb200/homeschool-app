@@ -304,7 +304,7 @@ export function Practice({
             <div className={`feedback ${result.correct ? "feedback-good" : "feedback-try"}`} role="status">
               <p className="feedback-title">
                 {result.correct ? <Tick /> : <Cross />}
-                {result.correct ? "Correct" : result.outcome === "not-simplified" ? "Nearly: simplify it" : result.outcome === "unreadable" ? "Check the format" : "Not quite"}
+                {result.correct ? "Correct" : result.outcome === "not-simplified" ? "Nearly there" : result.outcome === "unreadable" ? "Check the format" : "Not quite"}
               </p>
               {(prefs.feedbackStyle === "explained" || !result.correct) && result.feedback !== "Correct." && (
                 <p>

@@ -16,6 +16,8 @@ import type { MasteryLevel, Skill } from "@/engine/types";
 import { Demo } from "./Demos";
 import { ShapeDiagram } from "./ShapeDiagram";
 import type { ShapeSpec } from "@/engine/types";
+import type { Fraction } from "@/engine/fraction";
+import { FractionBars } from "./FractionDemos";
 import { Level } from "./Level";
 import { MathText } from "./MathText";
 import { Practice, type RunResult } from "./Practice";
@@ -139,7 +141,7 @@ export function LessonPlayer({ skill, lesson, startStage, level: initialLevel, p
             <Demo kind={lesson.teaching.demo} />
             <h3>Worked examples</h3>
             {lesson.teaching.examples.map((ex) => (
-              <WorkedExample key={ex.question} question={ex.question} steps={ex.steps} shape={ex.shape} />
+              <WorkedExample key={ex.question} question={ex.question} steps={ex.steps} shape={ex.shape} bars={ex.bars} />
             ))}
             <div>
               <button className="btn btn-primary" onClick={() => finish("teaching")}>
@@ -180,7 +182,7 @@ export function LessonPlayer({ skill, lesson, startStage, level: initialLevel, p
   );
 }
 
-function WorkedExample({ question, steps, shape }: { question: string; steps: string[]; shape?: ShapeSpec }) {
+function WorkedExample({ question, steps, shape, bars }: { question: string; steps: string[]; shape?: ShapeSpec; bars?: Fraction[] }) {
   const [shown, setShown] = useState(1);
   return (
     <div className="panel-sunk stack">
@@ -188,6 +190,13 @@ function WorkedExample({ question, steps, shape }: { question: string; steps: st
         <MathText text={question} />
       </p>
       {shape && <ShapeDiagram shape={shape} maxWidth={360} maxHeight={220} />}
+      {bars && (
+        <div className="stack optional">
+          {bars.map((b, i) => (
+            <FractionBars key={i} f={b} width={360} />
+          ))}
+        </div>
+      )}
       <ol className="solution" aria-live="polite">
         {steps.slice(0, shown).map((s, i) => (
           <li key={i}>

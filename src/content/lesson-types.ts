@@ -1,4 +1,5 @@
 /** Shared lesson shape for every chain. Six stages: Introduction → Teaching → Guided → Independent → Check → Review. */
+import type { Fraction } from "@/engine/fraction";
 import type { ShapeSpec, SkillId } from "@/engine/types";
 
 export type DemoKind =
@@ -8,6 +9,7 @@ export type DemoKind =
   | "add-bars"
   | "amount-bar"
   | "multiply-grid"
+  | "mixed-number-bars"
   | "rectangle-grid"
   | "triangle-half"
   | "parallelogram-shear"
@@ -21,6 +23,8 @@ export interface WorkedExample {
   steps: string[];
   /** Optional diagram shown with the question. */
   shape?: ShapeSpec;
+  /** Optional fraction bars shown with the question (improper fractions draw as several bars). */
+  bars?: Fraction[];
 }
 
 export interface Lesson {
