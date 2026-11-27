@@ -58,7 +58,16 @@ export type AnswerSpec =
    * true value. Marking accepts the correctly rounded value, and also answers
    * that come from using 3.14 for π (as GCSE mark schemes do).
    */
-  | { kind: "decimal"; exact: number; dp: number }
+  | {
+      kind: "decimal";
+      exact: number;
+      dp: number;
+      /**
+       * Strict rounding only: no extra allowance for π = 3.14. Used where π
+       * isn't involved (Pythagoras, trigonometry), so 10.4 isn't accepted for 10.3.
+       */
+      strict?: boolean;
+    }
   /**
    * An algebraic expression, compared mathematically (see engine/algebra.ts).
    * `form` says how it must be written to count as fully correct:
@@ -314,6 +323,13 @@ export interface AngleSpec {
   angles: AngleMark[];
   /** Points (in order) of a shape to shade. */
   polygon?: string[];
+  /**
+   * More shapes to shade, for diagrams with two shapes (congruent or similar
+   * triangles). Length labels and letters are pushed out from their own shape.
+   */
+  polygons?: string[][];
+  /** Draw it wider than usual (two shapes side by side). */
+  wide?: boolean;
   /** Equal-length marks: n small ticks across the middle of a segment. */
   ticks?: { a: string; b: string; n: number }[];
   /** Parallel marks: n arrowheads on a segment, pointing from a to b. */
