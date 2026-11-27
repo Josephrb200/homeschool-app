@@ -78,7 +78,13 @@ export type DemoKind =
   | "rotate-explore"
   | "translate-explore"
   | "enlarge-explore"
-  | "describe-sort";
+  | "describe-sort"
+  | "pythagoras-squares"
+  | "trig-ratio-explore"
+  | "trig-angle-finder"
+  | "exact-trig-triangles"
+  | "congruence-tests"
+  | "similar-scale";
 
 export type ContentStatus = "draft" | "in-review" | "verified";
 
