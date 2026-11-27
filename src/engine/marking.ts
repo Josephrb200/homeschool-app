@@ -5,6 +5,7 @@
 
 import { equals, gcd, isSimplest, parseAnswer, show, showDecimal, showMixed, simplify, frac, type Fraction } from "./fraction";
 import { parseExpression, polyEquals, untidyReason, UNTIDY_FEEDBACK } from "./algebra";
+import { markStandardForm, showStandardForm } from "./standard-form";
 import type { MarkResult, Misconception, Question } from "./types";
 
 /** The correct answer as text, for showing after an attempt. */
@@ -16,6 +17,7 @@ export function answerText(q: Question): string {
   if (a.kind === "expression") return a.value;
   if (a.kind === "decimal") return roundTo(a.exact, a.dp);
   if (a.kind === "ratio") return a.value.join(":");
+  if (a.kind === "standard-form") return showStandardForm(a.mantissa, a.power);
   return a.options[a.correctIndex] ?? "";
 }
 
@@ -60,6 +62,8 @@ export function markAnswer(
     })?.misconception;
     return wrong(mc, misconceptions);
   }
+
+  if (a.kind === "standard-form") return markStandardForm(q, a.mantissa, a.power, raw, misconceptions);
 
   if (a.kind === "ratio") return markRatio(q, a.value, a.requireSimplest, raw, misconceptions);
 

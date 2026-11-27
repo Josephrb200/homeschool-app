@@ -20,9 +20,25 @@ export function MathText({ text }: { text: string }) {
   );
 }
 
-/** Text for speech: "3/4" becomes "3 over 4", "−" becomes "minus". */
+const SUPERSCRIPT = "⁰¹²³⁴⁵⁶⁷⁸⁹";
+
+/** "²" → " squared", "³" → " cubed", "⁻⁴" → " to the power negative 4", "ⁿ" → " to the power n". */
+function speakPower(p: string): string {
+  if (p === "²") return " squared";
+  if (p === "³") return " cubed";
+  const neg = p.startsWith("⁻");
+  const body = (neg ? p.slice(1) : p).split("").map((c) => (c === "ⁿ" ? "n" : String(SUPERSCRIPT.indexOf(c)))).join("");
+  return ` to the power ${neg ? "negative " : ""}${body}`;
+}
+
+/** Text for speech: "3/4" becomes "3 over 4", "−" becomes "minus", "−3" becomes "negative 3", "7²" becomes "7 squared". */
 export function speakable(text: string) {
   return text
+    .replace(/√/g, "the square root of ")
+    .replace(/∛/g, "the cube root of ")
+    .replace(/⁻?[⁰¹²³⁴⁵⁶⁷⁸⁹ⁿ]+/g, speakPower)
+    // A minus sign stuck to a number (no space after it) is a negative number.
+    .replace(/(^|[\s(])−(?=\d)/g, "$1negative ")
     .replace(/\?\/(\d+)/g, "blank over $1")
     .replace(/(\d+)\/\?/g, "$1 over blank")
     .replace(/(\d+)\/(\d+)/g, "$1 over $2")

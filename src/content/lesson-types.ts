@@ -39,7 +39,12 @@ export type DemoKind =
   | "rounding-line"
   | "hundred-grid"
   | "percent-bar"
-  | "percent-change";
+  | "percent-change"
+  | "number-line-negatives"
+  | "square-cube-builder"
+  | "bidmas-steps"
+  | "index-expand"
+  | "standard-form-slider";
 
 export type ContentStatus = "draft" | "in-review" | "verified";
 

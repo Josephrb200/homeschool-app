@@ -4,9 +4,9 @@
  * equations (KS3, GCSE Foundation A1, A2, A4, A7, A17).
  *
  * Prerequisites follow the GCSE Foundation topic map, keeping only the skills
- * that are built so far. Order of operations, negative numbers and inverse
- * operations are in the map but not built yet, so questions here stay with
- * positive whole numbers and say the order of operations out loud.
+ * that are built so far. Questions here were written before negative numbers
+ * and the order of operations were built, so they stay with positive whole
+ * numbers and say the order of operations out loud.
  *
  * STATUS: Draft. Written by the build team; needs review by a qualified maths
  * teacher before it is marked Verified.
@@ -22,7 +22,7 @@ export const ALGEBRA_SKILLS: Skill[] = [
     objective: "I can write and read algebra the standard way: 5n, n + 5, n², ab.",
     typicalYear: 7,
     gcseTier: "foundation",
-    prerequisites: [],
+    prerequisites: ["num-order-of-operations"],
   },
   {
     id: "alg-collect-terms",
@@ -40,7 +40,7 @@ export const ALGEBRA_SKILLS: Skill[] = [
     objective: "I can work out the value of an expression or formula when I know the letters' values.",
     typicalYear: 7,
     gcseTier: "foundation",
-    prerequisites: ["alg-notation"],
+    prerequisites: ["alg-notation", "num-negatives"],
   },
   {
     id: "alg-expand-single",

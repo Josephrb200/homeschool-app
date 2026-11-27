@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { equals, frac, parseAnswer, show, showMixed } from "./fraction";
+import { equals, frac, parseAnswer, show, showMixed, showDecimal } from "./fraction";
 import { markAnswer } from "./marking";
 import { computeMastery } from "./mastery";
 import { reviewState, INTERVALS_DAYS } from "./scheduler";
@@ -34,7 +34,9 @@ const answerString = (q: Question) =>
           ? q.answer.value.join(":")
           : q.answer.kind === "choice"
             ? String(q.answer.correctIndex)
-            : String(q.answer.exact);
+            : q.answer.kind === "standard-form"
+              ? `${showDecimal(q.answer.mantissa)} x 10^${q.answer.power}`
+              : String(q.answer.exact);
 
 describe("parseAnswer", () => {
   it.each([
