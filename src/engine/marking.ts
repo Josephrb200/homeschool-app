@@ -16,7 +16,7 @@ export function answerText(q: Question): string {
   const a = q.answer;
   if (a.kind === "fraction") return a.form === "mixed" ? showMixed(a.value) : a.form === "decimal" ? showDecimal(a.value) : show(a.value);
   if (a.kind === "integer") return String(a.value);
-  if (a.kind === "expression") return a.value;
+  if (a.kind === "expression") return a.lhs ? `${a.lhs} = ${a.value}` : a.value;
   if (a.kind === "point") return showPoint(a.value);
   if (a.kind === "decimal") return roundTo(a.exact, a.dp);
   if (a.kind === "ratio") return a.value.join(":");
@@ -48,6 +48,13 @@ export function markAnswer(
   if (a.kind === "point") return markPoint(q, a.value, raw, misconceptions, a.vector);
 
   if (a.kind === "expression") {
+    // An equation answer like "y = 3x − 2": the "y =" is expected, then the right-hand side is marked.
+    let missingLhs = false;
+    if (a.lhs) {
+      const lhs = new RegExp(`^\\s*${a.lhs}\\s*=`, "i");
+      if (lhs.test(raw)) raw = raw.replace(lhs, "");
+      else missingLhs = true;
+    }
     const got = parseExpression(raw);
     if (!got.ok) {
       return {
@@ -60,7 +67,10 @@ export function markAnswer(
     if (!want.ok) throw new Error(`Bad expression answer: ${a.value}`);
     if (polyEquals(got.poly, want.poly)) {
       const why = untidyReason(got.ast, a.form);
-      if (why) return { outcome: "not-simplified", correct: false, feedback: `${UNTIDY_FEEDBACK[why]} The answer is ${a.value}.` };
+      if (why) return { outcome: "not-simplified", correct: false, feedback: `${UNTIDY_FEEDBACK[why]} The answer is ${answerText(q)}.` };
+      if (missingLhs) {
+        return { outcome: "not-simplified", correct: false, feedback: `That's the right expression. Write it as an equation, starting with ${a.lhs} =. The answer is ${answerText(q)}.` };
+      }
       return { outcome: "correct", correct: true, feedback: "Correct." };
     }
     const mc = q.wrongExpressions?.find((w) => {

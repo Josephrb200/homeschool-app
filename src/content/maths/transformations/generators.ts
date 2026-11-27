@@ -961,7 +961,10 @@ function describeDetail(r: Rng, tier: Tier): Q {
   const plane = describePlane(t, WIN2);
   if (kind === "Reflection" && t.m) {
     const m = t.m;
-    const opts = m.kind === "y=x" ? ["y = x", "y = −x", "x = 0", "y = 0"] : [mirrorName(m), mirrorName({ ...m, kind: m.kind === "x" ? "y" : "x" } as Mirror), mirrorName({ ...m, c: m.c + 1 } as Mirror), mirrorName({ ...m, c: m.c - 1 } as Mirror)];
+    const opts =
+      m.kind === "x" || m.kind === "y"
+        ? [mirrorName(m), mirrorName({ kind: m.kind === "x" ? "y" : "x", c: m.c }), mirrorName({ kind: m.kind, c: m.c + 1 }), mirrorName({ kind: m.kind, c: m.c - 1 })]
+        : ["y = x", "y = −x", "x = 0", "y = 0"];
     const correct = mirrorName(m);
     return choiceQ(
       `Shape A is reflected to give shape B. What is the equation of the mirror line?`,
