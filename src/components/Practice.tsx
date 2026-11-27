@@ -282,7 +282,9 @@ export function Practice({
             )}
           </form>
           <p id="answer-help" className="hint">
-            {q.visual?.kind === "shape"
+            {q.answerHelp
+              ? q.answerHelp
+              : q.visual?.kind === "shape"
               ? "Type a number like 24 or 7.5. Units like cm² are fine but not needed."
               : "Type a whole number like 12, a fraction like 3/4, or a mixed number like 1 1/2."}
             {mode === "check" && " This is a skill check, so there are no hints. Answers are explained at the end."}

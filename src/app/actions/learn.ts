@@ -18,6 +18,7 @@ export interface PublicQuestion {
   prompt: string;
   visual?: Question["visual"];
   hints: string[];
+  answerHelp?: string;
 }
 
 async function requireStudent() {
@@ -27,7 +28,7 @@ async function requireStudent() {
 }
 
 function publicPart(q: Question): PublicQuestion {
-  return { id: q.id, skillId: q.skillId, prompt: q.prompt, visual: q.visual, hints: q.hints };
+  return { id: q.id, skillId: q.skillId, prompt: q.prompt, visual: q.visual, hints: q.hints, answerHelp: q.answerHelp };
 }
 
 export async function nextQuestion(skillId: string, tier: Tier): Promise<PublicQuestion> {

@@ -55,6 +55,8 @@ export interface Question {
   wrongAnswers: { value: Fraction | number; misconception: MisconceptionId }[];
   hints: string[];
   solution: string[];
+  /** Optional line under the answer box saying what to type (e.g. "a decimal like 0.35"). */
+  answerHelp?: string;
 }
 
 /**
