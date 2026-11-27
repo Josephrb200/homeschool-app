@@ -413,7 +413,9 @@ function formulaSide(raw: string, subject: string): { rhs: string } | { problem:
 }
 
 export function markFormula(q: Question, a: Extract<Question["answer"], { kind: "formula" }>, raw: string, mcs: Mcs): MarkResult {
-  const side = formulaSide(raw, a.subject);
+  // Letters are compared ignoring case (P and p are the same letter here), so formulas never mix them.
+  const subject = a.subject.toLowerCase();
+  const side = formulaSide(raw, subject);
   if ("problem" in side) {
     return { outcome: "unreadable", correct: false, feedback: `The question asks for ${a.subject} on its own. Start your answer with ${a.subject} =` };
   }
@@ -425,7 +427,7 @@ export function markFormula(q: Question, a: Extract<Question["answer"], { kind: 
       feedback: "I couldn't read that. Use / for dividing and brackets where you need them, like (y − 3)/2. For a square root, type sqrt(A).",
     };
   }
-  if (formulaLetters(got).has(a.subject)) {
+  if (formulaLetters(got).has(subject)) {
     return { outcome: "incorrect", correct: false, feedback: `${a.subject} is still on both sides. The subject must be on its own, with no ${a.subject} on the other side.` };
   }
   const want = parseFormula(a.value);

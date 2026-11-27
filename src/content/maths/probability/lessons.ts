@@ -210,6 +210,55 @@ export const PROBABILITY_LESSONS: Record<SkillId, Lesson> = {
     counts: { guided: 5, independent: 5, check: 5 },
   },
 
+  "prob-frequency-trees": {
+    skillId: "prob-frequency-trees",
+    status: "draft",
+    minutes: 25,
+    intro: {
+      whyItMatters:
+        "A frequency tree is a tidy way to sort a group of people (or things) in two steps, like adults and children, then who bought popcorn. GCSE questions often give you the facts in words and ask you to build the tree yourself.",
+      byTheEnd: ["Fill in a frequency tree from the facts in a question.", "Find missing numbers by adding and taking away.", "Use the tree to find a probability or a fraction."],
+    },
+    teaching: {
+      paragraphs: [
+        "A frequency tree starts with everyone in one box. The first branches split them into two groups. Then each group splits again.",
+        "The key rule: the two boxes after a box always add up to that box. So if 60 people split into adults and children, adults + children = 60.",
+        "To find a missing box, take the other box away from the one before it.",
+        "When a question is in words, draw the tree first. Put in every number you're given, then fill in the gaps one at a time.",
+        "For a probability, check who you're choosing from. One person from everyone: put the starting number on the bottom. \"Of the people who bought popcorn\": add up both popcorn boxes and put that on the bottom.",
+      ],
+      demo: "frequency-tree-fill",
+      examples: [
+        {
+          question: "60 people went to the cinema. 25 were adults. 15 of the adults bought popcorn. 20 of the children bought popcorn. How many people did not buy popcorn?",
+          steps: [
+            "Children: 60 − 25 = 35.",
+            "Adults with no popcorn: 25 − 15 = 10. Children with no popcorn: 35 − 20 = 15.",
+            "No popcorn altogether: 10 + 15 = 25.",
+          ],
+          visual: {
+            kind: "tree",
+            tree: {
+              root: "60",
+              stages: ["Age", "Bought popcorn?"],
+              branches: [
+                { label: "Adults", count: "25", children: [{ label: "Popcorn", count: "15" }, { label: "No popcorn", count: "10" }] },
+                { label: "Children", count: "35", children: [{ label: "Popcorn", count: "20" }, { label: "No popcorn", count: "15" }] },
+              ],
+              highlight: [1, 3],
+              description: "Frequency tree. 60 people: 25 adults (15 popcorn, 10 no popcorn) and 35 children (20 popcorn, 15 no popcorn).",
+            },
+          },
+        },
+        {
+          question: "Using the same tree, one person is chosen at random. What is the probability that they are a child who bought popcorn?",
+          steps: ["Children who bought popcorn: 20.", "Chosen from everyone: 60.", "P = 20/60 (which simplifies to 1/3)."],
+        },
+      ],
+    },
+    counts: { guided: 4, independent: 5, check: 5 },
+  },
+
   "prob-venn": {
     skillId: "prob-venn",
     status: "draft",
@@ -246,5 +295,97 @@ export const PROBABILITY_LESSONS: Record<SkillId, Lesson> = {
       ],
     },
     counts: { guided: 5, independent: 5, check: 5 },
+  },
+
+  "prob-tree-independent": {
+    skillId: "prob-tree-independent",
+    status: "draft",
+    minutes: 30,
+    intro: {
+      whyItMatters:
+        "What's the chance of two things both happening, like passing two tests, or getting two reds in a row? A tree diagram shows every possible route, so you can work it out step by step instead of guessing.",
+      byTheEnd: ["Fill in the probabilities on a tree diagram.", "Multiply along the branches to find the chance of a route.", "Add routes together for questions like \"one of each\" or \"at least one\"."],
+    },
+    teaching: {
+      paragraphs: [
+        "A tree diagram has one set of branches for each event. Write the probability on each branch.",
+        "The branches coming out of one point always add up to 1. So if P(red) is 3/5, the other branch is 1 − 3/5 = 2/5.",
+        "Independent means the first result doesn't change the second. If a counter is put back, the second set of branches is the same as the first.",
+        "To find the chance of one route (this AND then that), multiply along the branches. For fractions, multiply the tops and multiply the bottoms.",
+        "If more than one route works (like red then blue, OR blue then red), work out each route, then add them.",
+        "\"At least one\" means every route except \"none\". The quick way: 1 − P(none).",
+      ],
+      demo: "tree-multiply",
+      examples: [
+        {
+          question: "A bag has 3 red and 2 blue counters. A counter is taken, put back, then a second is taken. Find P(both red) and P(one of each colour).",
+          steps: [
+            "Both red: 3/5 × 3/5 = 9/25.",
+            "Red then blue: 3/5 × 2/5 = 6/25. Blue then red: 2/5 × 3/5 = 6/25.",
+            "One of each: 6/25 + 6/25 = 12/25.",
+          ],
+          visual: {
+            kind: "tree",
+            tree: {
+              stages: ["First counter", "Second counter"],
+              branches: [
+                { label: "Red", p: "3/5", children: [{ label: "Red", p: "3/5", end: "Red, Red" }, { label: "Blue", p: "2/5", end: "Red, Blue" }] },
+                { label: "Blue", p: "2/5", children: [{ label: "Red", p: "3/5", end: "Blue, Red" }, { label: "Blue", p: "2/5", end: "Blue, Blue" }] },
+              ],
+              highlight: [0],
+              description: "Tree diagram. First counter: Red 3/5, Blue 2/5. Second counter, after either colour: Red 3/5, Blue 2/5.",
+            },
+          },
+        },
+        {
+          question: "The probability Cara passes her theory test is 0.8 and her practical test is 0.7. Find the probability she passes at least one test.",
+          steps: ["Fail both: 0.2 × 0.3 = 0.06.", "Every other route passes at least one test.", "1 − 0.06 = 0.94."],
+        },
+      ],
+    },
+    counts: { guided: 4, independent: 5, check: 5 },
+  },
+  "prob-tree-dependent": {
+    skillId: "prob-tree-dependent",
+    status: "draft",
+    minutes: 30,
+    intro: {
+      whyItMatters:
+        "Lots of real choices happen without putting things back: picking two people for a team, or eating sweets from a bag. The second probability changes because of the first. This is one of the harder Foundation questions, and it uses everything from the last lesson.",
+      byTheEnd: ["Change the second branches when the first item isn't put back.", "Multiply along the branches for one route.", "Add routes for \"one of each\", \"the same\" and \"at least one\"."],
+    },
+    teaching: {
+      paragraphs: [
+        "Without replacement means the first item is not put back. So for the second pick there is one fewer altogether: the bottom of every second-branch fraction goes down by 1.",
+        "If the first item was red, there is one fewer red left, so the top of the \"red again\" branch goes down by 1 too. The other colour's top stays the same.",
+        "Example: 5 red and 3 blue (8 altogether). After a red: 4 red and 3 blue are left, out of 7. So the branches are 4/7 and 3/7.",
+        "Check: the branches from each point still add up to 1 (4/7 + 3/7 = 7/7).",
+        "Then everything works as before: multiply along a route, and add routes when more than one works.",
+      ],
+      demo: "tree-without-replacement",
+      examples: [
+        {
+          question: "A bag has 5 red and 3 blue counters. Two are taken without replacement. Find the probability that both are red.",
+          steps: ["First red: 5/8.", "Second red, after a red: 4 reds left out of 7, so 4/7.", "5/8 × 4/7 = 20/56 (which simplifies to 5/14)."],
+          visual: {
+            kind: "tree",
+            tree: {
+              stages: ["First counter", "Second counter"],
+              branches: [
+                { label: "Red", p: "5/8", children: [{ label: "Red", p: "4/7", end: "Red, Red" }, { label: "Blue", p: "3/7", end: "Red, Blue" }] },
+                { label: "Blue", p: "3/8", children: [{ label: "Red", p: "5/7", end: "Blue, Red" }, { label: "Blue", p: "2/7", end: "Blue, Blue" }] },
+              ],
+              highlight: [0],
+              description: "Tree diagram without replacement. First: Red 5/8, Blue 3/8. After Red: Red 4/7, Blue 3/7. After Blue: Red 5/7, Blue 2/7.",
+            },
+          },
+        },
+        {
+          question: "Using the same bag, find the probability of one red and one blue.",
+          steps: ["Red then blue: 5/8 × 3/7 = 15/56.", "Blue then red: 3/8 × 5/7 = 15/56.", "Add: 15/56 + 15/56 = 30/56 (which simplifies to 15/28)."],
+        },
+      ],
+    },
+    counts: { guided: 4, independent: 5, check: 5 },
   },
 };
