@@ -145,7 +145,7 @@ function orient(r: Rng, base: Shape): Shape {
 /** Put a shape somewhere random inside the window. */
 function place(r: Rng, s: Shape, win: Window): Shape {
   const b = box(s);
-  return shift(s, [r.int(win.x[0] - b.x0, win.x[1] - b.x1), r.int(win.y[0] - b.y0, win.y[1] - b.y1)]);
+  return shift(s, [r.int(win.x[0] + 1 - b.x0, win.x[1] - 1 - b.x1), r.int(win.y[0] + 1 - b.y0, win.y[1] - 1 - b.y1)]);
 }
 
 const pickShape = (r: Rng, small = false) => {
@@ -184,7 +184,7 @@ const LETTERS = ["A", "B", "C", "D"];
 // ================================================================ reflection
 
 function randomMirror(r: Rng, tier: Tier): Mirror {
-  if (tier === 1) return r.next() < 0.5 ? { kind: "x", c: r.int(3, 7) } : { kind: "y", c: r.int(3, 7) };
+  if (tier === 1) return r.next() < 0.5 ? { kind: "x", c: r.int(4, 6) } : { kind: "y", c: r.int(4, 6) };
   const roll = r.next();
   if (roll < 0.25) return { kind: "y=x" };
   if (roll < 0.4) return { kind: "y=-x" };
@@ -291,7 +291,7 @@ function mirrorNudge(m: Mirror): (p: P) => P {
 
 function reflectWhich(r: Rng, tier: Tier): Q {
   const m: Mirror = tier === 1 ? (r.next() < 0.5 ? { kind: "x", c: 0 } : { kind: "y", c: 0 }) : r.pick<Mirror>([{ kind: "x", c: 0 }, { kind: "y", c: 0 }, { kind: "y=x" }]);
-  const big: Window = { x: [-5, 5], y: [-5, 5] };
+  const big: Window = { x: [-6, 6], y: [-6, 6] };
   return until(() => {
     const { s, img } = shapeForMirror(r, 2, m, big);
     // Keep it close to the mirror so the pictures stay small.
@@ -476,7 +476,7 @@ function rotatePoint(r: Rng, tier: Tier): Q {
 function rotateWhich(r: Rng, tier: Tier): Q {
   const t: Turn = { ...randomTurn(r, 1), deg: tier === 1 ? r.pick([90, 90, 180] as const) : r.pick([90, 180] as const) };
   if (tier === 2 && r.next() < 0.6) t.c = [r.int(-1, 1), r.int(-1, 1)];
-  const big: Window = { x: [-4, 4], y: [-4, 4] };
+  const big: Window = { x: [-5, 5], y: [-5, 5] };
   return until(() => {
     const { s, img } = shapeForTurn(r, t, big);
     const cands = [

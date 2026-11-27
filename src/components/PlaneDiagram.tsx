@@ -68,7 +68,6 @@ export function PlaneDiagram({ plane, maxWidth = 440, maxHeight = 340 }: { plane
       {showX && <Num x={X(x1) - 4} y={Y(0) - font * 0.9} text="x" size={font} italic anchor="end" />}
       {showY && <Num x={X(0) + font * 0.7} y={Y(y1) + font * 0.6} text="y" size={font} italic anchor="start" />}
       {showX && showY && <Num x={X(0) - font * 0.5} y={Y(0) + font * 0.95} text="0" size={font * 0.85} anchor="end" />}
-      {axisNums}
 
       {plane.shapes
         ?.filter((s) => s.tone !== "region")
@@ -89,6 +88,8 @@ export function PlaneDiagram({ plane, maxWidth = 440, maxHeight = 340 }: { plane
             />
           );
         })}
+
+      {axisNums}
 
       {plane.arcs?.map((a, k) => {
         const r = a.r * scale;
@@ -146,12 +147,14 @@ export function PlaneDiagram({ plane, maxWidth = 440, maxHeight = 340 }: { plane
         const len = Math.hypot(bx - ax, by - ay) || 1;
         let nx = -(by - ay) / len;
         let ny = (bx - ax) / len;
-        // Put the label above (or left of) the segment.
-        if (ny > 0 || (Math.abs(ny) < 1e-9 && nx > 0)) {
+        // Put the label on the side away from the middle of the shapes, so it sits outside them.
+        const all = (plane.shapes ?? []).flatMap((sh) => sh.points).map(S);
+        const mid: V = all.length ? [all.reduce((t, p) => t + p[0], 0) / all.length, all.reduce((t, p) => t + p[1], 0) / all.length] : [(ax + bx) / 2, 0];
+        if (((ax + bx) / 2 - mid[0]) * nx + ((ay + by) / 2 - mid[1]) * ny < 0) {
           nx = -nx;
           ny = -ny;
         }
-        return <Num key={`len${k}`} x={(ax + bx) / 2 + nx * 14} y={(ay + by) / 2 + ny * 14} text={t.text} size={font} bold />;
+        return <Num key={`len${k}`} x={(ax + bx) / 2 + nx * 16} y={(ay + by) / 2 + ny * 16} text={t.text} size={font} bold />;
       })}
 
       {plane.points?.map((p, k) => {

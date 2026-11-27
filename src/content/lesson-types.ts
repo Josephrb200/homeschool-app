@@ -67,7 +67,12 @@ export type DemoKind =
   | "shape-sorter"
   | "triangle-sum"
   | "parallel-lines"
-  | "polygon-split";
+  | "polygon-split"
+  | "reflect-explore"
+  | "rotate-explore"
+  | "translate-explore"
+  | "enlarge-explore"
+  | "describe-sort";
 
 export type ContentStatus = "draft" | "in-review" | "verified";
 

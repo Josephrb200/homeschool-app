@@ -115,8 +115,9 @@ export function apart(a: Shape, b: Shape, gap = 1): boolean {
 
 export type Window = { x: [number, number]; y: [number, number] };
 
+/** True if every corner is inside the window, at least one square in from its edges (so labels aren't cut off). */
 export function fits(s: Shape, win: Window): boolean {
-  return s.every(([x, y]) => x >= win.x[0] && x <= win.x[1] && y >= win.y[0] && y <= win.y[1]);
+  return s.every(([x, y]) => x >= win.x[0] + 1 && x <= win.x[1] - 1 && y >= win.y[0] + 1 && y <= win.y[1] - 1);
 }
 
 /**

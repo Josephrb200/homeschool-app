@@ -71,6 +71,8 @@ export const TRANSFORMATION_MISCONCEPTIONS: Record<string, Misconception> = Obje
   mc("refl-not-doubled", "Only moved the point onto the mirror line", "A reflection goes through the mirror and the same distance out the other side. If a point is 2 squares from the mirror, its image is 2 squares beyond it: 4 squares from where it started."),
   mc("refl-yx-sign", "Mixed up y = x and y = −x", "Reflecting in y = x swaps the coordinates: (a, b) becomes (b, a). Reflecting in y = −x swaps them and changes both signs: (a, b) becomes (−b, −a)."),
   mc("refl-not-flipped", "Slid the shape instead of flipping it", "A reflection flips the shape over, like a mirror. The image faces the opposite way. A shape that has only slid across, still facing the same way, is a translation."),
+  mc("refl-distance", "Put the image the wrong distance from the mirror", "Each corner of the image must be exactly as far from the mirror as the matching corner of the shape. Count the squares from the mirror for one corner on each side."),
+  mc("refl-flipped-both", "Flipped the shape both ways", "A reflection in an up-and-down mirror flips left and right only: the top of the shape stays at the top. A reflection in an across mirror flips top and bottom only."),
   mc("sym-diagonals", "Thought a diagonal is always a line of symmetry", "Fold along the line in your head. A rectangle's diagonal doesn't work: the corners don't land on each other. Only lines where the two halves match exactly count."),
   mc("sym-parallelogram", "Thought a parallelogram has lines of symmetry", "A parallelogram has no lines of symmetry. Fold it along any line and the halves don't match. (It does have rotational symmetry of order 2.)"),
   mc("sym-count", "Miscounted the lines of symmetry", "Check every possible fold: up and down, across, and corner to corner. A regular polygon has as many lines of symmetry as it has sides."),
@@ -90,7 +92,7 @@ export const TRANSFORMATION_MISCONCEPTIONS: Record<string, Misconception> = Obje
   mc("vec-gap", "Counted the gap between the shapes", "Pick one corner of the shape and count how far that same corner moves. Counting the empty squares between the two shapes misses the width of the shape."),
 
   // Enlargement
-  mc("enl-sf-difference", "Took away instead of dividing", "The scale factor is how many times bigger: new length ÷ old length. Taking away tells you how much longer, not how many times.", "ratio-scale-maps"),
+  mc("enl-sf-difference", "Took away instead of dividing", "The scale factor is how many times bigger: new length ÷ old length. Taking away tells you how much longer, not how many times."),
   mc("enl-sf-inverted", "Divided the wrong way round", "Scale factor = new length ÷ original length. If the shape got bigger, the scale factor is more than 1."),
   mc("enl-added", "Added the scale factor instead of multiplying", "Every length is multiplied by the scale factor. Scale factor 3 means 3 times as long, not 3 longer."),
   mc("enl-fraction-bigger", "Made the shape bigger with a fractional scale factor", "A scale factor between 0 and 1 makes the shape smaller. Scale factor ½ halves every length."),
