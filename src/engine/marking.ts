@@ -69,7 +69,11 @@ export function markAnswer(
   if (a.kind === "product") return markProduct(q, a, raw, misconceptions);
 
   // "x = 4" is a fine way to give a number answer to an equation.
-  const parsed = parseAnswer(a.kind === "integer" ? raw.replace(/^\s*[a-zA-Z]\s*=\s*/, "") : raw);
+  const parsedRaw = parseAnswer(a.kind === "integer" ? raw.replace(/^\s*[a-zA-Z]\s*=\s*/, "") : raw);
+  // For probabilities, "40%" means 40 hundredths.
+  const typedPercent = a.kind === "fraction" && a.percentAllowed && /%\s*$/.test(raw);
+  const parsed: typeof parsedRaw =
+    parsedRaw.ok && typedPercent ? { ok: true, value: simplify(frac(parsedRaw.value.n, parsedRaw.value.d * 100)), form: "decimal" } : parsedRaw;
   if (!parsed.ok) {
     return {
       outcome: "unreadable",
@@ -111,6 +115,13 @@ export function markAnswer(
   }
 
   // fraction answer
+  if (a.percentAllowed && !typedPercent && v.n > v.d && equals(frac(v.n, v.d * 100), a.value) && !matchWrong(q, v)) {
+    return {
+      outcome: "unreadable",
+      correct: false,
+      feedback: `A probability is never more than 1. If you meant ${raw.trim()}%, type the % sign, or write it as a fraction or a decimal.`,
+    };
+  }
   if (equals(v, a.value)) {
     if (a.form === "mixed" && a.value.d !== 1 && Math.abs(a.value.n) > a.value.d && parsed.form !== "mixed") {
       return {

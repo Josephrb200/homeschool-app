@@ -50,7 +50,13 @@ export type DemoKind =
   | "pie-builder"
   | "averages-explorer"
   | "freq-table-expand"
-  | "scatter-correlation";
+  | "scatter-correlation"
+  | "probability-scale"
+  | "counter-bag"
+  | "probability-bar"
+  | "experiment-trials"
+  | "sample-space-grid"
+  | "venn-sort";
 
 export type ContentStatus = "draft" | "in-review" | "verified";
 
