@@ -9,7 +9,7 @@
 import { useId, useState } from "react";
 import { FunctionMachine } from "./FunctionMachine";
 
-function Slider({ label, value, min, max, onChange }: { label: string; value: number; min: number; max: number; onChange: (n: number) => void }) {
+export function Slider({ label, value, min, max, onChange }: { label: string; value: number; min: number; max: number; onChange: (n: number) => void }) {
   const id = useId();
   return (
     <div className="field">
@@ -21,7 +21,7 @@ function Slider({ label, value, min, max, onChange }: { label: string; value: nu
   );
 }
 
-function Choices<T extends string | number>({ label, options, value, onChange, show }: { label: string; options: readonly T[]; value: T; onChange: (v: T) => void; show?: (v: T) => string }) {
+export function Choices<T extends string | number>({ label, options, value, onChange, show }: { label: string; options: readonly T[]; value: T; onChange: (v: T) => void; show?: (v: T) => string }) {
   return (
     <div className="stack" style={{ gap: 6 }}>
       <span style={{ fontWeight: 600 }}>{label}</span>

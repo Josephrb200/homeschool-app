@@ -83,13 +83,15 @@ export function parseList(raw: string): number[] | null {
     .replace(/[{}[\]().]+$/g, "")
     .replace(/^[{}[\]()]+/g, "")
     .replace(/\band\b/gi, ",")
-    .replace(/[;&]/g, ",");
+    .replace(/[;&]/g, ",")
+    // Negative whole numbers are allowed (inequality questions list them): "−2", "- 2".
+    .replace(/[−–-]\s*(?=\d)/g, "-");
   if (!s) return null;
   const parts = s.split(/[\s,]+/).filter(Boolean);
   if (parts.length === 0) return null;
   const out: number[] = [];
   for (const p of parts) {
-    if (!/^\d+$/.test(p)) return null;
+    if (!/^-?\d+$/.test(p)) return null;
     out.push(Number(p));
   }
   return out;
