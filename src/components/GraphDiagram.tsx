@@ -59,6 +59,8 @@ export function GraphDiagram({
     const unit = Math.min(380 / xr, 340 / yr, 40);
     plotW = unit * xr;
     plotH = unit * yr;
+    // A very tall, thin grid is hard to read: widen it (the x scale then differs from y).
+    if (plotW < 240) plotW = 240;
   }
   const W = L + plotW + R;
   const H = T + plotH + B;
@@ -115,7 +117,7 @@ export function GraphDiagram({
   );
 
   return (
-    <div className="graph-wrap" style={{ maxWidth }}>
+    <div className="graph-wrap" style={{ maxWidth: Math.min(maxWidth, Math.round(W * 1.15)) }}>
       <svg
         viewBox={`0 0 ${W} ${H}`}
         width="100%"
@@ -142,16 +144,16 @@ export function GraphDiagram({
         <line x1={L} x2={L + plotW} y1={Y(y0)} y2={Y(y0)} stroke="var(--ink)" strokeWidth={2} />
         <line x1={X(x0)} x2={X(x0)} y1={T} y2={T + plotH} stroke="var(--ink)" strokeWidth={2} />
         {xs.filter((v) => onLabel(v, xLabelStep) && !(originShared && v === 0)).map((v) => (
-          <text key={`lx${v}`} x={X(v)} y={Y(y0) + 17} textAnchor="middle" fontSize={13} fill="var(--ink)">
+          <text key={`lx${v}`} x={X(v)} y={Y(y0) + 17} textAnchor="middle" fontSize={13} fill="var(--ink)" stroke="var(--surface)" strokeWidth={3} paintOrder="stroke">
             {fmt(v)}
           </text>
         ))}
         {ys.filter((v) => onLabel(v, yLabelStep) && !(originShared && v === 0)).map((v) => (
-          <text key={`ly${v}`} x={X(x0) - 6} y={Y(v) + 4.5} textAnchor="end" fontSize={13} fill="var(--ink)">
+          <text key={`ly${v}`} x={X(x0) - 6} y={Y(v) + 4.5} textAnchor="end" fontSize={13} fill="var(--ink)" stroke="var(--surface)" strokeWidth={3} paintOrder="stroke">
             {fmt(v)}
           </text>
         ))}
-        {originShared && (
+        {originShared && (titled || plotW / xr >= 28) && (
           <text x={X(0) - 6} y={Y(0) + 17} textAnchor="end" fontSize={13} fill="var(--ink)">
             0
           </text>
