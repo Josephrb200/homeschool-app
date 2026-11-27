@@ -48,8 +48,18 @@ export function ProtractorDiagram({ spec, maxWidth = 440 }: { spec: ProtractorSp
   const [b1x, b1y] = at(t, R);
   const [b2x, b2y] = at(t + 180, R);
   const sweepEnd = at(t + 180, R);
+  // Crop the picture to what is drawn, so there is no empty half-circle of space.
+  const pts: [number, number][] = [[C, C], at(a1, arm), at(a2, arm)];
+  if (spec.hideProtractor) for (let d = Math.min(a1, a2); d <= Math.max(a1, a2); d += 5) pts.push(at(d, 34));
+  else for (let v = 0; v <= 180; v += 5) pts.push(at(t + v, R));
+  const pad = 12;
+  const x0 = Math.max(0, Math.min(...pts.map((q) => q[0])) - pad);
+  const y0 = Math.max(0, Math.min(...pts.map((q) => q[1])) - pad);
+  const x1 = Math.min(size, Math.max(...pts.map((q) => q[0])) + pad);
+  const y1 = Math.min(size, Math.max(...pts.map((q) => q[1])) + pad);
+  const vw = x1 - x0;
   return (
-    <svg viewBox={`0 0 ${size} ${size}`} width="100%" style={{ maxWidth: size }} role="img" aria-label={spec.description} className="shape-diagram protractor-diagram">
+    <svg viewBox={`${x0} ${y0} ${vw} ${y1 - y0}`} width="100%" style={{ maxWidth: vw }} role="img" aria-label={spec.description} className="shape-diagram protractor-diagram">
       {!spec.hideProtractor && (
         <g>
           <path d={`M ${b1x} ${b1y} A ${R} ${R} 0 0 0 ${sweepEnd[0]} ${sweepEnd[1]} Z`} fill="var(--surface)" fillOpacity={0.6} stroke="var(--muted)" strokeWidth={1.5} />

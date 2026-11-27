@@ -80,7 +80,7 @@ export const VOLUME_SKILLS: Skill[] = [
     objective: "I can find the surface area of a cuboid, triangular prism or cylinder by adding the areas of all its faces.",
     typicalYear: 8,
     gcseTier: "foundation",
-    prerequisites: ["area-triangle", "geo-circumference"],
+    prerequisites: ["geo-3d-shapes", "area-triangle", "geo-circumference"],
   },
 ];
 

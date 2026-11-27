@@ -72,8 +72,15 @@ export function AngleDiagram({ spec, maxWidth = 420, maxHeight = 280 }: { spec: 
     return best ? centroid(best) : allCentre;
   };
 
-  return (
-    <svg viewBox={`0 0 ${vbW} ${vbH}`} width="100%" style={{ maxWidth: vbW }} role="img" aria-label={spec.description} className="shape-diagram angle-diagram">
+  // Every text label is noted here, so the picture can grow to fit any that would be cut off.
+  const ext: [number, number, number][] = [];
+  const L = (key: string, x: number, y: number, text: string, italic = false) => {
+    ext.push([x, y, 4.8 * text.length + 4]);
+    return <Label key={key} x={x} y={y} text={text} italic={italic} />;
+  };
+
+  const body = (
+    <>
       {shapes.map((sh, k) => (
         <polygon key={`poly${k}`} points={sh.map((n) => S(n).join(",")).join(" ")} fill="var(--accent-soft)" stroke="none" />
       ))}
@@ -125,7 +132,7 @@ export function AngleDiagram({ spec, maxWidth = 420, maxHeight = 280 }: { spec: 
               stroke={m.highlight ? "var(--accent)" : "var(--ink)"}
               strokeWidth={m.highlight ? 3.5 : 2}
             />
-            {m.text && <Label x={at[0] + lr * Math.cos(mid)} y={at[1] + lr * Math.sin(mid)} text={m.text} />}
+            {m.text && L("t", at[0] + lr * Math.cos(mid), at[1] + lr * Math.sin(mid), m.text)}
           </g>
         );
       })}
@@ -185,7 +192,7 @@ export function AngleDiagram({ spec, maxWidth = 420, maxHeight = 280 }: { spec: 
         const centre = centreFor(t.a, t.b);
         if ((m[0] - centre[0]) * n[0] + (m[1] - centre[1]) * n[1] < 0) n = mul(n, -1);
         const at = add(m, mul(n, 18 + 3 * t.text.length * Math.abs(n[0])));
-        return <Label key={`l${k}`} x={at[0]} y={at[1]} text={t.text} />;
+        return L(`l${k}`, at[0], at[1], t.text);
       })}
 
       {spec.dots?.map((d) => {
@@ -197,9 +204,37 @@ export function AngleDiagram({ spec, maxWidth = 420, maxHeight = 280 }: { spec: 
         const p = S(name);
         let dir = sub(p, centreFor(name));
         if (Math.hypot(dir[0], dir[1]) < 1) dir = [-1, -1];
-        const at = add(p, mul(unit(dir), 18));
-        return <Label key={`p${name}`} x={at[0]} y={at[1]} text={name} italic />;
+        let dist = 18;
+        // A reflex mark goes nearly all the way round its corner: put the letter in the gap, or outside the arc.
+        const marks = spec.angles.filter((m) => m.at === name && !m.right);
+        if (marks.length === 1 && marks[0].reflex) {
+          const { start, sweep } = markSweep(p, S(marks[0].from), S(marks[0].to), true);
+          const gap = 2 * Math.PI - Math.abs(sweep);
+          const mid = start + sweep / 2 + Math.PI;
+          if (gap > Math.PI / 3) {
+            dir = [Math.cos(mid), Math.sin(mid)];
+            dist = Math.min(34, 13 / Math.sin(gap / 2));
+          } else {
+            // Gap too thin: sit outside the arc, a quarter turn away from the angle's own label.
+            const side = start + sweep / 2 + Math.PI / 2;
+            const c = sub(centreFor(name), p);
+            const pick: V = [Math.cos(side), Math.sin(side)];
+            dir = pick[0] * c[0] + pick[1] * c[1] > 0 ? mul(pick, -1) : pick;
+            dist = 40;
+          }
+        }
+        const at = add(p, mul(unit(dir), dist));
+        return L(`p${name}`, at[0], at[1], name, true);
       })}
+    </>
+  );
+  const vx = Math.min(0, ...ext.map(([x, , hw]) => x - hw));
+  const vy = Math.min(0, ...ext.map(([, y]) => y - 13));
+  const vw = Math.max(vbW, ...ext.map(([x, , hw]) => x + hw)) - vx;
+  const vh = Math.max(vbH, ...ext.map(([, y]) => y + 13)) - vy;
+  return (
+    <svg viewBox={`${vx} ${vy} ${vw} ${vh}`} width="100%" style={{ maxWidth: vw }} role="img" aria-label={spec.description} className="shape-diagram angle-diagram">
+      {body}
     </svg>
   );
 }
