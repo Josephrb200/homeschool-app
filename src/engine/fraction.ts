@@ -83,6 +83,8 @@ export type ParseResult =
 export function parseAnswer(raw: string): ParseResult {
   const s = raw
     .trim()
+    // Compound units, masses, capacities and times are welcome too: "50 km/h", "2.7 g/cm³", "350 ml", "45 minutes".
+    .replace(/\s*(km\/h|kph|m\/s|mph|g\/cm(³|\^?3)|kg\/m(³|\^?3)|n\/m(²|\^?2)|n\/cm(²|\^?2)|kg|g|grams?|kilograms?|ml|millilit(re|er)s?|lit(re|er)s?|l|seconds?|secs?|s|minutes?|mins?|hours?|hrs?|h|days?|weeks?|years?)\.?$/i, "")
     // Units are welcome but not needed: "24 cm²", "24cm2", "24 square metres", "24 units", "60 cm³", "60 cubic cm".
     .replace(/\s*(square\s+|sq\.?\s*|cubic\s+|cu\.?\s*)?(millimet(re|er)s?|centimet(re|er)s?|kilomet(re|er)s?|met(re|er)s?|mm|cm|km|m|units?)\s*(²|³|\^?[23]|squared|cubed)?\.?$/i, "")
     // Angles: "65°", "65 degrees", "65 deg".

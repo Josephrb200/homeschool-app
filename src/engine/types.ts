@@ -58,7 +58,16 @@ export type AnswerSpec =
    * true value. Marking accepts the correctly rounded value, and also answers
    * that come from using 3.14 for π (as GCSE mark schemes do).
    */
-  | { kind: "decimal"; exact: number; dp: number }
+  | {
+      kind: "decimal";
+      exact: number;
+      dp: number;
+      /**
+       * Strict rounding only: no extra allowance for π = 3.14. Used where π
+       * isn't involved (Pythagoras, trigonometry), so 10.4 isn't accepted for 10.3.
+       */
+      strict?: boolean;
+    }
   /**
    * An algebraic expression, compared mathematically (see engine/algebra.ts).
    * `form` says how it must be written to count as fully correct:
@@ -67,7 +76,7 @@ export type AnswerSpec =
   | {
       kind: "expression";
       value: string;
-      form: "notation" | "simplified";
+      form: "notation" | "simplified" | "factorised";
       /**
        * The answer is an equation like "y = 3x − 2": `lhs` is "y", `value` the right-hand side.
        * Typing "y =" is expected; leaving it out gets a nudge ("not-simplified").
@@ -79,6 +88,30 @@ export type AnswerSpec =
    * `vector` marks a column vector instead: feedback says "top number" and "bottom number".
    */
   | { kind: "point"; value: [number, number]; vector?: boolean }
+  /**
+   * An inequality such as x < 4 or −2 < x ≤ 3 (see engine/equations.ts). Any
+   * equivalent way of writing it is accepted (4 > x). The optional
+   * misconceptions name the near misses: < for ≤ (or the reverse), the sign
+   * pointing the wrong way, and "x = 4" given instead of an inequality.
+   */
+  | {
+      kind: "inequality";
+      variable: string;
+      value: Interval;
+      inclusiveMisconception?: MisconceptionId;
+      directionMisconception?: MisconceptionId;
+      equalsMisconception?: MisconceptionId;
+    }
+  /** All the solutions of an equation (a quadratic), in any order: "x = 2 or x = −5". */
+  | { kind: "roots"; variable: string; values: number[]; missingMisconception?: MisconceptionId }
+  /** One value for each letter, e.g. simultaneous equations: { x: 3, y: −2 }. `wrongAnswers` lists values in letter order. */
+  | { kind: "assignment"; values: Record<string, number> }
+  /**
+   * A formula rearranged to make `subject` the subject, e.g. subject "x",
+   * value "(y − c)/m". Any equivalent form is accepted; wrongExpressions are
+   * compared the same way.
+   */
+  | { kind: "formula"; subject: string; value: string }
   /**
    * A number in standard form, mantissa × 10^power with 1 ≤ mantissa < 10
    * (see engine/standard-form.ts). The right value written another way is "not-simplified".
@@ -98,6 +131,17 @@ export type AnswerSpec =
    * `index` asks for index form: the right primes written out in full get a nudge.
    */
   | { kind: "product"; value: number; index: boolean };
+
+/** One end of an inequality: the number, and whether it is included (≤, ≥) or not (<, >). */
+export interface Bound {
+  value: Fraction;
+  inclusive: boolean;
+}
+/** x between two bounds; a missing bound means no limit that way. */
+export interface Interval {
+  lower?: Bound;
+  upper?: Bound;
+}
 
 export interface Question {
   /** Stable id: skill + generator + seed. Lets us rebuild the exact question later. */
@@ -150,7 +194,24 @@ export type Visual =
   | { kind: "spinner"; spinner: SpinnerSpec }
   | { kind: "table"; table: TableSpec }
   | { kind: "venn"; venn: VennSpec }
+  | { kind: "plane"; plane: PlaneSpec }
+  | { kind: "panels"; panels: { label: string; visual: Visual }[]; description: string }
+  | { kind: "numberline"; line: NumberLineSpec }
   | { kind: "graph"; graph: GraphSpec };
+
+/**
+ * A number line from min to max (whole numbers marked), optionally showing an
+ * inequality: a circle at each bound (filled = included, open = not) and a
+ * thick line over the values that fit, with an arrow if it goes on forever.
+ */
+export interface NumberLineSpec {
+  min: number;
+  max: number;
+  /** Bounds use whole numbers so they sit on a tick. */
+  lower?: { value: number; inclusive: boolean };
+  upper?: { value: number; inclusive: boolean };
+  description: string;
+}
 
 /**
  * A coordinate grid with axes, drawn to scale: lines and curves (as lists of
@@ -178,6 +239,36 @@ export interface GraphAxis {
   labelStep?: number;
   /** Axis title, e.g. "Time (minutes)". Defaults to the letter x or y. */
   label?: string;
+}
+
+
+/**
+ * A flat drawing on a coordinate plane, drawn to scale (equal units on both
+ * axes): grids and axes, labelled polygons, straight lines, circles and arcs,
+ * points and arrows. Used for transformations, constructions and loci.
+ */
+export interface PlaneSpec {
+  /** The window to draw, in real units: [min, max] on each axis. */
+  x: [number, number];
+  y: [number, number];
+  /** Unit squares behind everything. */
+  grid?: boolean;
+  /** x and y axes through (0, 0), numbered every `axisStep` (default 1). */
+  axes?: boolean;
+  axisStep?: number;
+  /** Polygons. "object" is shaded, "image" is shaded in the second colour, "region" is a pale wash with no outline, "outline" is unfilled. */
+  shapes?: { points: [number, number][]; label?: string; tone?: "object" | "image" | "region" | "outline"; dashed?: boolean }[];
+  /** Straight lines from a to b. "mirror" lines are drawn bold in the highlight colour. */
+  lines?: { a: [number, number]; b: [number, number]; label?: string; dashed?: boolean; tone?: "mirror" | "ink" | "faint" }[];
+  /** Circles (no from/to) or arcs from angle `from` to `to`, degrees anticlockwise from east. */
+  arcs?: { c: [number, number]; r: number; from?: number; to?: number; dashed?: boolean; faint?: boolean }[];
+  /** Dots, with an optional letter or coordinate label. */
+  points?: { at: [number, number]; label?: string; hollow?: boolean }[];
+  /** Arrows from one point to another (e.g. a translation). */
+  arrows?: { from: [number, number]; to: [number, number] }[];
+  /** Length labels beside a segment. */
+  lengths?: { a: [number, number]; b: [number, number]; text: string }[];
+  description: string;
 }
 
 /** A fair spinner with equal sections, each labelled (a colour word or a number). */
@@ -264,6 +355,13 @@ export interface AngleSpec {
   angles: AngleMark[];
   /** Points (in order) of a shape to shade. */
   polygon?: string[];
+  /**
+   * More shapes to shade, for diagrams with two shapes (congruent or similar
+   * triangles). Length labels and letters are pushed out from their own shape.
+   */
+  polygons?: string[][];
+  /** Draw it wider than usual (two shapes side by side). */
+  wide?: boolean;
   /** Equal-length marks: n small ticks across the middle of a segment. */
   ticks?: { a: string; b: string; n: number }[];
   /** Parallel marks: n arrowheads on a segment, pointing from a to b. */

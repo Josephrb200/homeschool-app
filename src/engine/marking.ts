@@ -4,10 +4,11 @@
  */
 
 import { equals, gcd, isSimplest, parseAnswer, show, showDecimal, showMixed, simplify, frac, type Fraction } from "./fraction";
-import { parseExpression, polyEquals, untidyReason, UNTIDY_FEEDBACK } from "./algebra";
+import { leftoverFactor, parseExpression, polyEquals, untidyReason, UNTIDY_FEEDBACK } from "./algebra";
 import { markStandardForm, showStandardForm } from "./standard-form";
 import { markPoint, showPoint } from "./point";
 import { factorsOf, fullForm, indexForm, isPrime, parseList, parseProduct } from "./primes";
+import { markAssignment, markFormula, markInequality, markRoots, showInterval, showNum } from "./equations";
 import type { MarkResult, Misconception, Question } from "./types";
 
 /** The correct answer as text, for showing after an attempt. */
@@ -21,8 +22,12 @@ export function answerText(q: Question): string {
   if (a.kind === "decimal") return roundTo(a.exact, a.dp);
   if (a.kind === "ratio") return a.value.join(":");
   if (a.kind === "standard-form") return showStandardForm(a.mantissa, a.power);
-  if (a.kind === "list") return [...a.value].sort((x, y) => x - y).join(", ");
+  if (a.kind === "list") return [...a.value].sort((x, y) => x - y).map((n) => String(n).replace("-", "−")).join(", ");
   if (a.kind === "product") return a.index ? indexForm(a.value) : fullForm(a.value);
+  if (a.kind === "inequality") return showInterval(a.value, a.variable);
+  if (a.kind === "roots") return a.values.map((v) => `${a.variable} = ${showNum(frac(v))}`).join(" or ");
+  if (a.kind === "assignment") return Object.keys(a.values).sort().map((v) => `${v} = ${showNum(frac(a.values[v]))}`).join(", ");
+  if (a.kind === "formula") return `${a.subject} = ${a.value}`;
   return a.options[a.correctIndex] ?? "";
 }
 
@@ -67,6 +72,14 @@ export function markAnswer(
     if (!want.ok) throw new Error(`Bad expression answer: ${a.value}`);
     if (polyEquals(got.poly, want.poly)) {
       const why = untidyReason(got.ast, a.form);
+      if (why === "not-fully-factorised") {
+        const f = leftoverFactor(got.ast);
+        return {
+          outcome: "not-simplified",
+          correct: false,
+          feedback: `Good start, but it isn't fully factorised: every term inside the bracket can still be divided by ${f}. Take ${f} outside too. The answer is ${answerText(q)}.`,
+        };
+      }
       if (why) return { outcome: "not-simplified", correct: false, feedback: `${UNTIDY_FEEDBACK[why]} The answer is ${answerText(q)}.` };
       if (missingLhs) {
         return { outcome: "not-simplified", correct: false, feedback: `That's the right expression. Write it as an equation, starting with ${a.lhs} =. The answer is ${answerText(q)}.` };
@@ -84,6 +97,10 @@ export function markAnswer(
   if (a.kind === "ratio") return markRatio(q, a.value, a.requireSimplest, raw, misconceptions);
   if (a.kind === "list") return markList(q, a, raw, misconceptions);
   if (a.kind === "product") return markProduct(q, a, raw, misconceptions);
+  if (a.kind === "inequality") return markInequality(q, a, raw, misconceptions);
+  if (a.kind === "roots") return markRoots(q, a, raw, misconceptions);
+  if (a.kind === "assignment") return markAssignment(q, a, raw, misconceptions);
+  if (a.kind === "formula") return markFormula(q, a, raw, misconceptions);
 
   // "x = 4" is a fine way to give a number answer to an equation.
   const parsedRaw = parseAnswer(a.kind === "integer" ? raw.replace(/^\s*[a-zA-Z]\s*=\s*/, "") : raw);
@@ -105,7 +122,7 @@ export function markAnswer(
 
   if (a.kind === "decimal") {
     const x = v.n / v.d;
-    const tol = decimalTolerance(a.exact, a.dp);
+    const tol = decimalTolerance(a.exact, a.dp, a.strict);
     if (Math.abs(x - a.exact) <= tol) {
       const typedDp = /\.(\d+)/.exec(raw)?.[1].length ?? 0;
       const rounded = roundTo(a.exact, a.dp);
@@ -121,7 +138,7 @@ export function markAnswer(
     for (const w of q.wrongAnswers) {
       if (Array.isArray(w.value)) continue;
       const t = typeof w.value === "number" ? w.value : w.value.n / w.value.d;
-      if (Math.abs(x - t) <= decimalTolerance(t, a.dp)) return wrong(w.misconception, misconceptions);
+      if (Math.abs(x - t) <= decimalTolerance(t, a.dp, a.strict)) return wrong(w.misconception, misconceptions);
     }
     return wrong(undefined, misconceptions);
   }
@@ -195,10 +212,10 @@ export function roundTo(x: number, dp: number): string {
 
 /**
  * How far from the exact value a rounded answer may be: half a unit in the last
- * place (rounding), plus 0.06% for using 3.14 instead of π.
+ * place (rounding), plus 0.06% for using 3.14 instead of π (unless strict).
  */
-export function decimalTolerance(exact: number, dp: number): number {
-  return 0.5 * 10 ** -dp + Math.abs(exact) * 0.0006 + 1e-9;
+export function decimalTolerance(exact: number, dp: number, strict = false): number {
+  return 0.5 * 10 ** -dp + (strict ? 0 : Math.abs(exact) * 0.0006) + 1e-9;
 }
 
 /**

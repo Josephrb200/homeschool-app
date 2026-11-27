@@ -85,8 +85,9 @@ export function parseList(raw: string): number[] | null {
     .replace(/\b(and|or)\b/gi, ",")
     // Solutions of equations: "x = −1, x = 3".
     .replace(/\bx\s*=\s*/gi, "")
-    .replace(/[−–]/g, "-")
-    .replace(/[;&]/g, ",");
+    .replace(/[;&]/g, ",")
+    // Negative whole numbers are allowed (inequality questions list them): "−2", "- 2".
+    .replace(/[−–-]\s*(?=\d)/g, "-");
   if (!s) return null;
   const parts = s.split(/[\s,]+/).filter(Boolean);
   if (parts.length === 0) return null;
