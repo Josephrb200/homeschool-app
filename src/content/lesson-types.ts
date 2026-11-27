@@ -84,7 +84,8 @@ export type DemoKind =
   | "trig-angle-finder"
   | "exact-trig-triangles"
   | "congruence-tests"
-  | "similar-scale";
+  | "similar-scale"
+  | "vector-builder";
 
 export type ContentStatus = "draft" | "in-review" | "verified";
 
