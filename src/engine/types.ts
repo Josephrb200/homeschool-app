@@ -46,6 +46,8 @@ export type AnswerSpec =
       form?: "mixed" | "improper" | "decimal";
     }
   | { kind: "integer"; value: number }
+  /** A ratio such as 3:2 or 2:3:5. Any equivalent ratio is accepted unless requireSimplest. */
+  | { kind: "ratio"; value: number[]; requireSimplest: boolean }
   /**
    * An algebraic expression, compared mathematically (see engine/algebra.ts).
    * `form` says how it must be written to count as fully correct:
@@ -64,13 +66,15 @@ export interface Question {
   visual?: { kind: "bars"; bars: Fraction[] } | { kind: "shape"; shape: ShapeSpec } | { kind: "machine"; machine: MachineSpec };
   answer: AnswerSpec;
   /** Predicted wrong answers mapped to misconceptions (string form, compared exactly after parsing). */
-  wrongAnswers: { value: Fraction | number; misconception: MisconceptionId }[];
+  wrongAnswers: { value: Fraction | number | number[]; misconception: MisconceptionId }[];
   /** Predicted wrong expressions (for "expression" answers), compared mathematically. */
   wrongExpressions?: { value: string; misconception: MisconceptionId }[];
   /** How to type the answer, shown under the answer box. Defaults to number help. */
   answerHelp?: string;
   hints: string[];
   solution: string[];
+  /** How to show the correct answer, when the default would read badly (e.g. "£5.60" not "28/5"). */
+  answerText?: string;
 }
 
 /**

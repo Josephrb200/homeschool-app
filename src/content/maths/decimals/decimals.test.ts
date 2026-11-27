@@ -60,6 +60,8 @@ describe("decimals and percentages generators", () => {
           if (/pounds\?$/.test(q.prompt)) expect(markAnswer(q, `£${typed}`, MISCONCEPTIONS).correct).toBe(true);
           for (const w of q.wrongAnswers) {
             expect(MISCONCEPTIONS[w.misconception], w.misconception).toBeDefined();
+            expect(Array.isArray(w.value)).toBe(false);
+            if (Array.isArray(w.value)) continue;
             const val = typeof w.value === "number" ? frac(w.value) : w.value;
             const res = markAnswer(q, showDec(val), MISCONCEPTIONS);
             expect(res.correct, `${q.prompt}: wrong answer ${showDec(val)}`).toBe(false);
