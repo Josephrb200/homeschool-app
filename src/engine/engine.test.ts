@@ -22,7 +22,7 @@ function check(skillId: string, at: Date, right: number, id = "c1"): AttemptEven
   );
 }
 const answerString = (q: Question) =>
-  q.answer.kind === "fraction" ? show(q.answer.value) : q.answer.kind === "integer" ? String(q.answer.value) : String(q.answer.correctIndex);
+  q.answer.kind === "fraction" ? show(q.answer.value) : q.answer.kind === "integer" ? String(q.answer.value) : q.answer.kind === "ratio" ? q.answer.value.join(":") : String(q.answer.correctIndex);
 
 describe("parseAnswer", () => {
   it.each([
@@ -105,7 +105,7 @@ describe("generators", () => {
           expect(r.outcome, `${q.prompt} expected ${answerString(q)}`).toBe("correct");
           for (const w of q.wrongAnswers) {
             expect(MC[w.misconception], w.misconception).toBeDefined();
-            const s = typeof w.value === "number" ? String(w.value) : show(w.value);
+            const s = typeof w.value === "number" ? String(w.value) : Array.isArray(w.value) ? w.value.join(":") : show(w.value);
             const wr = markAnswer(q, s, MC);
             // an unsimplified equivalent can never be listed as a wrong answer
             expect(wr.outcome).toBe("incorrect");

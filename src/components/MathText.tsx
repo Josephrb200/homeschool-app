@@ -29,5 +29,7 @@ export function speakable(text: string) {
     .replace(/−/g, " minus ")
     .replace(/×/g, " times ")
     .replace(/÷/g, " divided by ")
-    .replace(/£(\d+)/g, "$1 pounds");
+    .replace(/£(\d+)/g, "$1 pounds")
+    // Ratios: "3:2" is read "3 to 2" (not as a time).
+    .replace(/(\d+)\s*:\s*(?=\d)(?!\d\d\s*(am|pm)\b)/gi, "$1 to ");
 }

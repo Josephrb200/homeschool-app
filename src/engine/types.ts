@@ -40,6 +40,8 @@ export type AnswerSpec =
       requireSimplest: boolean;
     }
   | { kind: "integer"; value: number }
+  /** A ratio such as 3:2 or 2:3:5. Any equivalent ratio is accepted unless requireSimplest. */
+  | { kind: "ratio"; value: number[]; requireSimplest: boolean }
   | { kind: "choice"; options: string[]; correctIndex: number };
 
 export interface Question {
@@ -52,9 +54,13 @@ export interface Question {
   visual?: { kind: "bars"; bars: Fraction[] } | { kind: "shape"; shape: ShapeSpec };
   answer: AnswerSpec;
   /** Predicted wrong answers mapped to misconceptions (string form, compared exactly after parsing). */
-  wrongAnswers: { value: Fraction | number; misconception: MisconceptionId }[];
+  wrongAnswers: { value: Fraction | number | number[]; misconception: MisconceptionId }[];
   hints: string[];
   solution: string[];
+  /** How to type the answer, shown under the box (e.g. "Type a ratio like 3:2"). */
+  inputHint?: string;
+  /** How to show the correct answer, when the default would read badly (e.g. "£5.60" not "28/5"). */
+  answerText?: string;
 }
 
 /**

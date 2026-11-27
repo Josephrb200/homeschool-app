@@ -12,7 +12,13 @@ export type DemoKind =
   | "triangle-half"
   | "parallelogram-shear"
   | "trapezium-double"
-  | "compound-split";
+  | "compound-split"
+  | "fraction-of-whole"
+  | "ratio-groups"
+  | "ratio-bar-model"
+  | "ratio-fraction-link"
+  | "recipe-scale"
+  | "proportion-graph";
 
 export type ContentStatus = "draft" | "in-review" | "verified";
 
