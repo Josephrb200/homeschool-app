@@ -85,6 +85,8 @@ export function parseAnswer(raw: string): ParseResult {
     .trim()
     // Units are welcome but not needed: "24 cm²", "24cm2", "24 square metres", "24 units", "60 cm³", "60 cubic cm".
     .replace(/\s*(square\s+|sq\.?\s*|cubic\s+|cu\.?\s*)?(millimet(re|er)s?|centimet(re|er)s?|kilomet(re|er)s?|met(re|er)s?|mm|cm|km|m|units?)\s*(²|³|\^?[23]|squared|cubed)?\.?$/i, "")
+    // "35%" and "35 %" mean 35 when a percentage is asked for.
+    .replace(/\s*%$/, "")
     .replace(/[£,]/g, "")
     .replace(/[−–]/g, "-") // unicode minus and en dash
     .replace(/÷/g, "/")
@@ -122,4 +124,18 @@ export function parseAnswer(raw: string): ParseResult {
   }
 
   return { ok: false, reason: "unrecognised" };
+}
+
+/** A fraction as a decimal, like 7/20 → "0.35", when it ends within 12 places; otherwise as a fraction. */
+export function showDecimal(f: Fraction): string {
+  const s = simplify(f);
+  for (let k = 0; k <= 12; k++) {
+    if ((10 ** k) % s.d !== 0) continue;
+    const units = Math.round((Math.abs(s.n) * 10 ** k) / s.d);
+    const sign = s.n < 0 ? "-" : "";
+    if (k === 0) return sign + String(units);
+    const str = String(units).padStart(k + 1, "0");
+    return `${sign}${str.slice(0, -k)}.${str.slice(-k)}`;
+  }
+  return show(s);
 }

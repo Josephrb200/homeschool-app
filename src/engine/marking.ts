@@ -3,7 +3,7 @@
  * mathematically, and matches predictable wrong answers to misconceptions.
  */
 
-import { equals, gcd, isSimplest, parseAnswer, show, showMixed, simplify, frac, type Fraction } from "./fraction";
+import { equals, gcd, isSimplest, parseAnswer, show, showDecimal, showMixed, simplify, frac, type Fraction } from "./fraction";
 import { parseExpression, polyEquals, untidyReason, UNTIDY_FEEDBACK } from "./algebra";
 import type { MarkResult, Misconception, Question } from "./types";
 
@@ -11,7 +11,7 @@ import type { MarkResult, Misconception, Question } from "./types";
 export function answerText(q: Question): string {
   if (q.answerText) return q.answerText;
   const a = q.answer;
-  if (a.kind === "fraction") return a.form === "mixed" ? showMixed(a.value) : show(a.value);
+  if (a.kind === "fraction") return a.form === "mixed" ? showMixed(a.value) : a.form === "decimal" ? showDecimal(a.value) : show(a.value);
   if (a.kind === "integer") return String(a.value);
   if (a.kind === "expression") return a.value;
   if (a.kind === "decimal") return roundTo(a.exact, a.dp);

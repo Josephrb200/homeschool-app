@@ -33,7 +33,13 @@ export type DemoKind =
   | "substitute-swap"
   | "expand-area"
   | "function-machine"
-  | "balance-solve";
+  | "balance-solve"
+  | "place-value-chart"
+  | "decimal-columns"
+  | "rounding-line"
+  | "hundred-grid"
+  | "percent-bar"
+  | "percent-change";
 
 export type ContentStatus = "draft" | "in-review" | "verified";
 

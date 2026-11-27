@@ -43,7 +43,7 @@ export type AnswerSpec =
        * with a nudge: "mixed" wants a mixed number like 2 3/4 (or a whole number),
        * "improper" wants a top-heavy fraction like 11/4.
        */
-      form?: "mixed" | "improper";
+      form?: "mixed" | "improper" | "decimal";
     }
   | { kind: "integer"; value: number }
   /** A ratio such as 3:2 or 2:3:5. Any equivalent ratio is accepted unless requireSimplest. */

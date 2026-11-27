@@ -3,8 +3,8 @@
  * Foundation). Skill ids match the GCSE Foundation topic map.
  *
  * Prerequisites list only skills that are live in the app. The map also names
- * prerequisites that are not built yet (num-add-sub, num-rounding,
- * geo-shape-properties, geo-3d-shapes); add them here when those lessons exist.
+ * prerequisites that are not built yet (geo-shape-properties, geo-3d-shapes);
+ * add them here when those lessons exist.
  *
  * STATUS: Draft. Written by the build team; needs review by a qualified maths
  * teacher before it is marked Verified.
@@ -20,7 +20,7 @@ export const PERIMETER_SKILLS: Skill[] = [
     objective: "I can find the perimeter of rectangles and L-shapes, including sides that aren't labelled.",
     typicalYear: 7,
     gcseTier: "foundation",
-    prerequisites: [],
+    prerequisites: ["num-add-sub"],
   },
 ];
 
@@ -41,7 +41,7 @@ export const CIRCLE_SKILLS: Skill[] = [
     objective: "I can find the circumference of a circle using C = π × d, and round my answer.",
     typicalYear: 8,
     gcseTier: "foundation",
-    prerequisites: ["geo-circle-parts"],
+    prerequisites: ["geo-circle-parts", "num-rounding"],
   },
   {
     id: "geo-circle-area",
@@ -50,7 +50,7 @@ export const CIRCLE_SKILLS: Skill[] = [
     objective: "I can find the area of a circle using A = π × r², and round my answer.",
     typicalYear: 8,
     gcseTier: "foundation",
-    prerequisites: ["geo-circle-parts", "area-rectangle"],
+    prerequisites: ["geo-circle-parts", "area-rectangle", "num-rounding"],
   },
 ];
 
