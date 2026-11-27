@@ -32,7 +32,9 @@ const answerString = (q: Question) =>
         ? q.answer.value
         : q.answer.kind === "ratio"
           ? q.answer.value.join(":")
-          : String(q.answer.correctIndex);
+          : q.answer.kind === "choice"
+            ? String(q.answer.correctIndex)
+            : String(q.answer.exact);
 
 describe("parseAnswer", () => {
   it.each([

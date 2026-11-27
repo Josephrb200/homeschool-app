@@ -16,7 +16,7 @@ import {
   type PublicQuestion,
 } from "@/app/actions/learn";
 import { FractionBar } from "./FractionDemos";
-import { ShapeDiagram } from "./ShapeDiagram";
+import { Visual } from "./Visual";
 import { FunctionMachine } from "./FunctionMachine";
 import { MathText } from "./MathText";
 import { SpeakButton } from "./Speak";
@@ -62,7 +62,7 @@ export function Practice({
   const [q, setQ] = useState<PublicQuestion | null>(null);
   const [index, setIndex] = useState(0);
   const [results, setResults] = useState<RunResult[]>([]);
-  const [answer, setAnswer] = useState("");
+  const [typedAnswer, setAnswer] = useState("");
   const [hintsShown, setHintsShown] = useState(0);
   const [solution, setSolution] = useState<{ steps: string[]; answer: string } | null>(null);
   const [result, setResult] = useState<AnswerResult | null>(null);
@@ -101,8 +101,10 @@ export function Practice({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
+  async function submit(e?: React.FormEvent, picked?: string) {
+    e?.preventDefault();
+    const answer = picked ?? typedAnswer;
+    if (picked !== undefined) setAnswer(picked);
     if (!q || busy || !answer.trim()) return;
     setBusy(true);
     setError(null);
@@ -239,9 +241,9 @@ export function Practice({
             </p>
             <SpeakButton text={q.prompt} label="Hear it" auto={prefs.autoReadQuestions} />
           </div>
-          {q.visual?.kind === "shape" && (
+          {q.visual && q.visual.kind !== "bars" && q.visual.kind !== "machine" && (
             <div className="shape-wrap">
-              <ShapeDiagram shape={q.visual.shape} />
+              <Visual visual={q.visual} />
             </div>
           )}
           {q.visual?.kind === "machine" && <FunctionMachine machine={q.visual.machine} />}
@@ -253,15 +255,39 @@ export function Practice({
             </div>
           )}
 
-          <form className="answer-row" onSubmit={submit} autoComplete="off">
-            <label htmlFor="answer" className="eyebrow" style={{ width: "100%" }}>
-              Your answer
-            </label>
-            <input
+          {q.format.kind === "choice" && (
+            <div className="stack">
+              <p className="eyebrow" id="choice-label">
+                Choose your answer
+              </p>
+              <div className="choice-row" role="group" aria-labelledby="choice-label prompt">
+                {q.format.options.map((o) => (
+                  <button
+                    key={o}
+                    type="button"
+                    className="choice choice-answer"
+                    aria-pressed={typedAnswer === o}
+                    disabled={busy || (!!answered && !retrying)}
+                    onClick={() => submit(undefined, o)}
+                  >
+                    {o}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <form className="answer-row" onSubmit={submit} autoComplete="off" hidden={q.format.kind === "choice" && !allowHints && !allowSolution}>
+            {q.format.kind !== "choice" && (
+              <label htmlFor="answer" className="eyebrow" style={{ width: "100%" }}>
+                Your answer
+              </label>
+            )}
+            {q.format.kind !== "choice" && <input
               id="answer"
               ref={input}
               className="answer-input"
-              value={answer}
+              value={typedAnswer}
               onChange={(e) => setAnswer(e.target.value)}
               disabled={!!answered && !retrying}
               aria-describedby="prompt answer-help"
@@ -269,9 +295,9 @@ export function Practice({
               autoCapitalize="off"
               autoCorrect="off"
               spellCheck={false}
-            />
-            {(!answered || retrying) && (
-              <button className="btn btn-primary" type="submit" disabled={busy || !answer.trim()}>
+            />}
+            {q.format.kind !== "choice" && (!answered || retrying) && (
+              <button className="btn btn-primary" type="submit" disabled={busy || !typedAnswer.trim()}>
                 Check
               </button>
             )}
@@ -287,11 +313,15 @@ export function Practice({
             )}
           </form>
           <p id="answer-help" className="hint">
-            {q.answerHelp
-              ? q.answerHelp
-              : q.visual?.kind === "shape"
-              ? "Type a number like 24 or 7.5. Units like cm² are fine but not needed."
-              : "Type a whole number like 12, a fraction like 3/4, or a mixed number like 1 1/2."}
+            {q.format.kind === "choice"
+              ? "Press the answer you think is right."
+              : q.answerHelp
+                ? q.answerHelp
+                : q.format.kind === "decimal"
+                  ? `Use the π button on your calculator, then round to ${q.format.dp} decimal place${q.format.dp === 1 ? "" : "s"}, like 28.3. Units are fine but not needed.`
+                  : q.visual && q.visual.kind !== "bars" && q.visual.kind !== "machine"
+                    ? "Type a number like 24 or 7.5. Units like cm, cm² or cm³ are fine but not needed."
+                    : "Type a whole number like 12, a fraction like 3/4, or a mixed number like 1 1/2."}
             {mode === "check" && " This is a skill check, so there are no hints. Answers are explained at the end."}
           </p>
 
@@ -345,7 +375,7 @@ export function Practice({
                   </li>
                 ))}
               </ol>
-              {!answered && <p className="hint">Now type the answer yourself. Answers after seeing the solution count as practice with help.</p>}
+              {!answered && <p className="hint">{q.format.kind === "choice" ? "Now choose the answer yourself." : "Now type the answer yourself."} Answers after seeing the solution count as practice with help.</p>}
             </div>
           )}
 

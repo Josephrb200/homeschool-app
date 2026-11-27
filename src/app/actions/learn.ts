@@ -17,6 +17,8 @@ export interface PublicQuestion {
   prompt: string;
   visual?: Question["visual"];
   hints: string[];
+  /** Tells the app which answer box to show. Never includes the answer. */
+  format: { kind: "typed" } | { kind: "decimal"; dp: number } | { kind: "choice"; options: string[] };
   answerHelp?: string;
 }
 
@@ -27,7 +29,13 @@ async function requireStudent() {
 }
 
 function publicPart(q: Question): PublicQuestion {
-  return { id: q.id, skillId: q.skillId, prompt: q.prompt, visual: q.visual, hints: q.hints, answerHelp: q.answerHelp };
+  const format: PublicQuestion["format"] =
+    q.answer.kind === "choice"
+      ? { kind: "choice", options: q.answer.options }
+      : q.answer.kind === "decimal"
+        ? { kind: "decimal", dp: q.answer.dp }
+        : { kind: "typed" };
+  return { id: q.id, skillId: q.skillId, prompt: q.prompt, visual: q.visual, hints: q.hints, format, answerHelp: q.answerHelp };
 }
 
 export async function nextQuestion(skillId: string, tier: Tier): Promise<PublicQuestion> {
