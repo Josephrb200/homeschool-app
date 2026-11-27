@@ -131,7 +131,8 @@ describe("ratio content", () => {
     }
     for (const m of Object.values(MC)) if (m.pointsTo) expect(SKILL_BY_ID[m.pointsTo]).toBeDefined();
     expect(MISCONCEPTIONS["ratio-reversed"]).toBeDefined();
-    expect(CHAINS.find((c) => c.id === "ratio")?.skillIds).toEqual(RATIO_SKILLS.map((s) => s.id));
+    // Scale drawings and inverse proportion (built later) follow on at the end.
+    expect(CHAINS.find((c) => c.id === "ratio")?.skillIds.slice(0, RATIO_SKILLS.length)).toEqual(RATIO_SKILLS.map((s) => s.id));
   });
 
   it("ratio skills unlock from the fractions chain while number skills aren't built", () => {
