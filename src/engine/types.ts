@@ -38,6 +38,12 @@ export type AnswerSpec =
       value: Fraction;
       /** If true, an equivalent but unsimplified answer is marked "not simplified". */
       requireSimplest: boolean;
+      /**
+       * If set, the right amount typed in another form is marked "not-simplified"
+       * with a nudge: "mixed" wants a mixed number like 2 3/4 (or a whole number),
+       * "improper" wants a top-heavy fraction like 11/4.
+       */
+      form?: "mixed" | "improper";
     }
   | { kind: "integer"; value: number }
   /**

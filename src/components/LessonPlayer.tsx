@@ -17,6 +17,8 @@ import { Demo } from "./Demos";
 import { ShapeDiagram } from "./ShapeDiagram";
 import { Visual } from "./Visual";
 import type { ShapeSpec, Visual as VisualSpec } from "@/engine/types";
+import type { Fraction } from "@/engine/fraction";
+import { FractionBars } from "./FractionDemos";
 import { Level } from "./Level";
 import { MathText } from "./MathText";
 import { Practice, type RunResult } from "./Practice";
@@ -140,7 +142,7 @@ export function LessonPlayer({ skill, lesson, startStage, level: initialLevel, p
             <Demo kind={lesson.teaching.demo} />
             <h3>Worked examples</h3>
             {lesson.teaching.examples.map((ex) => (
-              <WorkedExample key={ex.question} question={ex.question} steps={ex.steps} shape={ex.shape} visual={ex.visual} />
+              <WorkedExample key={ex.question} question={ex.question} steps={ex.steps} shape={ex.shape} visual={ex.visual} bars={ex.bars} />
             ))}
             <div>
               <button className="btn btn-primary" onClick={() => finish("teaching")}>
@@ -181,7 +183,7 @@ export function LessonPlayer({ skill, lesson, startStage, level: initialLevel, p
   );
 }
 
-function WorkedExample({ question, steps, shape, visual }: { question: string; steps: string[]; shape?: ShapeSpec; visual?: VisualSpec }) {
+function WorkedExample({ question, steps, shape, visual, bars }: { question: string; steps: string[]; shape?: ShapeSpec; visual?: VisualSpec; bars?: Fraction[] }) {
   const [shown, setShown] = useState(1);
   return (
     <div className="panel-sunk stack">
@@ -190,6 +192,13 @@ function WorkedExample({ question, steps, shape, visual }: { question: string; s
       </p>
       {shape && <ShapeDiagram shape={shape} maxWidth={360} maxHeight={220} />}
       {visual && <Visual visual={visual} compact />}
+      {bars && (
+        <div className="stack optional">
+          {bars.map((b, i) => (
+            <FractionBars key={i} f={b} width={360} />
+          ))}
+        </div>
+      )}
       <ol className="solution" aria-live="polite">
         {steps.slice(0, shown).map((s, i) => (
           <li key={i}>
