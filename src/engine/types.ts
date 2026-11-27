@@ -198,6 +198,7 @@ export type Visual =
   | { kind: "panels"; panels: { label: string; visual: Visual }[]; description: string }
   | { kind: "numberline"; line: NumberLineSpec }
   | { kind: "graph"; graph: GraphSpec }
+  | { kind: "tree"; tree: TreeSpec }
   | { kind: "protractor"; protractor: ProtractorSpec }
   | { kind: "cubes"; cubes: CubeStackSpec };
 
@@ -269,6 +270,36 @@ export interface GraphAxis {
   labelStep?: number;
   /** Axis title, e.g. "Time (minutes)". Defaults to the letter x or y. */
   label?: string;
+}
+
+/**
+ * A tree diagram, drawn left to right with two stages.
+ * Frequency trees put a count in every box (the starting box holds `root`).
+ * Probability trees write a probability on each branch and leave out `root`.
+ * "?" marks a value to find.
+ */
+export interface TreeSpec {
+  /** The count in the starting box (frequency trees). Left out for probability trees. */
+  root?: string;
+  /** First-stage branches, top to bottom. Each has its own second-stage branches. */
+  branches: TreeNode[];
+  /** Headings over each stage, e.g. ["First counter", "Second counter"]. */
+  stages?: [string, string];
+  /** Leaves (numbered top to bottom from 0) whose whole route is drawn bold. */
+  highlight?: number[];
+  description: string;
+}
+
+export interface TreeNode {
+  /** What happened, e.g. "Red" or "Adults". */
+  label: string;
+  /** A count shown under the label (frequency trees). */
+  count?: string;
+  /** The probability written on the branch leading here, e.g. "3/10" or "0.4". */
+  p?: string;
+  children?: TreeNode[];
+  /** Text after a leaf, e.g. "Red, Blue". */
+  end?: string;
 }
 
 
@@ -478,6 +509,21 @@ export type ChartSpec =
       yStep: number;
       /** Letters to write beside some points, by index. */
       letters?: { i: number; text: string }[];
+      /** One point circled, by index. */
+      highlight?: number;
+      /** Straight lines drawn across the graph (a line of best fit), in axis units, each with an optional letter. */
+      fits?: { from: [number, number]; to: [number, number]; label?: string }[];
+      description: string;
+    }
+  | {
+      /** A line graph or time series: points joined by straight lines, equally spaced along the bottom. */
+      type: "line";
+      labels: string[];
+      values: number[];
+      xLabel: string;
+      yLabel: string;
+      /** Gap between labelled gridlines (dashed half-way lines appear when it is even). */
+      yStep: number;
       /** One point circled, by index. */
       highlight?: number;
       description: string;

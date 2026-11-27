@@ -70,6 +70,7 @@ export function speakable(text: string) {
     .replace(/\s<\s/g, " is less than ")
     .replace(/\s>\s/g, " is greater than ")
     .replace(/≡/g, " is identical to ")
+    .replace(/\s*≈\s*/g, " is approximately ")
     .replace(/×/g, " times ")
     .replace(/÷/g, " divided by ")
     .replace(/£(\d+)/g, "$1 pounds")
