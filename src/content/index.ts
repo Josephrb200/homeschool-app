@@ -10,6 +10,8 @@ import { CIRCLE_SKILLS, MEASURES_MISCONCEPTIONS, MEASURES_SKILLS, PERIMETER_SKIL
 import { MEASURES_LESSONS } from "./maths/measures/lessons";
 import { ALGEBRA_MISCONCEPTIONS, ALGEBRA_SKILLS } from "./maths/algebra/skills";
 import { ALGEBRA_LESSONS } from "./maths/algebra/lessons";
+import { EXPRESSION_MISCONCEPTIONS, EXPRESSION_SKILLS } from "./maths/expressions/skills";
+import { EXPRESSION_LESSONS } from "./maths/expressions/lessons";
 import { DECIMAL_MISCONCEPTIONS, DECIMAL_SKILLS } from "./maths/decimals/skills";
 import { DECIMAL_LESSONS } from "./maths/decimals/lessons";
 import { PERCENT_MISCONCEPTIONS, PERCENT_SKILLS } from "./maths/percentages/skills";
@@ -26,10 +28,12 @@ import { POWERS_MISCONCEPTIONS, POWERS_SKILLS } from "./maths/powers/skills";
 import { POWERS_LESSONS } from "./maths/powers/lessons";
 import { ANGLE_MISCONCEPTIONS, ANGLE_SKILLS } from "./maths/angles/skills";
 import { ANGLE_LESSONS } from "./maths/angles/lessons";
+import { SHAPE_PROOF_SKILLS, TRIANGLE_MISCONCEPTIONS, TRIANGLE_SKILLS, TRIG_SKILLS } from "./maths/triangles/skills";
+import { TRIANGLE_LESSONS } from "./maths/triangles/lessons";
 import type { Skill } from "@/engine/types";
 
 /** Every skill exactly as its chain writes it (prerequisites copy the topic map). */
-const ALL_SKILLS: Skill[] = [...AREA_SKILLS, ...FRACTION_SKILLS, ...MEASURES_SKILLS, ...ALGEBRA_SKILLS, ...RATIO_SKILLS, ...DECIMAL_SKILLS, ...PERCENT_SKILLS, ...FACTOR_SKILLS, ...STATS_SKILLS, ...PROBABILITY_SKILLS, ...POWERS_SKILLS, ...ANGLE_SKILLS];
+const ALL_SKILLS: Skill[] = [...AREA_SKILLS, ...FRACTION_SKILLS, ...MEASURES_SKILLS, ...ALGEBRA_SKILLS, ...EXPRESSION_SKILLS, ...RATIO_SKILLS, ...DECIMAL_SKILLS, ...PERCENT_SKILLS, ...FACTOR_SKILLS, ...STATS_SKILLS, ...PROBABILITY_SKILLS, ...POWERS_SKILLS, ...ANGLE_SKILLS, ...TRIANGLE_SKILLS];
 const LIVE_IDS = new Set(ALL_SKILLS.map((s) => s.id));
 
 /**
@@ -38,8 +42,8 @@ const LIVE_IDS = new Set(ALL_SKILLS.map((s) => s.id));
  */
 export const SKILLS: Skill[] = ALL_SKILLS.map((s) => ({ ...s, prerequisites: s.prerequisites.filter((p) => LIVE_IDS.has(p)) }));
 export const SKILL_BY_ID: Record<string, Skill> = Object.fromEntries(SKILLS.map((s) => [s.id, s]));
-export const MISCONCEPTIONS = { ...FRACTION_MISCONCEPTIONS, ...AREA_MISCONCEPTIONS, ...MEASURES_MISCONCEPTIONS, ...ALGEBRA_MISCONCEPTIONS, ...RATIO_MISCONCEPTIONS, ...DECIMAL_MISCONCEPTIONS, ...PERCENT_MISCONCEPTIONS, ...FACTOR_MISCONCEPTIONS, ...STATS_MISCONCEPTIONS, ...PROBABILITY_MISCONCEPTIONS, ...POWERS_MISCONCEPTIONS, ...ANGLE_MISCONCEPTIONS };
-export const LESSONS = { ...FRACTION_LESSONS, ...AREA_LESSONS, ...MEASURES_LESSONS, ...ALGEBRA_LESSONS, ...RATIO_LESSONS, ...DECIMAL_LESSONS, ...PERCENT_LESSONS, ...FACTOR_LESSONS, ...STATS_LESSONS, ...PROBABILITY_LESSONS, ...POWERS_LESSONS, ...ANGLE_LESSONS };
+export const MISCONCEPTIONS = { ...FRACTION_MISCONCEPTIONS, ...AREA_MISCONCEPTIONS, ...MEASURES_MISCONCEPTIONS, ...ALGEBRA_MISCONCEPTIONS, ...EXPRESSION_MISCONCEPTIONS, ...RATIO_MISCONCEPTIONS, ...DECIMAL_MISCONCEPTIONS, ...PERCENT_MISCONCEPTIONS, ...FACTOR_MISCONCEPTIONS, ...STATS_MISCONCEPTIONS, ...PROBABILITY_MISCONCEPTIONS, ...POWERS_MISCONCEPTIONS, ...ANGLE_MISCONCEPTIONS, ...TRIANGLE_MISCONCEPTIONS };
+export const LESSONS = { ...FRACTION_LESSONS, ...AREA_LESSONS, ...MEASURES_LESSONS, ...ALGEBRA_LESSONS, ...EXPRESSION_LESSONS, ...RATIO_LESSONS, ...DECIMAL_LESSONS, ...PERCENT_LESSONS, ...FACTOR_LESSONS, ...STATS_LESSONS, ...PROBABILITY_LESSONS, ...POWERS_LESSONS, ...ANGLE_LESSONS, ...TRIANGLE_LESSONS };
 
 export const CHAINS = [
   {
@@ -50,10 +54,13 @@ export const CHAINS = [
     skillIds: [...PERIMETER_SKILLS, ...AREA_SKILLS].map((s) => s.id),
   },
   { id: "angles", subject: "Maths", strand: "Geometry", name: "Angles and shapes", skillIds: ANGLE_SKILLS.map((s) => s.id) },
+  { id: "trigonometry", subject: "Maths", strand: "Geometry", name: "Pythagoras and trigonometry", skillIds: TRIG_SKILLS.map((s) => s.id) },
+  { id: "congruence-similarity", subject: "Maths", strand: "Geometry", name: "Congruence and similarity", skillIds: SHAPE_PROOF_SKILLS.map((s) => s.id) },
   { id: "circles", subject: "Maths", strand: "Geometry", name: "Circles", skillIds: CIRCLE_SKILLS.map((s) => s.id) },
   { id: "volume", subject: "Maths", strand: "Geometry", name: "Volume and surface area", skillIds: VOLUME_SKILLS.map((s) => s.id) },
   { id: "fractions", subject: "Maths", strand: "Number", name: "Fractions", skillIds: FRACTION_SKILLS.map((s) => s.id) },
   { id: "algebra", subject: "Maths", strand: "Algebra", name: "Starting algebra", skillIds: ALGEBRA_SKILLS.map((s) => s.id) },
+  { id: "expressions", subject: "Maths", strand: "Algebra", name: "Expressions and brackets", skillIds: EXPRESSION_SKILLS.map((s) => s.id) },
   { id: "ratio", subject: "Maths", strand: "Ratio", name: "Ratio and proportion", skillIds: RATIO_SKILLS.map((s) => s.id) },
   { id: "factors", subject: "Maths", strand: "Number", name: "Factors and primes", skillIds: FACTOR_SKILLS.map((s) => s.id) },
   { id: "decimals", subject: "Maths", strand: "Number", name: "Decimals and rounding", skillIds: DECIMAL_SKILLS.map((s) => s.id) },

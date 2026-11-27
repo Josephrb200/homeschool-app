@@ -18,9 +18,17 @@ import {
 import { FractionBar } from "./FractionDemos";
 import { Visual } from "./Visual";
 import { FunctionMachine } from "./FunctionMachine";
+import { GraphDiagram } from "./GraphDiagram";
+import { parsePoint, showPoint } from "@/engine/point";
 import { MathText } from "./MathText";
 import { SpeakButton } from "./Speak";
 import { usePrefs } from "./PrefsProvider";
+
+/** The point typed so far, if it is a whole-number point, so the grid can show it. */
+function pickedPoint(typed: string): [number, number] | null {
+  const p = parsePoint(typed);
+  return p && p[0].d === 1 && p[1].d === 1 ? [p[0].n, p[1].n] : null;
+}
 
 export type Mode = "guided" | "independent" | "check" | "review";
 
@@ -177,7 +185,7 @@ export function Practice({
           {finished.map((f, i) => (
             <li key={f.id}>
               <p>
-                <MathText text={f.prompt} /> {results[i]?.correct ? "(correct)" : `(answer: ${f.answer})`}
+                <MathText text={f.prompt} /> {results[i]?.correct ? "(correct)" : <MathText text={`(answer: ${f.answer})`} />}
               </p>
               {!results[i]?.correct && (
                 <ol className="solution small muted">
@@ -241,10 +249,23 @@ export function Practice({
             </p>
             <SpeakButton text={q.prompt} label="Hear it" auto={prefs.autoReadQuestions} />
           </div>
-          {q.visual && q.visual.kind !== "bars" && q.visual.kind !== "machine" && (
+          {q.visual?.kind === "graph" && q.visual.graph.pick ? (
             <div className="shape-wrap">
-              <Visual visual={q.visual} />
+              <GraphDiagram
+                key={q.id}
+                graph={q.visual.graph}
+                picked={pickedPoint(typedAnswer)}
+                onPick={answered && !retrying ? undefined : (p) => setAnswer(showPoint(p))}
+              />
             </div>
+          ) : (
+            q.visual &&
+            q.visual.kind !== "bars" &&
+            q.visual.kind !== "machine" && (
+              <div className="shape-wrap">
+                <Visual visual={q.visual} />
+              </div>
+            )
           )}
           {q.visual?.kind === "machine" && <FunctionMachine machine={q.visual.machine} />}
           {q.visual?.kind === "bars" && mode !== "check" && (

@@ -34,6 +34,12 @@ export type DemoKind =
   | "expand-area"
   | "function-machine"
   | "balance-solve"
+  | "vocab-sorter"
+  | "factorise-area"
+  | "index-laws-expand"
+  | "double-grid"
+  | "factor-pair-finder"
+  | "identity-tester"
   | "place-value-chart"
   | "decimal-columns"
   | "rounding-line"
@@ -76,7 +82,13 @@ export type DemoKind =
   | "shape-sorter"
   | "triangle-sum"
   | "parallel-lines"
-  | "polygon-split";
+  | "polygon-split"
+  | "pythagoras-squares"
+  | "trig-ratio-explore"
+  | "trig-angle-finder"
+  | "exact-trig-triangles"
+  | "congruence-tests"
+  | "similar-scale";
 
 export type ContentStatus = "draft" | "in-review" | "verified";
 

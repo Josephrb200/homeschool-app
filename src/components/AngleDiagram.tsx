@@ -43,22 +43,40 @@ export function AngleDiagram({ spec, maxWidth = 420, maxHeight = 280 }: { spec: 
   const maxY = Math.max(...ys);
   const w = maxX - minX || 1;
   const h = maxY - minY || 1;
-  const scale = Math.min((maxWidth - 2 * PAD) / w, (maxHeight - 2 * PAD) / h);
-  const vbW = w * scale + 2 * PAD;
+  // Length labels beside upright sides stick out sideways: leave room for the longest one.
+  const padX = PAD + Math.max(0, ...(spec.lengths ?? []).map((l) => l.text.length * 6.5));
+  const scale = Math.min((maxWidth - 2 * padX) / w, (maxHeight - 2 * PAD) / h);
+  const vbW = w * scale + 2 * padX;
   const vbH = h * scale + 2 * PAD;
   const S = (name: string): V => {
     const p = spec.points[name];
     if (!p) throw new Error(`AngleDiagram: no point ${name}`);
-    return [PAD + (p[0] - minX) * scale, PAD + (maxY - p[1]) * scale];
+    return [padX + (p[0] - minX) * scale, PAD + (maxY - p[1]) * scale];
   };
 
-  // Centre used to push point letters outward.
-  const ref = (spec.polygon ?? Object.keys(spec.points)).map(S);
-  const centre: V = [ref.reduce((s, p) => s + p[0], 0) / ref.length, ref.reduce((s, p) => s + p[1], 0) / ref.length];
+  // Centre used to push point letters and length labels outward.
+  const centroid = (names: string[]): V => {
+    const ref = names.map(S);
+    return [ref.reduce((s, p) => s + p[0], 0) / ref.length, ref.reduce((s, p) => s + p[1], 0) / ref.length];
+  };
+  const shapes = [...(spec.polygon ? [spec.polygon] : []), ...(spec.polygons ?? [])];
+  const allCentre = centroid(spec.polygon ?? Object.keys(spec.points));
+  /** The centre of the shape these points belong to (the one holding most of them), so labels go outside it. */
+  const centreFor = (...names: string[]): V => {
+    let best: string[] | undefined;
+    let most = 0;
+    for (const sh of shapes) {
+      const n = names.filter((x) => sh.includes(x)).length;
+      if (n > most) [best, most] = [sh, n];
+    }
+    return best ? centroid(best) : allCentre;
+  };
 
   return (
     <svg viewBox={`0 0 ${vbW} ${vbH}`} width="100%" style={{ maxWidth: vbW }} role="img" aria-label={spec.description} className="shape-diagram angle-diagram">
-      {spec.polygon && <polygon points={spec.polygon.map((n) => S(n).join(",")).join(" ")} fill="var(--accent-soft)" stroke="none" />}
+      {shapes.map((sh, k) => (
+        <polygon key={`poly${k}`} points={sh.map((n) => S(n).join(",")).join(" ")} fill="var(--accent-soft)" stroke="none" />
+      ))}
 
       {spec.angles.map((m, k) => {
         const at = S(m.at);
@@ -164,6 +182,7 @@ export function AngleDiagram({ spec, maxWidth = 420, maxHeight = 280 }: { spec: 
         const u = unit(sub(q, p));
         let n: V = [-u[1], u[0]];
         const m = mul(add(p, q), 0.5);
+        const centre = centreFor(t.a, t.b);
         if ((m[0] - centre[0]) * n[0] + (m[1] - centre[1]) * n[1] < 0) n = mul(n, -1);
         const at = add(m, mul(n, 18 + 3 * t.text.length * Math.abs(n[0])));
         return <Label key={`l${k}`} x={at[0]} y={at[1]} text={t.text} />;
@@ -176,7 +195,7 @@ export function AngleDiagram({ spec, maxWidth = 420, maxHeight = 280 }: { spec: 
 
       {spec.labels?.map((name) => {
         const p = S(name);
-        let dir = sub(p, centre);
+        let dir = sub(p, centreFor(name));
         if (Math.hypot(dir[0], dir[1]) < 1) dir = [-1, -1];
         const at = add(p, mul(unit(dir), 18));
         return <Label key={`p${name}`} x={at[0]} y={at[1]} text={name} italic />;
