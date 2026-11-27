@@ -15,12 +15,13 @@ import { POWERS_DEMOS } from "./PowersDemos";
 import { ANGLE_DEMOS } from "./AngleDemos";
 import { TRANSFORM_DEMOS } from "./TransformDemos";
 import { TRIANGLE_DEMOS } from "./TriangleDemos";
+import { VECTOR_DEMOS } from "./VectorDemos";
 import { CALCULATION_DEMOS } from "./CalculationDemos";
 import { STATS_MORE_DEMOS } from "./StatsMoreDemos";
 import { TREE_DEMOS } from "./TreeDemos";
 
 
-const DEMOS: Record<DemoKind, () => React.ReactNode> = { ...FRACTION_DEMOS, ...AREA_DEMOS, ...MEASURES_DEMOS, ...ALGEBRA_DEMOS, ...EXPRESSION_DEMOS, ...RATIO_DEMOS, ...DECIMAL_DEMOS, ...FACTOR_DEMOS, ...STATS_DEMOS, ...PROBABILITY_DEMOS, ...POWERS_DEMOS, ...ANGLE_DEMOS, ...TRIANGLE_DEMOS, ...TRANSFORM_DEMOS, ...CALCULATION_DEMOS, ...STATS_MORE_DEMOS, ...TREE_DEMOS };
+const DEMOS: Record<DemoKind, () => React.ReactNode> = { ...FRACTION_DEMOS, ...AREA_DEMOS, ...MEASURES_DEMOS, ...ALGEBRA_DEMOS, ...EXPRESSION_DEMOS, ...RATIO_DEMOS, ...DECIMAL_DEMOS, ...FACTOR_DEMOS, ...STATS_DEMOS, ...PROBABILITY_DEMOS, ...POWERS_DEMOS, ...ANGLE_DEMOS, ...TRIANGLE_DEMOS, ...TRANSFORM_DEMOS, ...CALCULATION_DEMOS, ...STATS_MORE_DEMOS, ...TREE_DEMOS, ...VECTOR_DEMOS };
 
 export function Demo({ kind }: { kind: DemoKind }) {
   const C = DEMOS[kind];
