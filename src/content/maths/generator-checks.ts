@@ -43,13 +43,14 @@ export function checkQuestion(q: Question) {
     case "expression": {
       const want = parseExpression(a.value);
       expect(want.ok, a.value).toBe(true);
-      expectRight(a.value);
-      expectRight(ascii(a.value));
+      const pre = a.lhs ? `${a.lhs} = ` : "";
+      expectRight(pre + a.value);
+      expectRight(ascii(pre + a.value));
       for (const w of q.wrongExpressions ?? []) {
         mc(w.misconception);
         const p = parseExpression(w.value);
         expect(p.ok && want.ok && !polyEquals(p.poly, want.poly), `${q.prompt}: wrong "${w.value}" equals the answer`).toBe(true);
-        expectWrong(w.value, w.misconception);
+        expectWrong(pre + w.value, w.misconception);
       }
       break;
     }

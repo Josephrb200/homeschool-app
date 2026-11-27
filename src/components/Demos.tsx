@@ -7,6 +7,7 @@ import { DECIMAL_DEMOS } from "./DecimalDemos";
 import { MEASURES_DEMOS } from "./MeasuresDemos";
 import { ALGEBRA_DEMOS } from "./AlgebraDemos";
 import { EXPRESSION_DEMOS } from "./ExpressionDemos";
+import { EQUATION_DEMOS } from "./EquationDemos";
 import { RATIO_DEMOS } from "./RatioDemos";
 import { PROBABILITY_DEMOS } from "./ProbabilityDemos";
 import { FACTOR_DEMOS } from "./FactorDemos";
@@ -14,7 +15,7 @@ import { STATS_DEMOS } from "./StatsDemos";
 import { POWERS_DEMOS } from "./PowersDemos";
 import { ANGLE_DEMOS } from "./AngleDemos";
 
-const DEMOS: Record<DemoKind, () => React.ReactNode> = { ...FRACTION_DEMOS, ...AREA_DEMOS, ...MEASURES_DEMOS, ...ALGEBRA_DEMOS, ...EXPRESSION_DEMOS, ...RATIO_DEMOS, ...DECIMAL_DEMOS, ...FACTOR_DEMOS, ...STATS_DEMOS, ...PROBABILITY_DEMOS, ...POWERS_DEMOS, ...ANGLE_DEMOS };
+const DEMOS: Record<DemoKind, () => React.ReactNode> = { ...FRACTION_DEMOS, ...AREA_DEMOS, ...MEASURES_DEMOS, ...ALGEBRA_DEMOS, ...EXPRESSION_DEMOS, ...EQUATION_DEMOS, ...RATIO_DEMOS, ...DECIMAL_DEMOS, ...FACTOR_DEMOS, ...STATS_DEMOS, ...PROBABILITY_DEMOS, ...POWERS_DEMOS, ...ANGLE_DEMOS };
 
 export function Demo({ kind }: { kind: DemoKind }) {
   const C = DEMOS[kind];
