@@ -67,7 +67,19 @@ export type DemoKind =
   | "shape-sorter"
   | "triangle-sum"
   | "parallel-lines"
-  | "polygon-split";
+  | "polygon-split"
+  | "coordinate-explorer"
+  | "line-table-plot"
+  | "real-life-reader"
+  | "gradient-explorer"
+  | "parallel-lines-graph"
+  | "quadratic-explorer"
+  | "graph-families"
+  | "solve-with-graphs"
+  | "sequence-builder"
+  | "special-sequences-dots"
+  | "nth-term-builder"
+  | "other-sequences-explorer";
 
 export type ContentStatus = "draft" | "in-review" | "verified";
 

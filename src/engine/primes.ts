@@ -82,14 +82,17 @@ export function parseList(raw: string): number[] | null {
     .trim()
     .replace(/[{}[\]().]+$/g, "")
     .replace(/^[{}[\]()]+/g, "")
-    .replace(/\band\b/gi, ",")
+    .replace(/\b(and|or)\b/gi, ",")
+    // Solutions of equations: "x = −1, x = 3".
+    .replace(/\bx\s*=\s*/gi, "")
+    .replace(/[−–]/g, "-")
     .replace(/[;&]/g, ",");
   if (!s) return null;
   const parts = s.split(/[\s,]+/).filter(Boolean);
   if (parts.length === 0) return null;
   const out: number[] = [];
   for (const p of parts) {
-    if (!/^\d+$/.test(p)) return null;
+    if (!/^-?\d+$/.test(p)) return null;
     out.push(Number(p));
   }
   return out;
