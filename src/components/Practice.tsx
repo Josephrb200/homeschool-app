@@ -291,7 +291,7 @@ export function Practice({
                     disabled={busy || (!!answered && !retrying)}
                     onClick={() => submit(undefined, o)}
                   >
-                    {o}
+                    <MathText text={o} />
                   </button>
                 ))}
               </div>
