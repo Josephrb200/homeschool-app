@@ -74,6 +74,17 @@ export type DemoKind =
   | "triangle-sum"
   | "parallel-lines"
   | "polygon-split"
+  | "reflect-explore"
+  | "rotate-explore"
+  | "translate-explore"
+  | "enlarge-explore"
+  | "describe-sort"
+  | "pythagoras-squares"
+  | "trig-ratio-explore"
+  | "trig-angle-finder"
+  | "exact-trig-triangles"
+  | "congruence-tests"
+  | "similar-scale"
   | "decimal-compare"
   | "grid-multiply"
   | "bus-stop-division"
@@ -82,13 +93,7 @@ export type DemoKind =
   | "estimate-compare"
   | "error-interval-line"
   | "listing-grid"
-  | "sf-multiply"
-  | "pythagoras-squares"
-  | "trig-ratio-explore"
-  | "trig-angle-finder"
-  | "exact-trig-triangles"
-  | "congruence-tests"
-  | "similar-scale";
+  | "sf-multiply";
 
 export type ContentStatus = "draft" | "in-review" | "verified";
 

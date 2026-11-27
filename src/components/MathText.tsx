@@ -4,10 +4,20 @@
  */
 export function MathText({ text }: { text: string }) {
   // A root on top is part of the fraction: √3/2 is "root 3, over 2".
-  const parts = text.split(/((?:√?\d+|\?)\/(?:\d+|\?))/g);
+  const parts = text.split(/((?:√?\d+|\?)\/(?:\d+|\?)|vec\([^,()]+,[^,()]+\))/g);
   return (
     <>
       {parts.map((p, i) => {
+        const v = VEC.exec(p);
+        if (v) {
+          const [top, bottom] = [v[1].trim(), v[2].trim()];
+          return (
+            <span key={i} className="colvec" role="img" aria-label={`column vector ${speakable(top)}, ${speakable(bottom)}`}>
+              <span aria-hidden="true">{top}</span>
+              <span aria-hidden="true">{bottom}</span>
+            </span>
+          );
+        }
         const m = /^(√?\d+|\?)\/(\d+|\?)$/.exec(p);
         if (!m) return <span key={i}>{p}</span>;
         return (
@@ -20,6 +30,9 @@ export function MathText({ text }: { text: string }) {
     </>
   );
 }
+
+/** A column vector, written vec(3,−2) in text: top number, then bottom number. */
+const VEC = /^vec\(([^,()]+),([^,()]+)\)$/;
 
 const SUPERSCRIPT = "⁰¹²³⁴⁵⁶⁷⁸⁹";
 
@@ -35,6 +48,7 @@ function speakPower(p: string): string {
 /** Text for speech: "3/4" becomes "3 over 4", "−" becomes "minus", "−3" becomes "negative 3", "7²" becomes "7 squared". */
 export function speakable(text: string) {
   return text
+    .replace(/vec\(([^,()]+),\s*([^,()]+)\)/g, "column vector $1, $2")
     // Trigonometry: "sin⁻¹" is "inverse sine"; "sin" is said "sine", not "sin".
     .replace(/\b(sin|cos|tan)⁻¹/g, (_, f: string) => `inverse ${f === "sin" ? "sine" : f}`)
     .replace(/\bsin\b/g, "sine")
@@ -44,7 +58,7 @@ export function speakable(text: string) {
     .replace(/∛/g, "the cube root of ")
     .replace(/⁻?[⁰¹²³⁴⁵⁶⁷⁸⁹ⁿ]+/g, speakPower)
     // A minus sign stuck to a number (no space after it) is a negative number.
-    .replace(/(^|[\s(])−(?=\d)/g, "$1negative ")
+    .replace(/(^|[\s(,])−(?=\d)/g, "$1negative ")
     .replace(/\?\/(\d+)/g, "blank over $1")
     .replace(/(\d+)\/\?/g, "$1 over blank")
     .replace(/(\d+)\/(\d+)/g, "$1 over $2")
