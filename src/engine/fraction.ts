@@ -83,8 +83,8 @@ export type ParseResult =
 export function parseAnswer(raw: string): ParseResult {
   const s = raw
     .trim()
-    // Units are welcome but not needed: "24 cm²", "24cm2", "24 square metres", "24 units".
-    .replace(/\s*(square\s+|sq\.?\s*)?(millimet(re|er)s?|centimet(re|er)s?|kilomet(re|er)s?|met(re|er)s?|mm|cm|km|m|units?)\s*(²|\^?2|squared)?\.?$/i, "")
+    // Units are welcome but not needed: "24 cm²", "24cm2", "24 square metres", "24 units", "60 cm³", "60 cubic cm".
+    .replace(/\s*(square\s+|sq\.?\s*|cubic\s+|cu\.?\s*)?(millimet(re|er)s?|centimet(re|er)s?|kilomet(re|er)s?|met(re|er)s?|mm|cm|km|m|units?)\s*(²|³|\^?[23]|squared|cubed)?\.?$/i, "")
     .replace(/[£,]/g, "")
     .replace(/[−–]/g, "-") // unicode minus and en dash
     .replace(/÷/g, "/")

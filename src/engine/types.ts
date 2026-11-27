@@ -40,6 +40,12 @@ export type AnswerSpec =
       requireSimplest: boolean;
     }
   | { kind: "integer"; value: number }
+  /**
+   * A rounded answer, e.g. a circle's area to 1 decimal place. `exact` is the
+   * true value. Marking accepts the correctly rounded value, and also answers
+   * that come from using 3.14 for π (as GCSE mark schemes do).
+   */
+  | { kind: "decimal"; exact: number; dp: number }
   | { kind: "choice"; options: string[]; correctIndex: number };
 
 export interface Question {
@@ -48,8 +54,8 @@ export interface Question {
   skillId: SkillId;
   /** Plain text prompt. Fractions written as a/b; the UI renders them stacked. */
   prompt: string;
-  /** Optional visual: fraction bars, or a labelled shape diagram. */
-  visual?: { kind: "bars"; bars: Fraction[] } | { kind: "shape"; shape: ShapeSpec };
+  /** Optional visual: fraction bars, a labelled shape, a circle or a 3D solid. */
+  visual?: Visual;
   answer: AnswerSpec;
   /** Predicted wrong answers mapped to misconceptions (string form, compared exactly after parsing). */
   wrongAnswers: { value: Fraction | number; misconception: MisconceptionId }[];
@@ -75,6 +81,48 @@ export interface ShapeSpec {
   /** Words for screen readers, e.g. "A triangle with base 8 cm and perpendicular height 5 cm." */
   description: string;
 }
+
+export type Visual =
+  | { kind: "bars"; bars: Fraction[] }
+  | { kind: "shape"; shape: ShapeSpec }
+  | { kind: "circle"; circle: CircleSpec }
+  | { kind: "solid"; solid: SolidSpec };
+
+export type CirclePart = "centre" | "radius" | "diameter" | "chord" | "tangent" | "arc" | "sector" | "segment" | "circumference";
+
+/** A circle with some of its parts drawn. Each part has a fixed place, so parts never overlap. */
+export interface CircleSpec {
+  /** Parts to draw. `text` labels a length (radius, diameter or chord). */
+  parts: { part: CirclePart; text?: string }[];
+  /** One part drawn bold in the highlight colour, for "what is this part called?". */
+  highlight?: CirclePart;
+  description: string;
+}
+
+/**
+ * A 3D solid drawn in oblique projection, with hidden edges dashed.
+ * A prism is its front cross-section (a convex ShapeSpec, real units) pushed back
+ * by `length`; a cuboid is a prism with a rectangle face.
+ */
+export type SolidSpec =
+  | {
+      kind: "prism";
+      face: ShapeSpec;
+      length: number;
+      lengthText?: string;
+      /** Draw unit cubes on the visible faces (cuboids only). */
+      cubes?: boolean;
+      description: string;
+    }
+  | {
+      kind: "cylinder";
+      r: number;
+      h: number;
+      /** Label the radius or the diameter on the top face. */
+      label: { on: "radius" | "diameter"; text: string };
+      hText: string;
+      description: string;
+    };
 
 export type AttemptMode = "guided" | "independent" | "check" | "review";
 

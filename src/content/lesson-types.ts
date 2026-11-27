@@ -1,5 +1,5 @@
 /** Shared lesson shape for every chain. Six stages: Introduction → Teaching → Guided → Independent → Check → Review. */
-import type { ShapeSpec, SkillId } from "@/engine/types";
+import type { ShapeSpec, SkillId, Visual } from "@/engine/types";
 
 export type DemoKind =
   | "equivalent-bars"
@@ -12,7 +12,14 @@ export type DemoKind =
   | "triangle-half"
   | "parallelogram-shear"
   | "trapezium-double"
-  | "compound-split";
+  | "compound-split"
+  | "perimeter-walk"
+  | "circle-parts"
+  | "circumference-unroll"
+  | "circle-area-rearrange"
+  | "cuboid-layers"
+  | "prism-slices"
+  | "cuboid-net";
 
 export type ContentStatus = "draft" | "in-review" | "verified";
 
@@ -21,6 +28,8 @@ export interface WorkedExample {
   steps: string[];
   /** Optional diagram shown with the question. */
   shape?: ShapeSpec;
+  /** Or any other picture: a circle or a 3D solid. */
+  visual?: Visual;
 }
 
 export interface Lesson {
