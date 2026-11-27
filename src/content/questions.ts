@@ -15,12 +15,13 @@ import { PERCENT_COMPARE_GENERATORS } from "./maths/percentages/compare-generato
 import { FACTOR_GENERATORS } from "./maths/factors/generators";
 import { STATS_GENERATORS } from "./maths/statistics/generators";
 import { POWERS_GENERATORS } from "./maths/powers/generators";
+import { TRIANGLE_GENERATORS } from "./maths/triangles/generators";
 import { CALCULATION_GENERATORS } from "./maths/calculation/generators";
 
 /** Difficulty within a skill: 1 = guided practice, 2 = independent/check. */
 export type Tier = 1 | 2;
 
-const GENERATORS = { ...FRACTION_GENERATORS, ...AREA_GENERATORS, ...MEASURES_GENERATORS, ...ALGEBRA_GENERATORS, ...EXPRESSION_GENERATORS, ...RATIO_GENERATORS, ...DECIMAL_GENERATORS, ...PERCENT_GENERATORS, ...PERCENT_COMPARE_GENERATORS, ...FACTOR_GENERATORS, ...STATS_GENERATORS, ...PROBABILITY_GENERATORS, ...POWERS_GENERATORS, ...ANGLE_GENERATORS, ...CALCULATION_GENERATORS };
+const GENERATORS = { ...FRACTION_GENERATORS, ...AREA_GENERATORS, ...MEASURES_GENERATORS, ...ALGEBRA_GENERATORS, ...EXPRESSION_GENERATORS, ...RATIO_GENERATORS, ...DECIMAL_GENERATORS, ...PERCENT_GENERATORS, ...PERCENT_COMPARE_GENERATORS, ...FACTOR_GENERATORS, ...STATS_GENERATORS, ...PROBABILITY_GENERATORS, ...POWERS_GENERATORS, ...ANGLE_GENERATORS, ...TRIANGLE_GENERATORS, ...CALCULATION_GENERATORS };
 
 export function hasGenerator(skillId: SkillId): boolean {
   return skillId in GENERATORS;

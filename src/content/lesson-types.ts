@@ -82,7 +82,13 @@ export type DemoKind =
   | "estimate-compare"
   | "error-interval-line"
   | "listing-grid"
-  | "sf-multiply";
+  | "sf-multiply"
+  | "pythagoras-squares"
+  | "trig-ratio-explore"
+  | "trig-angle-finder"
+  | "exact-trig-triangles"
+  | "congruence-tests"
+  | "similar-scale";
 
 export type ContentStatus = "draft" | "in-review" | "verified";
 

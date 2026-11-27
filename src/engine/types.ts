@@ -62,8 +62,11 @@ export type AnswerSpec =
       kind: "decimal";
       exact: number;
       dp: number;
-      /** True when π isn't involved (money, speeds): only rounding to `dp` places is allowed for. */
-      noPi?: boolean;
+      /**
+       * Strict rounding only: no extra allowance for π = 3.14. Used where π
+       * isn't involved (Pythagoras, trigonometry), so 10.4 isn't accepted for 10.3.
+       */
+      strict?: boolean;
     }
   /**
    * An algebraic expression, compared mathematically (see engine/algebra.ts).
@@ -320,6 +323,13 @@ export interface AngleSpec {
   angles: AngleMark[];
   /** Points (in order) of a shape to shade. */
   polygon?: string[];
+  /**
+   * More shapes to shade, for diagrams with two shapes (congruent or similar
+   * triangles). Length labels and letters are pushed out from their own shape.
+   */
+  polygons?: string[][];
+  /** Draw it wider than usual (two shapes side by side). */
+  wide?: boolean;
   /** Equal-length marks: n small ticks across the middle of a segment. */
   ticks?: { a: string; b: string; n: number }[];
   /** Parallel marks: n arrowheads on a segment, pointing from a to b. */
