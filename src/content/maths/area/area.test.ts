@@ -56,7 +56,7 @@ describe("area generators", () => {
           // Every predicted wrong answer is wrong and maps to a known misconception.
           for (const w of q.wrongAnswers) {
             expect(MC[w.misconception]).toBeDefined();
-            const val = typeof w.value === "number" ? frac(w.value) : w.value;
+            const val = typeof w.value === "number" ? frac(w.value) : (w.value as ReturnType<typeof frac>);
             const res = markAnswer(q, show(val), MC);
             expect(res.correct).toBe(false);
             expect(res.misconception).toBe(w.misconception);

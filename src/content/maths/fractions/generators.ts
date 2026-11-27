@@ -32,6 +32,7 @@ function cleanWrong(correct: Fraction | number, wrong: Question["wrongAnswers"])
   const c = typeof correct === "number" ? frac(correct) : correct;
   const seen: Fraction[] = [];
   return wrong.filter((w) => {
+    if (Array.isArray(w.value)) return false;
     const v = typeof w.value === "number" ? frac(w.value) : w.value;
     if (v.d === 0 || equals(v, c) || seen.some((s) => equals(s, v))) return false;
     seen.push(v);
