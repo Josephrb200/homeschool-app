@@ -52,6 +52,12 @@ export type AnswerSpec =
    * that come from using 3.14 for π (as GCSE mark schemes do).
    */
   | { kind: "decimal"; exact: number; dp: number }
+  /**
+   * An algebraic expression, compared mathematically (see engine/algebra.ts).
+   * `form` says how it must be written to count as fully correct:
+   * "notation" = algebra conventions (5n, x²), "simplified" = also expanded and collected.
+   */
+  | { kind: "expression"; value: string; form: "notation" | "simplified" }
   | { kind: "choice"; options: string[]; correctIndex: number };
 
 export interface Question {
@@ -65,6 +71,10 @@ export interface Question {
   answer: AnswerSpec;
   /** Predicted wrong answers mapped to misconceptions (string form, compared exactly after parsing). */
   wrongAnswers: { value: Fraction | number; misconception: MisconceptionId }[];
+  /** Predicted wrong expressions (for "expression" answers), compared mathematically. */
+  wrongExpressions?: { value: string; misconception: MisconceptionId }[];
+  /** How to type the answer, shown under the answer box. Defaults to number help. */
+  answerHelp?: string;
   hints: string[];
   solution: string[];
 }
@@ -92,7 +102,8 @@ export type Visual =
   | { kind: "bars"; bars: Fraction[] }
   | { kind: "shape"; shape: ShapeSpec }
   | { kind: "circle"; circle: CircleSpec }
-  | { kind: "solid"; solid: SolidSpec };
+  | { kind: "solid"; solid: SolidSpec }
+  | { kind: "machine"; machine: MachineSpec };
 
 export type CirclePart = "centre" | "radius" | "diameter" | "chord" | "tangent" | "arc" | "sector" | "segment" | "circumference";
 
@@ -129,6 +140,14 @@ export type SolidSpec =
       hText: string;
       description: string;
     };
+
+/** A function machine: input → operations in order → output. "?" marks the unknown. */
+export interface MachineSpec {
+  input: string;
+  /** Operations as shown, e.g. ["× 3", "+ 4"]. */
+  steps: string[];
+  output: string;
+}
 
 export type AttemptMode = "guided" | "independent" | "check" | "review";
 

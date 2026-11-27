@@ -17,6 +17,7 @@ import {
 } from "@/app/actions/learn";
 import { FractionBar } from "./FractionDemos";
 import { Visual } from "./Visual";
+import { FunctionMachine } from "./FunctionMachine";
 import { MathText } from "./MathText";
 import { SpeakButton } from "./Speak";
 import { usePrefs } from "./PrefsProvider";
@@ -240,11 +241,12 @@ export function Practice({
             </p>
             <SpeakButton text={q.prompt} label="Hear it" auto={prefs.autoReadQuestions} />
           </div>
-          {q.visual && q.visual.kind !== "bars" && (
+          {q.visual && q.visual.kind !== "bars" && q.visual.kind !== "machine" && (
             <div className="shape-wrap">
               <Visual visual={q.visual} />
             </div>
           )}
+          {q.visual?.kind === "machine" && <FunctionMachine machine={q.visual.machine} />}
           {q.visual?.kind === "bars" && mode !== "check" && (
             <div className="stack optional">
               {q.visual.bars.slice(0, 1).map((b, i) => (
@@ -290,6 +292,9 @@ export function Practice({
               disabled={!!answered && !retrying}
               aria-describedby="prompt answer-help"
               inputMode="text"
+              autoCapitalize="off"
+              autoCorrect="off"
+              spellCheck={false}
             />}
             {q.format.kind !== "choice" && (!answered || retrying) && (
               <button className="btn btn-primary" type="submit" disabled={busy || !typedAnswer.trim()}>
@@ -310,11 +315,13 @@ export function Practice({
           <p id="answer-help" className="hint">
             {q.format.kind === "choice"
               ? "Press the answer you think is right."
-              : q.format.kind === "decimal"
-                ? `Use the π button on your calculator, then round to ${q.format.dp} decimal place${q.format.dp === 1 ? "" : "s"}, like 28.3. Units are fine but not needed.`
-                : q.visual && q.visual.kind !== "bars"
-                  ? "Type a number like 24 or 7.5. Units like cm, cm² or cm³ are fine but not needed."
-                  : "Type a whole number like 12, a fraction like 3/4, or a mixed number like 1 1/2."}
+              : q.answerHelp
+                ? q.answerHelp
+                : q.format.kind === "decimal"
+                  ? `Use the π button on your calculator, then round to ${q.format.dp} decimal place${q.format.dp === 1 ? "" : "s"}, like 28.3. Units are fine but not needed.`
+                  : q.visual && q.visual.kind !== "bars" && q.visual.kind !== "machine"
+                    ? "Type a number like 24 or 7.5. Units like cm, cm² or cm³ are fine but not needed."
+                    : "Type a whole number like 12, a fraction like 3/4, or a mixed number like 1 1/2."}
             {mode === "check" && " This is a skill check, so there are no hints. Answers are explained at the end."}
           </p>
 

@@ -4,7 +4,18 @@
  */
 
 import { equals, isSimplest, parseAnswer, show, showMixed, simplify, frac } from "./fraction";
+import { parseExpression, polyEquals, untidyReason, UNTIDY_FEEDBACK } from "./algebra";
 import type { MarkResult, Misconception, Question } from "./types";
+
+/** The correct answer as text, for showing after an attempt. */
+export function answerText(q: Question): string {
+  const a = q.answer;
+  if (a.kind === "fraction") return a.form === "mixed" ? showMixed(a.value) : show(a.value);
+  if (a.kind === "integer") return String(a.value);
+  if (a.kind === "expression") return a.value;
+  if (a.kind === "decimal") return roundTo(a.exact, a.dp);
+  return a.options[a.correctIndex] ?? "";
+}
 
 export function markAnswer(
   q: Question,
@@ -25,7 +36,31 @@ export function markAnswer(
     return wrong(mc, misconceptions);
   }
 
-  const parsed = parseAnswer(raw);
+  if (a.kind === "expression") {
+    const got = parseExpression(raw);
+    if (!got.ok) {
+      return {
+        outcome: "unreadable",
+        correct: false,
+        feedback: "I couldn't read that. Type an expression like 3x + 2. For squared, type x^2 or x².",
+      };
+    }
+    const want = parseExpression(a.value);
+    if (!want.ok) throw new Error(`Bad expression answer: ${a.value}`);
+    if (polyEquals(got.poly, want.poly)) {
+      const why = untidyReason(got.ast, a.form);
+      if (why) return { outcome: "not-simplified", correct: false, feedback: `${UNTIDY_FEEDBACK[why]} The answer is ${a.value}.` };
+      return { outcome: "correct", correct: true, feedback: "Correct." };
+    }
+    const mc = q.wrongExpressions?.find((w) => {
+      const p = parseExpression(w.value);
+      return p.ok && polyEquals(p.poly, got.poly);
+    })?.misconception;
+    return wrong(mc, misconceptions);
+  }
+
+  // "x = 4" is a fine way to give a number answer to an equation.
+  const parsed = parseAnswer(a.kind === "integer" ? raw.replace(/^\s*[a-zA-Z]\s*=\s*/, "") : raw);
   if (!parsed.ok) {
     return {
       outcome: "unreadable",
@@ -125,13 +160,4 @@ export function roundTo(x: number, dp: number): string {
  */
 export function decimalTolerance(exact: number, dp: number): number {
   return 0.5 * 10 ** -dp + Math.abs(exact) * 0.0006 + 1e-9;
-}
-
-/** The correct answer as the student should see it. */
-export function answerText(q: Question): string {
-  const a = q.answer;
-  if (a.kind === "fraction") return a.form === "mixed" ? showMixed(a.value) : show(a.value);
-  if (a.kind === "integer") return String(a.value);
-  if (a.kind === "decimal") return roundTo(a.exact, a.dp);
-  return a.options[a.correctIndex];
 }

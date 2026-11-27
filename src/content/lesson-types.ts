@@ -21,7 +21,13 @@ export type DemoKind =
   | "circle-area-rearrange"
   | "cuboid-layers"
   | "prism-slices"
-  | "cuboid-net";
+  | "cuboid-net"
+  | "notation-meaning"
+  | "like-terms-sort"
+  | "substitute-swap"
+  | "expand-area"
+  | "function-machine"
+  | "balance-solve";
 
 export type ContentStatus = "draft" | "in-review" | "verified";
 
