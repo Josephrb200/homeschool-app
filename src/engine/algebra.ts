@@ -36,7 +36,9 @@ export type Untidy =
   | "multiple-numbers"
   | "repeated-letter"
   | "one-coefficient"
-  | "like-terms";
+  | "like-terms"
+  | "not-factorised"
+  | "not-fully-factorised";
 
 export type ExprParse = { ok: true; poly: Poly; ast: Sum } | { ok: false };
 
@@ -46,8 +48,7 @@ function normalise(raw: string): string {
     .replace(/^=\s*/, "")
     .replace(/[−–—]/g, "-")
     .replace(/[×*·⋅]/g, "*")
-    .replace(/²/g, "^2")
-    .replace(/³/g, "^3")
+    .replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, (m) => `^${[...m].map((c) => "⁰¹²³⁴⁵⁶⁷⁸⁹".indexOf(c)).join("")}`)
     .replace(/\s+/g, "")
     .toLowerCase();
 }
@@ -67,7 +68,7 @@ export function parseExpression(raw: string): ExprParse {
     if (!m) throw new Error("bad power");
     i += m[0].length;
     const p = Number(m[0]);
-    if (p < 1 || p > 9) throw new Error("bad power");
+    if (p < 1 || p > 99) throw new Error("bad power");
     return p;
   }
 
@@ -229,15 +230,42 @@ function notationIssue(s: Sum): Untidy | null {
   return null;
 }
 
+const gcdInt = (a: number, b: number): number => (b === 0 ? Math.abs(a) : gcdInt(b, a % b));
+
+/** What every term of a bracket has in common, e.g. 2x in (4x² + 6x). Null if nothing. */
+export function commonFactor(p: Poly): string | null {
+  const keys = [...p.keys()];
+  if (keys.length < 2) return null;
+  const g = [...p.values()].reduce((acc, c) => gcdInt(acc, c), 0);
+  const monos = keys.map(unkey);
+  const shared: Monomial = {};
+  for (const v of Object.keys(monos[0])) {
+    const least = Math.min(...monos.map((m) => m[v] ?? 0));
+    if (least > 0) shared[v] = least;
+  }
+  const letters = key(shared);
+  if (g <= 1 && letters === "") return null;
+  return `${g > 1 ? g : ""}${letters.replace(/\^(\d+)/g, (_, d) => "⁰¹²³⁴⁵⁶⁷⁸⁹"[Number(d)] ?? `^${d}`)}`;
+}
+
 /**
  * Why an expression isn't written in the expected form, or null if it is.
  * - "notation": algebra conventions only (no ×, number first, x² not xx, x not 1x). Brackets are fine.
  * - "simplified": conventions, no brackets, and like terms collected.
+ * - "factorised": conventions, written as one product with brackets, and no
+ *   bracket has a common factor left inside it.
  */
-export function untidyReason(ast: Sum, form: "notation" | "simplified"): Untidy | null {
+export function untidyReason(ast: Sum, form: "notation" | "simplified" | "factorised"): Untidy | null {
   const issue = notationIssue(ast);
   if (issue) return issue;
   if (form === "notation") return null;
+  if (form === "factorised") {
+    if (ast.terms.length !== 1) return "not-factorised";
+    const groups = ast.terms[0].product.factors.filter((f) => f.kind === "group");
+    if (groups.length === 0) return "not-factorised";
+    for (const g of groups) if (g.kind === "group" && commonFactor(sumPoly(g.sum))) return "not-fully-factorised";
+    return null;
+  }
   if (ast.terms.some((t) => t.product.factors.some((f) => f.kind === "group"))) return "brackets";
   const seen = new Set<string>();
   for (const t of ast.terms) {
@@ -245,6 +273,17 @@ export function untidyReason(ast: Sum, form: "notation" | "simplified"): Untidy 
     if (seen.has(k)) return "like-terms";
     seen.add(k);
   }
+  return null;
+}
+
+/** The common factor still inside a bracket (for "not fully factorised" feedback), e.g. "3" or "2x". */
+export function leftoverFactor(ast: Sum): string | null {
+  for (const t of ast.terms)
+    for (const f of t.product.factors)
+      if (f.kind === "group") {
+        const c = commonFactor(sumPoly(f.sum));
+        if (c) return c;
+      }
   return null;
 }
 
@@ -256,4 +295,6 @@ export const UNTIDY_FEEDBACK: Record<Untidy, string> = {
   "repeated-letter": "Right value. A letter times itself is written with a power: x × x = x².",
   "one-coefficient": "Right value. We don't write the 1: 1x is just x.",
   "like-terms": "That's equal, but it isn't fully simplified. Collect the like terms together.",
+  "not-factorised": "That's equal, but it isn't factorised. Factorised means written as a product, with brackets.",
+  "not-fully-factorised": "Good start, but it isn't fully factorised: the terms inside the bracket still have a common factor. Take that outside too.",
 };
