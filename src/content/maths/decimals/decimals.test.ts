@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { equals, frac, parseAnswer, show } from "@/engine/fraction";
 import { answerText, markAnswer } from "@/engine/marking";
-import { makeQuestion, questionFromId } from "@/content/questions";
+import { hasGenerator, makeQuestion, questionFromId } from "@/content/questions";
 import { LESSONS, MISCONCEPTIONS, SKILL_BY_ID } from "@/content";
 import { DECIMAL_GENERATORS } from "./generators";
 import { DECIMAL_SKILLS } from "./skills";
@@ -114,7 +114,7 @@ describe("decimals and percentages content", () => {
   it("every skill has a draft lesson, a generator and live prerequisites", () => {
     for (const s of [...DECIMAL_SKILLS, ...PERCENT_SKILLS]) {
       expect(LESSONS[s.id]?.status).toBe("draft");
-      expect(GENERATORS[s.id]).toBeDefined();
+      expect(hasGenerator(s.id), s.id).toBe(true);
       for (const p of s.prerequisites) expect(SKILL_BY_ID[p], `${s.id} -> ${p}`).toBeDefined();
     }
     for (const m of Object.values(MISCONCEPTIONS)) if (m.pointsTo) expect(SKILL_BY_ID[m.pointsTo], m.id).toBeDefined();

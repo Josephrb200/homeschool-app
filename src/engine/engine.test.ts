@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { equals, frac, parseAnswer, show, showMixed } from "./fraction";
-import { markAnswer } from "./marking";
+import { answerText, markAnswer } from "./marking";
 import { computeMastery } from "./mastery";
 import { reviewState, INTERVALS_DAYS } from "./scheduler";
 import { diagnose } from "./diagnosis";
@@ -34,7 +34,9 @@ const answerString = (q: Question) =>
           ? q.answer.value.join(":")
           : q.answer.kind === "choice"
             ? String(q.answer.correctIndex)
-            : String(q.answer.exact);
+            : q.answer.kind === "decimal"
+              ? String(q.answer.exact)
+              : answerText(q);
 
 describe("parseAnswer", () => {
   it.each([
