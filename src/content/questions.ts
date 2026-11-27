@@ -17,6 +17,7 @@ import { STATS_GENERATORS } from "./maths/statistics/generators";
 import { POWERS_GENERATORS } from "./maths/powers/generators";
 import { TRANSFORMATION_GENERATORS } from "./maths/transformations/generators";
 import { TRIANGLE_GENERATORS } from "./maths/triangles/generators";
+import { VECTOR_GENERATORS } from "./maths/vectors/generators";
 import { CALCULATION_GENERATORS } from "./maths/calculation/generators";
 import { GRAPH_GENERATORS } from "./maths/graphs/generators";
 import { SEQUENCE_GENERATORS } from "./maths/sequences/generators";
@@ -24,7 +25,7 @@ import { SEQUENCE_GENERATORS } from "./maths/sequences/generators";
 /** Difficulty within a skill: 1 = guided practice, 2 = independent/check. */
 export type Tier = 1 | 2;
 
-const GENERATORS = { ...FRACTION_GENERATORS, ...AREA_GENERATORS, ...MEASURES_GENERATORS, ...ALGEBRA_GENERATORS, ...EXPRESSION_GENERATORS, ...RATIO_GENERATORS, ...DECIMAL_GENERATORS, ...PERCENT_GENERATORS, ...PERCENT_COMPARE_GENERATORS, ...FACTOR_GENERATORS, ...STATS_GENERATORS, ...PROBABILITY_GENERATORS, ...POWERS_GENERATORS, ...ANGLE_GENERATORS, ...TRIANGLE_GENERATORS, ...TRANSFORMATION_GENERATORS, ...CALCULATION_GENERATORS, ...GRAPH_GENERATORS, ...SEQUENCE_GENERATORS };
+const GENERATORS = { ...FRACTION_GENERATORS, ...AREA_GENERATORS, ...MEASURES_GENERATORS, ...ALGEBRA_GENERATORS, ...EXPRESSION_GENERATORS, ...RATIO_GENERATORS, ...DECIMAL_GENERATORS, ...PERCENT_GENERATORS, ...PERCENT_COMPARE_GENERATORS, ...FACTOR_GENERATORS, ...STATS_GENERATORS, ...PROBABILITY_GENERATORS, ...POWERS_GENERATORS, ...ANGLE_GENERATORS, ...TRIANGLE_GENERATORS, ...TRANSFORMATION_GENERATORS, ...CALCULATION_GENERATORS, ...VECTOR_GENERATORS, ...GRAPH_GENERATORS, ...SEQUENCE_GENERATORS };
 
 export function hasGenerator(skillId: SkillId): boolean {
   return skillId in GENERATORS;

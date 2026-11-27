@@ -94,6 +94,7 @@ export type DemoKind =
   | "exact-trig-triangles"
   | "congruence-tests"
   | "similar-scale"
+  | "vector-builder"
   | "decimal-compare"
   | "grid-multiply"
   | "bus-stop-division"
