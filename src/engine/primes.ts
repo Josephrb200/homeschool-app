@@ -82,7 +82,9 @@ export function parseList(raw: string): number[] | null {
     .trim()
     .replace(/[{}[\]().]+$/g, "")
     .replace(/^[{}[\]()]+/g, "")
-    .replace(/\band\b/gi, ",")
+    .replace(/\b(and|or)\b/gi, ",")
+    // Solutions of equations: "x = −1, x = 3".
+    .replace(/\bx\s*=\s*/gi, "")
     .replace(/[;&]/g, ",")
     // Negative whole numbers are allowed (inequality questions list them): "−2", "- 2".
     .replace(/[−–-]\s*(?=\d)/g, "-");
