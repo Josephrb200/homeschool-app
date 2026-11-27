@@ -56,7 +56,12 @@ export type DemoKind =
   | "probability-bar"
   | "experiment-trials"
   | "sample-space-grid"
-  | "venn-sort";
+  | "venn-sort"
+  | "number-line-negatives"
+  | "square-cube-builder"
+  | "bidmas-steps"
+  | "index-expand"
+  | "standard-form-slider";
 
 export type ContentStatus = "draft" | "in-review" | "verified";
 

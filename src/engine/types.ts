@@ -65,6 +65,11 @@ export type AnswerSpec =
    * "notation" = algebra conventions (5n, x²), "simplified" = also expanded and collected.
    */
   | { kind: "expression"; value: string; form: "notation" | "simplified" }
+  /**
+   * A number in standard form, mantissa × 10^power with 1 ≤ mantissa < 10
+   * (see engine/standard-form.ts). The right value written another way is "not-simplified".
+   */
+  | { kind: "standard-form"; mantissa: Fraction; power: number }
   | { kind: "choice"; options: string[]; correctIndex: number }
   /**
    * A list of whole numbers in any order, e.g. "the factors of 12" (1, 2, 3, 4, 6, 12).
