@@ -108,4 +108,72 @@ export const PERCENT_LESSONS: Record<SkillId, Lesson> = {
     },
     counts: { guided: 5, independent: 4, check: 5 },
   },
+
+  "pct-one-of-another": {
+    skillId: "pct-one-of-another",
+    status: "draft",
+    minutes: 25,
+    intro: {
+      whyItMatters:
+        "Test results, survey answers and 'what percentage of the class...' questions all ask you to write one amount as a percentage of another. Percentages make different totals easy to compare: 18 out of 25 and 34 out of 40 are hard to compare until you see 72% and 85%.",
+      byTheEnd: [
+        "Write one amount as a fraction of another, then as a percentage.",
+        "Use an equivalent fraction out of 100, or divide and multiply by 100.",
+        "Make the units the same first, like pence and pounds.",
+      ],
+    },
+    teaching: {
+      paragraphs: [
+        "Start with a fraction: the part on top, the total on the bottom. 18 out of 25 is 18/25.",
+        "If the bottom goes into 100, make an equivalent fraction out of 100. 25 × 4 = 100, so 18/25 = 72/100 = 72%.",
+        "If it doesn't, divide and multiply by 100. 7 out of 8: 7 ÷ 8 = 0.875, and 0.875 × 100 = 87.5%. With a calculator, round as the question asks.",
+        "Units must match. 45p as a percentage of £3: change £3 to 300p first. 45/300 = 15/100 = 15%.",
+        "Sense check: a part of something is less than the whole, so the answer is less than 100%. If you get more than 100%, you've probably divided the wrong way round.",
+      ],
+      demo: "percent-of-whole",
+      examples: [
+        {
+          question: "Jo scored 34 out of 40 in a test. What percentage did Jo score?",
+          steps: ["As a fraction: 34/40", "34 ÷ 40 = 0.85", "0.85 × 100 = 85%"],
+        },
+        {
+          question: "What is 30 cm as a percentage of 2 m?",
+          steps: ["Make the units the same: 2 m = 200 cm.", "As a fraction: 30/200", "Divide top and bottom by 2: 15/100 = 15%"],
+        },
+      ],
+    },
+    counts: { guided: 5, independent: 4, check: 5 },
+  },
+
+  "pct-change": {
+    skillId: "pct-change",
+    status: "draft",
+    minutes: 25,
+    intro: {
+      whyItMatters:
+        "'Prices up 20%', 'sales down 15%', 'a 25% profit': percentage change describes how much something has grown or shrunk compared with where it started. It's on almost every GCSE paper, often in money questions.",
+      byTheEnd: ["Find a percentage increase or decrease.", "Find a percentage profit or loss.", "Always divide by the original amount."],
+    },
+    teaching: {
+      paragraphs: [
+        "Percentage change = change ÷ original amount × 100.",
+        "Step 1: find the change by subtracting. A ticket goes from £40 to £50, so the change is £10.",
+        "Step 2: write the change as a percentage of the original. £10 out of £40 is 10/40 = 25/100, so it's a 25% increase.",
+        "Always divide by the original (the starting amount), never the new one. Profit and loss work the same way: the original is the price paid.",
+        "Check: if the new amount is 125% of the old one, that's a 25% increase. If it's 80% of the old one, that's a 20% decrease.",
+      ],
+      demo: "percent-change-find",
+      examples: [
+        {
+          question: "A jacket's price drops from £80 to £60 in a sale. What is the percentage decrease?",
+          steps: ["Change = £80 − £60 = £20", "As a fraction of the original: 20/80", "20 ÷ 80 × 100 = 25", "A 25% decrease"],
+        },
+        {
+          question: "Sami buys a bike for £150 and sells it for £180. What is the percentage profit?",
+          steps: ["Profit = £180 − £150 = £30", "Divide by the price paid (the original): 30 ÷ 150 = 0.2", "0.2 × 100 = 20% profit"],
+        },
+      ],
+    },
+    counts: { guided: 5, independent: 4, check: 5 },
+  },
 };

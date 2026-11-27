@@ -44,6 +44,11 @@ export type AnswerSpec =
        * "improper" wants a top-heavy fraction like 11/4.
        */
       form?: "mixed" | "improper" | "decimal";
+      /**
+       * Probability answers: "40%" means 0.4 (not 40), and typing 40 when the
+       * answer is 0.4 gets a nudge to add the % sign instead of being marked wrong.
+       */
+      percentAllowed?: boolean;
     }
   | { kind: "integer"; value: number }
   /** A ratio such as 3:2 or 2:3:5. Any equivalent ratio is accepted unless requireSimplest. */
@@ -60,7 +65,25 @@ export type AnswerSpec =
    * "notation" = algebra conventions (5n, x²), "simplified" = also expanded and collected.
    */
   | { kind: "expression"; value: string; form: "notation" | "simplified" }
-  | { kind: "choice"; options: string[]; correctIndex: number };
+  /**
+   * A number in standard form, mantissa × 10^power with 1 ≤ mantissa < 10
+   * (see engine/standard-form.ts). The right value written another way is "not-simplified".
+   */
+  | { kind: "standard-form"; mantissa: Fraction; power: number }
+  | { kind: "choice"; options: string[]; correctIndex: number }
+  /**
+   * A list of whole numbers in any order, e.g. "the factors of 12" (1, 2, 3, 4, 6, 12).
+   * Repeats are ignored. `noun` names the items in feedback ("factors").
+   * A list missing some items gets `missingMisconception`; one with items that
+   * don't belong gets `extraMisconception`, and feedback names those items.
+   */
+  | { kind: "list"; value: number[]; noun: string; missingMisconception?: MisconceptionId; extraMisconception?: MisconceptionId }
+  /**
+   * A number written as a product of primes, e.g. 60 = 2 × 2 × 3 × 5 or 2² × 3 × 5.
+   * Any order. Right product with a non-prime (or a 1) is "not-simplified".
+   * `index` asks for index form: the right primes written out in full get a nudge.
+   */
+  | { kind: "product"; value: number; index: boolean };
 
 export interface Question {
   /** Stable id: skill + generator + seed. Lets us rebuild the exact question later. */
@@ -108,7 +131,46 @@ export type Visual =
   | { kind: "circle"; circle: CircleSpec }
   | { kind: "solid"; solid: SolidSpec }
   | { kind: "machine"; machine: MachineSpec }
-  | { kind: "angles"; angles: AngleSpec };
+  | { kind: "angles"; angles: AngleSpec }
+  | { kind: "chart"; chart: ChartSpec }
+  | { kind: "spinner"; spinner: SpinnerSpec }
+  | { kind: "table"; table: TableSpec }
+  | { kind: "venn"; venn: VennSpec };
+
+/** A fair spinner with equal sections, each labelled (a colour word or a number). */
+export interface SpinnerSpec {
+  sections: string[];
+  description: string;
+}
+
+/**
+ * A table: a header row, then rows whose first cell is a row header.
+ * Used for sample space diagrams, frequency tables and probability tables.
+ * A cell of "?" is drawn as a blank to find. `highlight` marks [row, col] body cells.
+ */
+export interface TableSpec {
+  corner?: string;
+  columns: string[];
+  rows: { head: string; cells: string[] }[];
+  highlight?: [number, number][];
+  description: string;
+}
+
+/**
+ * A two-set Venn diagram. Each region holds text: a count ("7"), a list of
+ * members ("2, 4, 8") or "?" for the value to find.
+ */
+export interface VennSpec {
+  a: string;
+  b: string;
+  onlyA: string;
+  both: string;
+  onlyB: string;
+  neither: string;
+  /** Regions to shade, to show what a question means. */
+  shade?: ("onlyA" | "both" | "onlyB" | "neither")[];
+  description: string;
+}
 
 export type CirclePart = "centre" | "radius" | "diameter" | "chord" | "tangent" | "arc" | "sector" | "segment" | "circumference";
 
@@ -185,6 +247,64 @@ export interface AngleMark {
   /** Draw it bold in the highlight colour. */
   highlight?: boolean;
 }
+
+/**
+ * A statistics chart or table. Drawn exactly from the numbers given, so the
+ * student reads the values off it. `description` is for screen readers.
+ */
+export type ChartSpec =
+  | {
+      type: "table";
+      headers: string[];
+      rows: (string | number)[][];
+      /** Draw this column's numbers as tally marks instead of digits. */
+      tallyColumn?: number;
+      description: string;
+    }
+  | {
+      type: "bar";
+      categories: string[];
+      values: number[];
+      xLabel: string;
+      yLabel: string;
+      /** Gap between labelled gridlines. */
+      yStep: number;
+      description: string;
+    }
+  | {
+      type: "pictogram";
+      categories: string[];
+      values: number[];
+      /** What one whole symbol stands for (an even number, so half a symbol is a whole number). */
+      perSymbol: number;
+      /** What is being counted, for the key: "people". */
+      unit: string;
+      description: string;
+    }
+  | {
+      type: "pie";
+      /** Sectors in order clockwise from 12 o'clock. Angles add to 360. */
+      sectors: { label: string; angle: number }[];
+      /** Write each angle in its sector. A sector in `hideAngle` shows "?" instead. */
+      showAngles: boolean;
+      hideAngle?: number;
+      description: string;
+    }
+  | {
+      type: "scatter";
+      points: [number, number][];
+      xLabel: string;
+      yLabel: string;
+      xMax: number;
+      yMax: number;
+      xStep: number;
+      yStep: number;
+      /** Letters to write beside some points, by index. */
+      letters?: { i: number; text: string }[];
+      /** One point circled, by index. */
+      highlight?: number;
+      description: string;
+    };
 
 /** A function machine: input → operations in order → output. "?" marks the unknown. */
 export interface MachineSpec {
