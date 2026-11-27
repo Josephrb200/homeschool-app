@@ -85,7 +85,16 @@ export type DemoKind =
   | "exact-trig-triangles"
   | "congruence-tests"
   | "similar-scale"
-  | "vector-builder";
+  | "vector-builder"
+  | "decimal-compare"
+  | "grid-multiply"
+  | "bus-stop-division"
+  | "time-number-line"
+  | "unit-staircase"
+  | "estimate-compare"
+  | "error-interval-line"
+  | "listing-grid"
+  | "sf-multiply";
 
 export type ContentStatus = "draft" | "in-review" | "verified";
 
