@@ -107,7 +107,7 @@ describe("measures generators", () => {
                 ? q.answer.options[w.value as number]
                 : q.answer.kind === "decimal"
                   ? roundTo(w.value as number, 1)
-                  : show(typeof w.value === "number" ? frac(w.value) : w.value);
+                  : show(typeof w.value === "number" ? frac(w.value) : (w.value as ReturnType<typeof frac>));
             const res = markAnswer(q, typed, MC);
             expect(res.correct, `${q.prompt} wrong ${typed}`).toBe(false);
             expect(res.misconception).toBe(w.misconception);

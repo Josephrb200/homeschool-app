@@ -4,12 +4,13 @@ import type { Question, SkillId } from "@/engine/types";
 import { GENERATORS as FRACTION_GENERATORS } from "./maths/fractions/generators";
 import { AREA_GENERATORS } from "./maths/area/generators";
 import { MEASURES_GENERATORS } from "./maths/measures/generators";
+import { RATIO_GENERATORS } from "./maths/ratio/generators";
 import { ALGEBRA_GENERATORS } from "./maths/algebra/generators";
 
 /** Difficulty within a skill: 1 = guided practice, 2 = independent/check. */
 export type Tier = 1 | 2;
 
-const GENERATORS = { ...FRACTION_GENERATORS, ...AREA_GENERATORS, ...MEASURES_GENERATORS, ...ALGEBRA_GENERATORS };
+const GENERATORS = { ...FRACTION_GENERATORS, ...AREA_GENERATORS, ...MEASURES_GENERATORS, ...ALGEBRA_GENERATORS, ...RATIO_GENERATORS };
 
 export function hasGenerator(skillId: SkillId): boolean {
   return skillId in GENERATORS;

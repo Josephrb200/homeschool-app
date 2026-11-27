@@ -30,9 +30,11 @@ const answerString = (q: Question) =>
       ? String(q.answer.value)
       : q.answer.kind === "expression"
         ? q.answer.value
-        : q.answer.kind === "choice"
-          ? String(q.answer.correctIndex)
-          : String(q.answer.exact);
+        : q.answer.kind === "ratio"
+          ? q.answer.value.join(":")
+          : q.answer.kind === "choice"
+            ? String(q.answer.correctIndex)
+            : String(q.answer.exact);
 
 describe("parseAnswer", () => {
   it.each([
@@ -115,7 +117,7 @@ describe("generators", () => {
           expect(r.outcome, `${q.prompt} expected ${answerString(q)}`).toBe("correct");
           for (const w of q.wrongAnswers) {
             expect(MC[w.misconception], w.misconception).toBeDefined();
-            const s = typeof w.value === "number" ? String(w.value) : show(w.value);
+            const s = typeof w.value === "number" ? String(w.value) : Array.isArray(w.value) ? w.value.join(":") : show(w.value);
             const wr = markAnswer(q, s, MC);
             // an unsimplified equivalent can never be listed as a wrong answer
             expect(wr.outcome).toBe("incorrect");

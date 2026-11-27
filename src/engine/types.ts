@@ -46,6 +46,8 @@ export type AnswerSpec =
       form?: "mixed" | "improper";
     }
   | { kind: "integer"; value: number }
+  /** A ratio such as 3:2 or 2:3:5. Any equivalent ratio is accepted unless requireSimplest. */
+  | { kind: "ratio"; value: number[]; requireSimplest: boolean }
   /**
    * A rounded answer, e.g. a circle's area to 1 decimal place. `exact` is the
    * true value. Marking accepts the correctly rounded value, and also answers
@@ -70,13 +72,15 @@ export interface Question {
   visual?: Visual;
   answer: AnswerSpec;
   /** Predicted wrong answers mapped to misconceptions (string form, compared exactly after parsing). */
-  wrongAnswers: { value: Fraction | number; misconception: MisconceptionId }[];
+  wrongAnswers: { value: Fraction | number | number[]; misconception: MisconceptionId }[];
   /** Predicted wrong expressions (for "expression" answers), compared mathematically. */
   wrongExpressions?: { value: string; misconception: MisconceptionId }[];
   /** How to type the answer, shown under the answer box. Defaults to number help. */
   answerHelp?: string;
   hints: string[];
   solution: string[];
+  /** How to show the correct answer, when the default would read badly (e.g. "£5.60" not "28/5"). */
+  answerText?: string;
 }
 
 /**
