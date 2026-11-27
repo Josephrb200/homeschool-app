@@ -137,7 +137,7 @@ export default async function ChildPage({ params }: { params: Promise<{ id: stri
                       </td>
                       <td>{a.answer}</td>
                       <td>
-                        {a.correct ? "Correct" : a.outcome === "not-simplified" ? "Right value, not simplified" : "Incorrect"}
+                        {a.correct ? "Correct" : a.outcome === "not-simplified" ? "Right value, not in the form asked" : "Incorrect"}
                         {a.misconception && ` (${MISCONCEPTIONS[a.misconception]?.label.toLowerCase()})`}
                       </td>
                       <td>
